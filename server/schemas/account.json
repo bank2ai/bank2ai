@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bank2ai.org/schemas/account.json",
+  "title": "Account",
+  "description": "Bank account with balance and metadata",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique account identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable account name",
+      "examples": ["Main Checking", "Savings Account", "Credit Card"]
+    },
+    "accountNumber": {
+      "type": "string",
+      "description": "Formatted account number (format varies by country)",
+      "examples": ["1234-56-789012", "GB29NWBK60161331926819"]
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code",
+      "pattern": "^[A-Z]{3}$",
+      "examples": ["USD", "EUR", "ISK", "GBP"]
+    },
+    "balance": {
+      "type": "number",
+      "description": "Current account balance"
+    },
+    "availableBalance": {
+      "type": "number",
+      "description": "Available balance (after pending transactions)"
+    },
+    "overdraftLimit": {
+      "type": "number",
+      "description": "Overdraft/credit limit (0 if none)",
+      "minimum": 0
+    },
+    "isWithdrawalAccount": {
+      "type": "boolean",
+      "description": "Whether this account can be used for withdrawals/transfers"
+    },
+    "isDefaultAccount": {
+      "type": "boolean",
+      "description": "Whether this is the user's default account"
+    },
+    "accountType": {
+      "type": "string",
+      "enum": ["Current", "Savings", "Credit"],
+      "description": "Type of account"
+    }
+  },
+  "required": ["id", "accountNumber", "currency", "balance"]
+}

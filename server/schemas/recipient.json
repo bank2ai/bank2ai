@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bank2ai.org/schemas/recipient.json",
+  "title": "Recipient",
+  "description": "Payment recipient with account details",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique recipient identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Recipient's full name or business name"
+    },
+    "accountNumber": {
+      "type": "string",
+      "description": "Recipient's bank account number",
+      "examples": ["5678-90-123456", "GB29NWBK60161331926819"]
+    },
+    "accountNumberType": {
+      "type": "string",
+      "description": "Type of account number",
+      "examples": ["Domestic", "IBAN", "SWIFT"]
+    },
+    "bankInfo": {
+      "type": "string",
+      "description": "Bank name or identifier",
+      "examples": ["Example Bank", "Bank of America"]
+    },
+    "paymentType": {
+      "type": "string",
+      "description": "Type of payment supported",
+      "examples": ["Domestic", "International", "SEPA"]
+    },
+    "socialSecurityNumber": {
+      "type": "string",
+      "description": "National ID / SSN (format varies by country)",
+      "examples": ["010190-1234", "123-45-6789"]
+    },
+    "address": {
+      "type": "string",
+      "description": "Recipient's address (if available)"
+    },
+    "isFavorite": {
+      "type": "boolean",
+      "description": "Whether this recipient is marked as favorite"
+    },
+    "description": {
+      "type": "string",
+      "description": "User-provided description or note",
+      "examples": ["Friend", "Landlord", "Contractor"]
+    }
+  },
+  "required": ["name", "accountNumber", "socialSecurityNumber"]
+}
