@@ -119,18 +119,9 @@ TOOL_METHOD_MAP = {
 def _get_tools_by_name() -> dict:
     """Import server module and return tools keyed by name."""
     import server
-    # The list_tools function is registered via decorator; call it to get the list
-    tools = [
-        server.TOOL_GET_ACCOUNTS,
-        server.TOOL_TRANSACTIONS,
-        server.TOOL_GET_CATEGORIES,
-        server.TOOL_SPENDING_SUMMARY,
-        server.TOOL_RECIPIENTS_BY_NAME,
-        server.TOOL_CREATE_RECIPIENT,
-        server.TOOL_TRANSFER_MONEY,
-        server.TOOL_EXECUTE_TRANSFER,
-    ]
-    return {t.name: t for t in tools}
+    tools = server.app._tool_manager.list_tools()
+    # Expose `inputSchema` (matches MCP wire shape) on top of FastMCP's `parameters`.
+    return {t.name: type("ToolView", (), {"name": t.name, "inputSchema": t.parameters})() for t in tools}
 
 
 def _get_adapter_params(method_name: str) -> set[str]:
