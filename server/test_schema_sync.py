@@ -5,6 +5,7 @@ Run from the server/ directory:
     pytest test_schema_sync.py -v
 """
 
+import asyncio
 import inspect
 import json
 from pathlib import Path
@@ -119,7 +120,7 @@ TOOL_METHOD_MAP = {
 def _get_tools_by_name() -> dict:
     """Import server module and return tools keyed by name."""
     import server
-    tools = server.app._tool_manager.list_tools()
+    tools = asyncio.run(server.app.list_tools())
     # Expose `inputSchema` (matches MCP wire shape) on top of FastMCP's `parameters`.
     return {t.name: type("ToolView", (), {"name": t.name, "inputSchema": t.parameters})() for t in tools}
 

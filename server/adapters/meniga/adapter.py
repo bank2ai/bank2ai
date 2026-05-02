@@ -63,33 +63,41 @@ class MenigaAdapter(BankAdapter):
             )        
 
         self.logger.info("Authenticating with Meniga API at %s", self._base_url)
-        response = httpx.post(
-            f"{self._base_url}/v1/authentication",
-            json={"email": email, "password": password},
-        )
-        self.logger.info("Auth response status: %d", response.status_code)
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                f"{self._base_url}/v1/authentication",
+                json={"email": email, "password": password},
+            )
+            self.logger.info("Auth response status: %d", response.status_code)
 
-        if response.status_code in (400, 401):
-            self.logger.error("Authentication failed: %d %s", response.status_code, response.text)
-            return AuthReponse(authenticated=False, message="Authentication failed")
+            if response.status_code in (400, 401):
+                self.logger.error("Authentication failed: %d %s", response.status_code, response.text)
+                return AuthReponse(authenticated=False, message="Authentication failed")
 
-        response.raise_for_status()
-        response_data = response.json()
-        self._token = response_data["data"]["accessToken"]
-        decoded_token = jwt.decode(self._token, options={"verify_signature": False})
-        self.logger.info("Token decoded, fetching user profile")
-    
-        me_response = httpx.get(
-            f"{self._base_url}/v1/me?includeAll=true",
-            headers={"Authorization": "Bearer " + self._token},
-        ).json()
+            response.raise_for_status()
+            response_data = response.json()
+            self._token = response_data["data"]["accessToken"]
+            decoded_token = jwt.decode(self._token, options={"verify_signature": False})
+            self.logger.info("Token decoded, fetching user profile")
 
-        person_id = decoded_token["context"]["personId"]
-        person = next(
-            (x for x in me_response["data"] if x["personId"] == person_id),
-            None,
-        )
-        self._culture = person["culture"] if person else "en-GB"
+            self._culture = "en-GB"
+            try:
+                me_response = await client.get(
+                    f"{self._base_url}/v1/me?includeAll=true",
+                    headers={"Authorization": "Bearer " + self._token},
+                )
+                me_response.raise_for_status()
+                person_id = decoded_token["context"]["personId"]
+                person = next(
+                    (x for x in me_response.json()["data"] if x["personId"] == person_id),
+                    None,
+                )
+                if person:
+                    self._culture = person["culture"]
+            except httpx.HTTPError as e:
+                # Non-fatal: we have a valid token; culture falls back to default.
+                self.logger.warning("Failed to fetch /v1/me, using default culture: %s", e)
+
         self._email = email
         self._password = password
         self.logger.info("Authenticated successfully, culture=%s", self._culture)

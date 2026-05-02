@@ -15,12 +15,18 @@ A second `meniga` adapter is included as an example of wiring a real bank API be
 
 ## Quick Start
 
+This project uses [uv](https://docs.astral.sh/uv/) for environment and dependency management.
+
 ### 1. Install Dependencies
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+uv sync
+```
+
+To include test extras as well:
+
+```bash
+uv sync --group test
 ```
 
 ### 2. Run the Demo Server
@@ -28,7 +34,7 @@ pip install -r requirements.txt
 The server uses stdio transport for MCP communication:
 
 ```bash
-python server.py
+uv run python server.py
 ```
 
 ### 3. Test with the Demo Client
@@ -36,8 +42,7 @@ python server.py
 In another terminal:
 
 ```bash
-source venv/bin/activate  # Activate the same venv
-python client.py
+uv run python client.py
 ```
 
 This will run through a series of test cases demonstrating all the Bank2AI tools.
@@ -92,8 +97,11 @@ Add to your Claude Desktop configuration:
 {
   "mcpServers": {
     "bank2ai-demo": {
-      "command": "python",
-      "args": ["/path/to/bank2ai-server/server.py"],
+      "command": "uv",
+      "args": [
+        "--directory", "/path/to/bank2ai-server",
+        "run", "python", "server.py"
+      ],
       "env": {}
     }
   }
@@ -107,8 +115,11 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 server_params = StdioServerParameters(
-    command="python",
-    args=["/path/to/bank2ai-server/server.py"],
+    command="uv",
+    args=[
+        "--directory", "/path/to/bank2ai-server",
+        "run", "python", "server.py",
+    ],
 )
 
 async with stdio_client(server_params) as (read, write):
@@ -143,7 +154,8 @@ The `generate_transactions()` function creates realistic transaction patterns - 
 server/
 ├── server.py                    # MCP server implementation
 ├── client.py                    # Test client
-├── requirements.txt             # Python dependencies
+├── pyproject.toml               # Python project & dependencies (uv)
+├── uv.lock                      # Locked dependency versions
 ├── schemas/                     # JSON schemas (mirror of bank2ai/spec)
 ├── test_schema_sync.py          # Verifies models stay in sync with schemas/
 ├── adapters/
@@ -221,7 +233,7 @@ ACCOUNTS.append({
 Run the test client to verify all tools work:
 
 ```bash
-python client.py
+uv run python client.py
 ```
 
 Expected output:
@@ -235,14 +247,14 @@ Expected output:
 
 Install dependencies:
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
 
 ### "Permission denied" errors
 
-Make sure you've activated the virtual environment:
+Run commands through `uv run` so the managed virtual environment is used:
 ```bash
-source venv/bin/activate
+uv run python server.py
 ```
 
 ### Server doesn't respond
