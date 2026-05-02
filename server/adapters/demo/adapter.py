@@ -12,8 +12,8 @@ from adapters.models import *
 class DemoDataAdapter(BankAdapter):
     """Bank adapter backed by hardcoded demo data from data.py."""
 
-    async def authenticate(self, param_values: list[AuthParamValue]) -> AuthReponse:
-        return AuthReponse(
+    async def authenticate(self, param_values: list[AuthParamValue]) -> AuthResponse:
+        return AuthResponse(
             authenticated=True,
         )
 

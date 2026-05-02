@@ -48,13 +48,13 @@ class MenigaAdapter(BankAdapter):
             self.logger.error("Auth token missing")
             return httpx.AsyncClient()
 
-    async def authenticate(self, param_values: list[AuthParamValue]) -> AuthReponse:
+    async def authenticate(self, param_values: list[AuthParamValue]) -> AuthResponse:
         creds = {p.id: p.value for p in param_values}
         email = creds.get("email", self._email)
         password = creds.get("password", self._password)
         if not email or not password:
             self.logger.warning("Missing email or password in authentication parameters")
-            return AuthReponse(
+            return AuthResponse(
                 authenticated=False,
                 required_parameters = [
                     AuthParam(id="email", title="Email", type=AuthParamType.Text),
@@ -72,7 +72,7 @@ class MenigaAdapter(BankAdapter):
 
             if response.status_code in (400, 401):
                 self.logger.error("Authentication failed: %d %s", response.status_code, response.text)
-                return AuthReponse(authenticated=False, message="Authentication failed")
+                return AuthResponse(authenticated=False, message="Authentication failed")
 
             response.raise_for_status()
             response_data = response.json()
@@ -102,7 +102,7 @@ class MenigaAdapter(BankAdapter):
         self._password = password
         self.logger.info("Authenticated successfully, culture=%s", self._culture)
 
-        return AuthReponse(
+        return AuthResponse(
             authenticated=True,
             token=self._token,
             culture=self._culture,

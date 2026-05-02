@@ -17,7 +17,7 @@ class BankAdapter(ABC):
         self.logger = logger
 
     @abstractmethod
-    async def authenticate(self, param_values: list[AuthParamValue]) -> AuthReponse:
+    async def authenticate(self, param_values: list[AuthParamValue]) -> AuthResponse:
         ...
 
     @abstractmethod
