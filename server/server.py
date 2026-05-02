@@ -422,7 +422,7 @@ async def _register_authenticate_tool() -> None:
 async def main() -> None:
     """Run the MCP server over stdio."""
     await _register_authenticate_tool()
-    await app.run_stdio_async()
+    await app.run_async()
 
 
 if __name__ == "__main__":
