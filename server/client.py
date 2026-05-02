@@ -20,7 +20,7 @@ async def main():
     # Start the server as a subprocess
     server_params = StdioServerParameters(
         command="python",
-        args=["server.py"],
+        args=["demo_server.py"],
     )
 
     async with stdio_client(server_params) as (read, write):

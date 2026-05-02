@@ -1,173 +1,62 @@
-"""Tests that JSON schemas, Pydantic models, MCP tool definitions, and adapter
-interface stay in sync.
+"""Tests that the registered MCP tool surface matches the Bank2AI spec.
 
 Run from the server/ directory:
     pytest test_schema_sync.py -v
 """
 
 import asyncio
-import inspect
-import json
-from pathlib import Path
-from typing import get_type_hints
 
 import pytest
 
-from adapters.base import BankAdapter
-from adapters.models import Account, Category, Receipient, Transaction
-
-SCHEMA_DIR = Path(__file__).resolve().parent / "schemas"
-
-# Map each JSON schema file to its Pydantic model
-SCHEMA_MODEL_PAIRS = [
-    ("account.json", Account),
-    ("transaction.json", Transaction),
-    ("recipient.json", Receipient),
-    ("category.json", Category),
-]
+import demo_server
 
 
 # ---------------------------------------------------------------------------
-# 1. JSON schemas ↔ Pydantic models
+# register_tools produces the full Bank2AI surface with the right inputs
 # ---------------------------------------------------------------------------
 
-
-@pytest.mark.parametrize("schema_file, model", SCHEMA_MODEL_PAIRS, ids=lambda x: x if isinstance(x, str) else x.__name__)
-def test_model_has_all_schema_fields(schema_file, model):
-    """Every property in a JSON schema must exist as a field on the Pydantic model."""
-    schema = json.loads((SCHEMA_DIR / schema_file).read_text())
-    schema_props = set(schema.get("properties", {}).keys())
-    model_fields = set(model.model_fields.keys())
-
-    missing = schema_props - model_fields
-    assert not missing, (
-        f"{model.__name__} is missing fields defined in {schema_file}: {missing}"
-    )
-
-
-@pytest.mark.parametrize("schema_file, model", SCHEMA_MODEL_PAIRS, ids=lambda x: x if isinstance(x, str) else x.__name__)
-def test_model_has_no_extra_fields(schema_file, model):
-    """Pydantic model should not have fields absent from the JSON schema."""
-    schema = json.loads((SCHEMA_DIR / schema_file).read_text())
-    schema_props = set(schema.get("properties", {}).keys())
-    model_fields = set(model.model_fields.keys())
-
-    extra = model_fields - schema_props
-    assert not extra, (
-        f"{model.__name__} has fields not in {schema_file}: {extra}"
-    )
-
-
-@pytest.mark.parametrize("schema_file, model", SCHEMA_MODEL_PAIRS, ids=lambda x: x if isinstance(x, str) else x.__name__)
-def test_required_fields_match(schema_file, model):
-    """Fields marked required in JSON schema must be required in the Pydantic model."""
-    schema = json.loads((SCHEMA_DIR / schema_file).read_text())
-    schema_required = set(schema.get("required", []))
-
-    model_required = set()
-    for name, field_info in model.model_fields.items():
-        if field_info.is_required():
-            model_required.add(name)
-
-    missing_required = schema_required - model_required
-    assert not missing_required, (
-        f"{model.__name__} should require {missing_required} (required in {schema_file})"
-    )
-
-
-# ---------------------------------------------------------------------------
-# 2. MCP tool inputSchemas ↔ BankAdapter method signatures
-# ---------------------------------------------------------------------------
-
-# Map tool name → adapter method name and any parameter renames
-# (tool schema key → adapter method kwarg)
-TOOL_METHOD_MAP = {
-    "get-accounts": {
-        "method": "get_accounts",
-        "param_map": {"only_withdrawal_accounts": "only_withdrawal"},
-    },
+EXPECTED_TOOL_INPUTS = {
+    "get-accounts": {"only_withdrawal_accounts", "account_type"},
     "transactions": {
-        "method": "get_transactions",
-        "param_map": {},
+        "count", "type", "order", "start_date", "end_date",
+        "description", "categories",
     },
-    "get-categories": {
-        "method": "get_categories",
-        "param_map": {},
-    },
-    "spending-summary": {
-        "method": "get_spending_summary",
-        "param_map": {},
-    },
-    "recipients-by-name": {
-        "method": "search_recipients",
-        "param_map": {},
-    },
-    "create-recipient": {
-        "method": "create_recipient",
-        "param_map": {},
-    },
+    "get-categories": set(),
+    "spending-summary": {"group_by", "start_date", "end_date", "categories"},
+    "recipients-by-name": {"name"},
+    "create-recipient": {"name", "account_number", "kennitala"},
     "transfer-money-icelandic": {
-        "method": "prepare_transfer",
-        "param_map": {"recipient_ssn": "recipient_ssn"},
+        "amount", "recipient_ssn", "recipient_account_number",
+        "description", "withdrawal_account_number", "currency",
     },
     "execute-transfer": {
-        "method": "execute_transfer",
-        "param_map": {},
+        "withdrawal_account_id", "recipient_account_number", "amount", "description",
     },
 }
 
 
-def _get_tools_by_name() -> dict:
-    """Import server module and return tools keyed by name."""
-    import server
-    tools = asyncio.run(server.app.list_tools())
-    # Expose `inputSchema` (matches MCP wire shape) on top of FastMCP's `parameters`.
-    return {t.name: type("ToolView", (), {"name": t.name, "inputSchema": t.parameters})() for t in tools}
-
-
-def _get_adapter_params(method_name: str) -> set[str]:
-    """Get parameter names for a BankAdapter method (excluding self)."""
-    method = getattr(BankAdapter, method_name)
-    sig = inspect.signature(method)
-    return {p for p in sig.parameters if p != "self"}
-
-
 @pytest.fixture(scope="module")
 def tools_by_name():
-    return _get_tools_by_name()
+    return {t.name: t for t in asyncio.run(demo_server.app.list_tools())}
 
 
-@pytest.mark.parametrize("tool_name", list(TOOL_METHOD_MAP.keys()))
-def test_tool_params_covered_by_adapter(tools_by_name, tool_name):
-    """Every tool inputSchema property must map to an adapter method parameter."""
-    mapping = TOOL_METHOD_MAP[tool_name]
+def test_all_expected_tools_registered(tools_by_name):
+    assert set(tools_by_name) == set(EXPECTED_TOOL_INPUTS)
+
+
+@pytest.mark.parametrize("tool_name, expected_props", list(EXPECTED_TOOL_INPUTS.items()))
+def test_tool_input_properties(tools_by_name, tool_name, expected_props):
     tool = tools_by_name[tool_name]
-    tool_props = set(tool.inputSchema.get("properties", {}).keys())
-    adapter_params = _get_adapter_params(mapping["method"])
-    param_map = mapping.get("param_map", {})
-
-    for prop in tool_props:
-        mapped = param_map.get(prop, prop)
-        assert mapped in adapter_params, (
-            f"Tool '{tool_name}' has property '{prop}' (mapped to '{mapped}') "
-            f"but BankAdapter.{mapping['method']} has no such parameter. "
-            f"Available: {adapter_params}"
-        )
-
-
-@pytest.mark.parametrize("tool_name", list(TOOL_METHOD_MAP.keys()))
-def test_adapter_has_method(tool_name):
-    """Every tool must have a corresponding method on BankAdapter."""
-    method_name = TOOL_METHOD_MAP[tool_name]["method"]
-    assert hasattr(BankAdapter, method_name), (
-        f"BankAdapter is missing method '{method_name}' for tool '{tool_name}'"
+    actual = set(tool.parameters.get("properties", {}).keys())
+    assert actual == expected_props, (
+        f"{tool_name}: expected input properties {expected_props}, got {actual}"
     )
 
 
-def test_all_tools_have_mapping(tools_by_name):
-    """Every tool defined in server.py must have an entry in TOOL_METHOD_MAP."""
-    unmapped = set(tools_by_name.keys()) - set(TOOL_METHOD_MAP.keys())
-    assert not unmapped, (
-        f"Tools without adapter mapping: {unmapped}. "
-        f"Add entries to TOOL_METHOD_MAP in test_schema_sync.py."
-    )
+@pytest.mark.parametrize("tool_name", list(EXPECTED_TOOL_INPUTS.keys()))
+def test_tool_has_object_output_schema(tools_by_name, tool_name):
+    """Every Bank2AI tool exposes an object output schema (inferred by FastMCP
+    from the Pydantic response-model annotation)."""
+    tool = tools_by_name[tool_name]
+    assert tool.output_schema is not None, f"{tool_name} missing output_schema"
+    assert tool.output_schema.get("type") == "object"

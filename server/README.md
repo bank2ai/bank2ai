@@ -1,17 +1,13 @@
 # Bank2AI Reference Server
 
-A reference MCP server implementation of the [Bank2AI specification](https://github.com/bank2ai/spec) using hardcoded demo data and a pluggable bank adapter.
+A reference MCP server implementation of the [Bank2AI specification](https://github.com/bank2ai/spec). The Bank2AI tool surface (names, input/output schemas, descriptions) lives in a single shared module — `bank2ai_mcp.py` — and each backend ships as its own MCP server that imports the shared spec and provides handler callables.
 
-## Purpose
+Two servers are included out of the box:
 
-This server demonstrates how to implement a Bank2AI-compliant MCP server. With the bundled `demo` adapter it serves realistic hardcoded data (no real bank required), making it perfect for:
+- **`demo_server.py`** — backed by hardcoded data in `demo_data.py`. Great for testing AI agents, demonstrations, and integration testing without a real bank.
+- **`meniga_server.py`** — backed by Meniga APIs (`api.meniga.cloud` / `api.meniga.is`) as an example of wiring a real bank behind the same Bank2AI surface.
 
-- Testing AI agents during development
-- Learning how to implement the Bank2AI specification
-- Demonstrating Bank2AI tools to stakeholders
-- Integration testing without needing real bank accounts
-
-A second `meniga` adapter is included as an example of wiring a real bank API behind the same interface.
+To add another bank, write a `<bank>_server.py` that imports `register_tools` from `bank2ai_mcp` and supplies handler callables — no need to redefine schemas.
 
 ## Quick Start
 
@@ -34,7 +30,13 @@ uv sync --group test
 The server uses stdio transport for MCP communication:
 
 ```bash
-uv run python server.py
+uv run python demo_server.py
+```
+
+To run the Meniga-backed server instead (requires `BANK2AI_MENIGA_BASE_URL` and credentials — see `meniga_server.py` for the full env var list):
+
+```bash
+uv run python meniga_server.py
 ```
 
 ### 3. Test with the Demo Client
@@ -100,7 +102,7 @@ Add to your Claude Desktop configuration:
       "command": "uv",
       "args": [
         "--directory", "/path/to/bank2ai-server",
-        "run", "python", "server.py"
+        "run", "python", "demo_server.py"
       ],
       "env": {}
     }
@@ -118,7 +120,7 @@ server_params = StdioServerParameters(
     command="uv",
     args=[
         "--directory", "/path/to/bank2ai-server",
-        "run", "python", "server.py",
+        "run", "python", "demo_server.py",
     ],
 )
 
@@ -139,7 +141,7 @@ Any MCP-compatible client can connect to this server using stdio transport.
 
 ## Customizing Test Data
 
-Edit `adapters/demo/data.py` to customize:
+Edit `demo_data.py` to customize:
 
 - Account balances and types
 - Transaction history
@@ -152,73 +154,70 @@ The `generate_transactions()` function creates realistic transaction patterns - 
 
 ```
 server/
-├── server.py                    # MCP server implementation
-├── client.py                    # Test client
+├── bank2ai_mcp.py               # Shared Bank2AI tool spec: names,
+│                                # input/output schemas, Pydantic response
+│                                # models, register_tools() helper, and
+│                                # optional auth middleware/tool
+├── demo_server.py               # Demo MCP server (uses bank2ai_mcp + demo_data)
+├── demo_data.py                 # Hardcoded demo accounts/txns/categories/recipients
+├── meniga_server.py             # Meniga-backed MCP server
+├── client.py                    # Test client (talks to demo_server)
+├── test_schema_sync.py          # Verifies tool registration matches the spec
 ├── pyproject.toml               # Python project & dependencies (uv)
 ├── uv.lock                      # Locked dependency versions
-├── schemas/                     # JSON schemas (mirror of bank2ai/spec)
-├── test_schema_sync.py          # Verifies models stay in sync with schemas/
-├── adapters/
-│   ├── base.py                  # BankAdapter interface
-│   ├── models.py                # Pydantic models for accounts, transactions, etc.
-│   ├── demo/
-│   │   ├── adapter.py           # Demo adapter using hardcoded data
-│   │   └── data.py              # Hardcoded test data
-│   └── meniga/
-│       └── adapter.py           # Meniga API adapter
 └── README.md                    # This file
 ```
 
-### server.py
+### bank2ai_mcp.py
 
-- Implements all 8 Bank2AI tools
-- Uses MCP SDK for protocol handling
-- Stdio transport for maximum compatibility
-- Dispatches to a pluggable adapter (configured via `BANK2AI_ADAPTER`)
+- Single source of truth for the Bank2AI MCP surface: tool names,
+  descriptions, input parameters (with `Field` annotations), and the
+  Pydantic response models that FastMCP turns into tool output schemas.
+- `register_tools(app, *, get_accounts=, get_transactions=, ...)` wires
+  the entire surface onto a `FastMCP` app, dispatching to caller-supplied
+  async handler callables.
+- Optional `make_auth_middleware()` and `register_authenticate_tool()`
+  helpers for servers that need credential-based authentication.
 
-### adapters/demo/data.py
+### demo_server.py / demo_data.py
 
-- Defines ACCOUNTS, TRANSACTIONS, CATEGORIES, RECIPIENTS
-- Generates realistic transaction history
-- Easy to modify for testing different scenarios
+- `demo_server.py` provides handler callables that read from `demo_data.py`.
+- `demo_data.py` defines `ACCOUNTS`, `TRANSACTIONS`, `CATEGORIES`,
+  `RECIPIENTS` with `generate_transactions()` for realistic history.
+- No authentication; this server is for offline/local use.
+
+### meniga_server.py
+
+- Same shape as `demo_server.py`, but its handlers call into Meniga APIs.
+- Registers the auth middleware and a dynamic `authenticate` tool that
+  collects `email` / `password` (via MCP elicitation when supported).
 
 ### client.py
 
-- Demonstrates connecting to the MCP server
-- Shows example usage of each tool
-- Good starting point for integration testing
+- Demonstrates connecting to a Bank2AI MCP server (defaults to
+  `demo_server.py`).
+- Shows example usage of each tool.
+- Good starting point for integration testing.
 
 ## Extending the Demo
 
 ### Adding New Tools
 
-1. Add the tool definition to `server.py`:
-```python
-TOOL_MY_TOOL = Tool(
-    name="my-tool",
-    description="...",
-    inputSchema={...}
-)
-```
+Add a new tool to the shared spec by editing `bank2ai_mcp.py`:
 
-2. Add the tool to `list_tools()`:
-```python
-return [
-    ...,
-    TOOL_MY_TOOL,
-]
-```
+1. Define the input parameters and `output_schema` inside `register_tools()`,
+   following the existing tools as a template, and dispatch to a new handler
+   keyword arg.
+2. Add the matching keyword argument to the `register_tools` signature.
+3. Implement the handler in each server (`demo_server.py`, `meniga_server.py`).
+4. Pass it in the corresponding `register_tools(...)` call.
 
-3. Add handler logic to `call_tool()`:
-```python
-elif name == "my-tool":
-    # Implementation here
-    return [TextContent(type="text", text=json.dumps(result))]
-```
+This way the input schema, output schema, name, and description are defined
+exactly once for all backends.
 
 ### Adding More Test Data
 
-Edit `adapters/demo/data.py` and add to the appropriate list:
+Edit `demo_data.py` and add to the appropriate list:
 
 ```python
 ACCOUNTS.append({
