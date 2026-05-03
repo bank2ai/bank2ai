@@ -207,8 +207,138 @@ class TransactionOrder(str, Enum):
     OldestFirst = "OldestFirst"
 
 
-def custom_json_encoder(obj):
-    """Custom JSON encoder for date objects."""
-    if isinstance(obj, date):
-        return obj.isoformat()
-    raise TypeError(f"Type {type(obj)} is not JSON serializable")
+class SpendingSummaryGroup(BaseModel):
+    """One row of an aggregated spending summary."""
+
+    group: str = Field(
+        description="Aggregation key value (category name, group, month, or merchant).",
+    )
+    total_amount: float = Field(description="Sum of transaction amounts in this group.")
+    transaction_count: int = Field(
+        description="Number of transactions contributing to this group.",
+        ge=0,
+    )
+    average_amount: float = Field(
+        description="Mean transaction amount within this group.",
+    )
+
+
+class SpendingSummaryPeriod(BaseModel):
+    """Inclusive date range covered by a spending summary."""
+
+    start_date: str = Field(
+        description="Inclusive lower bound, ISO 8601 (YYYY-MM-DD).",
+        examples=["2024-03-01"],
+    )
+    end_date: str = Field(
+        description="Inclusive upper bound, ISO 8601 (YYYY-MM-DD).",
+        examples=["2024-03-31"],
+    )
+
+
+class SpendingSummary(BaseModel):
+    """Aggregated spending summary"""
+
+    summary: list[SpendingSummaryGroup] = Field(
+        description="One entry per aggregation key value.",
+    )
+    period: SpendingSummaryPeriod = Field(
+        description="Date range covered by the aggregation.",
+    )
+    total: float = Field(description="Sum across all groups in the summary.")
+
+
+class CreateRecipientResponse(BaseModel):
+    """Result of creating a payment recipient"""
+
+    content: str = Field(description="Human-readable status message")
+    item: Optional[Recipient] = Field(
+        default=None,
+        description="The created recipient when creation succeeded.",
+    )
+
+
+class TransferAction(BaseModel):
+    """Suggested follow-up action for a prepared transfer."""
+
+    title: str = Field(description="Human-readable label for the action.")
+    link: str = Field(description="Target URL or in-app link to perform the action.")
+
+
+class TransferPreparedItem(BaseModel):
+    """Validated transfer details awaiting user confirmation."""
+
+    amount: float = Field(description="Transfer amount in `currency`.", gt=0)
+    description: str = Field(
+        description="Free-text note shown on the recipient's statement.",
+    )
+    currency: str = Field(
+        description="ISO 4217 currency code.",
+        pattern="^[A-Z]{3}$",
+        examples=["ISK", "EUR", "USD"],
+    )
+    recipient_account_number: str = Field(
+        description="Destination bank account number.",
+    )
+    recipient_ssn: str = Field(
+        description="Recipient's national ID / SSN.",
+    )
+    recipient_name: str = Field(description="Recipient's full name or business name.")
+    withdrawal_account_id: str = Field(
+        description="Source account.id (from get-accounts).",
+    )
+    withdrawal_account: Account = Field(
+        description="Resolved source account snapshot used for the transfer.",
+    )
+
+
+class TransferPreparedResponse(BaseModel):
+    """Prepared transfer details awaiting confirmation"""
+
+    content: str = Field(description="Human-readable status message")
+    item: Optional[TransferPreparedItem] = Field(
+        default=None,
+        description="Prepared transfer details when validation succeeded.",
+    )
+    actions: list[TransferAction] = Field(
+        default_factory=list,
+        description="Optional follow-up actions the client may surface.",
+    )
+
+
+class ExecuteTransferDetail(BaseModel):
+    """Bank-issued receipt for an executed transfer."""
+
+    transfer_id: str = Field(description="Bank-issued transfer identifier.")
+    status: str = Field(
+        description="Execution status reported by the bank.",
+        examples=["Completed", "Pending", "Rejected"],
+    )
+    timestamp: str = Field(
+        description="ISO 8601 timestamp when the bank recorded the transfer.",
+    )
+
+
+class ExecuteTransferResponse(BaseModel):
+    """Result of executing a transfer"""
+
+    content: str = Field(description="Human-readable status message")
+    item: Optional[ExecuteTransferDetail] = Field(
+        default=None,
+        description="Receipt details when the transfer was accepted by the bank.",
+    )
+
+
+class AuthenticateResponse(BaseModel):
+    """Authentication result"""
+
+    message: Optional[str] = Field(
+        default=None,
+        description="Success message to surface to the user.",
+    )
+    error: Optional[str] = Field(
+        default=None,
+        description="Error message when authentication failed.",
+    )
+
+

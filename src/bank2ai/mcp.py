@@ -22,91 +22,23 @@ from fastmcp import Context, FastMCP
 from fastmcp.exceptions import ToolError
 from fastmcp.server.middleware import Middleware, MiddlewareContext
 from fastmcp.tools.base import Tool
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from .models import (
     Account,
+    AuthenticateResponse,
     AuthParam,
     AuthParamType,
     AuthParamValue,
     AuthResponse,
     Category,
+    CreateRecipientResponse,
+    ExecuteTransferResponse,
     Recipient,
+    SpendingSummary,
     Transaction,
+    TransferPreparedResponse,
 )
-
-
-# ---- Bank2AI response wrapper models ----
-
-class SpendingSummaryGroup(BaseModel):
-    group: str
-    total_amount: float
-    transaction_count: int
-    average_amount: float
-
-
-class SpendingSummaryPeriod(BaseModel):
-    start_date: str
-    end_date: str
-
-
-class SpendingSummary(BaseModel):
-    """Aggregated spending summary"""
-
-    summary: list[SpendingSummaryGroup]
-    period: SpendingSummaryPeriod
-    total: float
-
-
-class CreateRecipientResponse(BaseModel):
-    """Result of creating a payment recipient"""
-
-    content: str = Field(description="Human-readable status message")
-    item: Optional[Recipient] = None
-
-
-class TransferAction(BaseModel):
-    title: str
-    link: str
-
-
-class TransferPreparedItem(BaseModel):
-    amount: float
-    description: str
-    currency: str
-    recipient_account_number: str
-    recipient_ssn: str
-    recipient_name: str
-    withdrawal_account_id: str
-    withdrawal_account: Account
-
-
-class TransferPreparedResponse(BaseModel):
-    """Prepared transfer details awaiting confirmation"""
-
-    content: str = Field(description="Human-readable status message")
-    item: Optional[TransferPreparedItem] = None
-    actions: list[TransferAction] = Field(default_factory=list)
-
-
-class ExecuteTransferDetail(BaseModel):
-    transfer_id: str
-    status: str
-    timestamp: str
-
-
-class ExecuteTransferResponse(BaseModel):
-    """Result of executing a transfer"""
-
-    content: str
-    item: Optional[ExecuteTransferDetail] = None
-
-
-class AuthenticateResponse(BaseModel):
-    """Authentication result"""
-
-    message: Optional[str] = None
-    error: Optional[str] = None
 
 
 # ---- Handler protocol ----

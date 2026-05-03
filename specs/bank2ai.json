@@ -700,7 +700,8 @@
                 "type": "null"
               }
             ],
-            "default": null
+            "default": null,
+            "description": "The created recipient when creation succeeded."
           }
         },
         "required": [
@@ -745,19 +746,29 @@
         "description": "Result of executing a transfer",
         "properties": {
           "content": {
+            "description": "Human-readable status message",
             "type": "string"
           },
           "item": {
             "anyOf": [
               {
+                "description": "Bank-issued receipt for an executed transfer.",
                 "properties": {
                   "status": {
+                    "description": "Execution status reported by the bank.",
+                    "examples": [
+                      "Completed",
+                      "Pending",
+                      "Rejected"
+                    ],
                     "type": "string"
                   },
                   "timestamp": {
+                    "description": "ISO 8601 timestamp when the bank recorded the transfer.",
                     "type": "string"
                   },
                   "transfer_id": {
+                    "description": "Bank-issued transfer identifier.",
                     "type": "string"
                   }
                 },
@@ -772,7 +783,8 @@
                 "type": "null"
               }
             ],
-            "default": null
+            "default": null,
+            "description": "Receipt details when the transfer was accepted by the bank."
           }
         },
         "required": [
@@ -1217,11 +1229,20 @@
         "description": "Aggregated spending summary",
         "properties": {
           "period": {
+            "description": "Date range covered by the aggregation.",
             "properties": {
               "end_date": {
+                "description": "Inclusive upper bound, ISO 8601 (YYYY-MM-DD).",
+                "examples": [
+                  "2024-03-31"
+                ],
                 "type": "string"
               },
               "start_date": {
+                "description": "Inclusive lower bound, ISO 8601 (YYYY-MM-DD).",
+                "examples": [
+                  "2024-03-01"
+                ],
                 "type": "string"
               }
             },
@@ -1232,18 +1253,25 @@
             "type": "object"
           },
           "summary": {
+            "description": "One entry per aggregation key value.",
             "items": {
+              "description": "One row of an aggregated spending summary.",
               "properties": {
                 "average_amount": {
+                  "description": "Mean transaction amount within this group.",
                   "type": "number"
                 },
                 "group": {
+                  "description": "Aggregation key value (category name, group, month, or merchant).",
                   "type": "string"
                 },
                 "total_amount": {
+                  "description": "Sum of transaction amounts in this group.",
                   "type": "number"
                 },
                 "transaction_count": {
+                  "description": "Number of transactions contributing to this group.",
+                  "minimum": 0,
                   "type": "integer"
                 }
               },
@@ -1258,6 +1286,7 @@
             "type": "array"
           },
           "total": {
+            "description": "Sum across all groups in the summary.",
             "type": "number"
           }
         },
@@ -1488,12 +1517,16 @@
         "description": "Prepared transfer details awaiting confirmation",
         "properties": {
           "actions": {
+            "description": "Optional follow-up actions the client may surface.",
             "items": {
+              "description": "Suggested follow-up action for a prepared transfer.",
               "properties": {
                 "link": {
+                  "description": "Target URL or in-app link to perform the action.",
                   "type": "string"
                 },
                 "title": {
+                  "description": "Human-readable label for the action.",
                   "type": "string"
                 }
               },
@@ -1512,27 +1545,41 @@
           "item": {
             "anyOf": [
               {
+                "description": "Validated transfer details awaiting user confirmation.",
                 "properties": {
                   "amount": {
+                    "description": "Transfer amount in `currency`.",
+                    "exclusiveMinimum": 0,
                     "type": "number"
                   },
                   "currency": {
+                    "description": "ISO 4217 currency code.",
+                    "examples": [
+                      "ISK",
+                      "EUR",
+                      "USD"
+                    ],
+                    "pattern": "^[A-Z]{3}$",
                     "type": "string"
                   },
                   "description": {
+                    "description": "Free-text note shown on the recipient's statement.",
                     "type": "string"
                   },
                   "recipient_account_number": {
+                    "description": "Destination bank account number.",
                     "type": "string"
                   },
                   "recipient_name": {
+                    "description": "Recipient's full name or business name.",
                     "type": "string"
                   },
                   "recipient_ssn": {
+                    "description": "Recipient's national ID / SSN.",
                     "type": "string"
                   },
                   "withdrawal_account": {
-                    "description": "Bank account with balance and metadata",
+                    "description": "Resolved source account snapshot used for the transfer.",
                     "properties": {
                       "accountNumber": {
                         "description": "Formatted account number (format varies by country)",
@@ -1655,6 +1702,7 @@
                     "type": "object"
                   },
                   "withdrawal_account_id": {
+                    "description": "Source account.id (from get-accounts).",
                     "type": "string"
                   }
                 },
@@ -1674,7 +1722,8 @@
                 "type": "null"
               }
             ],
-            "default": null
+            "default": null,
+            "description": "Prepared transfer details when validation succeeded."
           }
         },
         "required": [
