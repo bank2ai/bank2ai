@@ -8,7 +8,7 @@ Bank2AI defines a single [Model Context Protocol](https://modelcontextprotocol.i
 The contract has three parts:
 
 1. The **tool surface** — eight named MCP tools whose input and output JSON Schemas are fixed by the spec.
-2. The **shared data models** — `Account`, `Transaction`, `Category`, `Receipient`, plus the auth types — used inside tool inputs and outputs.
+2. The **shared data models** — `Account`, `Transaction`, `Category`, `Recipient`, plus the auth types — used inside tool inputs and outputs.
 3. The **authentication protocol** — a small contract servers follow if they need credentials before serving the surface.
 
 > **About RFC 2119 keywords.** *MUST*, *SHOULD*, *MAY* are used per [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119).
@@ -48,7 +48,7 @@ The schemas in `bank2ai.json` under `models{}` define the canonical shapes for:
 * **`Account`** — id, accountNumber, currency, balance, optional availableBalance, overdraftLimit, isWithdrawalAccount, isDefaultAccount, accountType (`Current` | `Savings` | `Credit`).
 * **`Transaction`** — id, description, amount (negative = expense), transaction_date (ISO 8601), category.
 * **`Category`** — id, name (localized).
-* **`Receipient`** — id, name, accountNumber, accountNumberType (`Domestic` | `IBAN` | `SWIFT`), socialSecurityNumber, optional bankInfo, paymentType, address, isFavorite, description.
+* **`Recipient`** — id, name, accountNumber, accountNumberType (`Domestic` | `IBAN` | `SWIFT`), socialSecurityNumber, optional bankInfo, paymentType, address, isFavorite, description.
 * **`AuthParam`** — id, title, type (`text` | `password`).
 * **`AuthResponse`** — authenticated, message, required_parameters, session_parameters, token, culture.
 

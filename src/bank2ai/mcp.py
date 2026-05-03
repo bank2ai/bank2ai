@@ -31,7 +31,7 @@ from .models import (
     AuthParamValue,
     AuthResponse,
     Category,
-    Receipient,
+    Recipient,
     Transaction,
 )
 
@@ -62,7 +62,7 @@ class CreateRecipientResponse(BaseModel):
     """Result of creating a payment recipient"""
 
     content: str = Field(description="Human-readable status message")
-    item: Optional[Receipient] = None
+    item: Optional[Recipient] = None
 
 
 class TransferAction(BaseModel):
@@ -270,7 +270,7 @@ def register_tools(
         name: str = Field(
             description="Free-text search; matches partial names of saved recipients.",
         ),
-    ) -> list[Receipient]:
+    ) -> list[Recipient]:
         return await search_recipients(name=name)
 
     @app.tool(

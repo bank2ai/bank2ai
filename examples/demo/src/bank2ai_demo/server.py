@@ -20,7 +20,7 @@ from bank2ai import (
     CreateRecipientResponse,
     ExecuteTransferDetail,
     ExecuteTransferResponse,
-    Receipient,
+    Recipient,
     SpendingSummary,
     SpendingSummaryGroup,
     SpendingSummaryPeriod,
@@ -160,10 +160,10 @@ async def get_spending_summary(
     )
 
 
-async def search_recipients(*, name: str) -> list[Receipient]:
+async def search_recipients(*, name: str) -> list[Recipient]:
     logger.info("search_recipients: name=%s", name)
     search = name.lower()
-    return [Receipient(**r) for r in demo_data.RECIPIENTS if search in r["name"].lower()]
+    return [Recipient(**r) for r in demo_data.RECIPIENTS if search in r["name"].lower()]
 
 
 async def create_recipient(
@@ -173,7 +173,7 @@ async def create_recipient(
     kennitala: str = "",
 ) -> CreateRecipientResponse:
     logger.info("create_recipient: name=%s", name)
-    recipient = Receipient(
+    recipient = Recipient(
         id=f"rcpt_{len(demo_data.RECIPIENTS) + 1:03d}",
         name=name,
         accountNumber=account_number,

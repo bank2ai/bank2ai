@@ -334,7 +334,7 @@
       "title": "Category",
       "type": "object"
     },
-    "Receipient": {
+    "Recipient": {
       "description": "Payment recipient with account details",
       "properties": {
         "accountNumber": {
@@ -469,7 +469,7 @@
         "socialSecurityNumber",
         "accountNumber"
       ],
-      "title": "Receipient",
+      "title": "Recipient",
       "type": "object"
     },
     "Transaction": {

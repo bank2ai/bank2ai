@@ -28,7 +28,7 @@ from bank2ai.models import (
     AuthParam,
     AuthResponse,
     Category,
-    Receipient,
+    Recipient,
     Transaction,
 )
 
@@ -41,7 +41,7 @@ DOCUMENTED_MODELS = {
     "Account": Account,
     "Transaction": Transaction,
     "Category": Category,
-    "Receipient": Receipient,
+    "Recipient": Recipient,
     "AuthParam": AuthParam,
     "AuthResponse": AuthResponse,
 }

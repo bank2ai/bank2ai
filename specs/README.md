@@ -35,7 +35,7 @@ The Python package (`bank2ai`) versions independently of the spec.
 
 * **Building a new server (any language):** read `bank2ai.spec.md` for semantics, then validate request/response payloads against the JSON Schemas in `bank2ai.json`.
 * **Building a client / agent:** rely on each server's MCP `tools/list` response — but the schemas in `bank2ai.json` are authoritative and clients can use them to render forms, validate parameters, or generate typed bindings.
-* **Auto-generating bindings:** the `models{}` block contains standalone schemas for shared types (`Account`, `Transaction`, `Category`, `Receipient`, `AuthParam`, `AuthResponse`) suitable for JSON-Schema-based code generators.
+* **Auto-generating bindings:** the `models{}` block contains standalone schemas for shared types (`Account`, `Transaction`, `Category`, `Recipient`, `AuthParam`, `AuthResponse`) suitable for JSON-Schema-based code generators.
 
 ## Reference implementations
 

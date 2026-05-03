@@ -35,7 +35,7 @@ For credentialed servers, `make_auth_middleware` and `register_authenticate_tool
 
 | Module           | Contents                                                  |
 | ---------------- | --------------------------------------------------------- |
-| `bank2ai.models` | Pydantic data models: `Account`, `Transaction`, `Receipient`, `Category`, `AuthParam`, `AuthResponse`, … |
+| `bank2ai.models` | Pydantic data models: `Account`, `Transaction`, `Recipient`, `Category`, `AuthParam`, `AuthResponse`, … |
 | `bank2ai.mcp`    | Tool surface (`register_tools`), response models, auth middleware, dynamic `authenticate` tool |
 
 ## Specification

@@ -34,7 +34,7 @@ from bank2ai import (
     Category,
     CreateRecipientResponse,
     ExecuteTransferResponse,
-    Receipient,
+    Recipient,
     SpendingSummary,
     SpendingSummaryGroup,
     SpendingSummaryPeriod,
@@ -70,7 +70,7 @@ _auth_state = AuthState()
 _token: Optional[str] = None
 _culture: str = _DEFAULT_CULTURE
 _categories_cache: list[Category] = []
-_recipients_store: list[Receipient] = []
+_recipients_store: list[Recipient] = []
 
 
 def _client() -> httpx.AsyncClient:
@@ -317,7 +317,7 @@ async def get_spending_summary(
     )
 
 
-async def search_recipients(*, name: str) -> list[Receipient]:
+async def search_recipients(*, name: str) -> list[Recipient]:
     logger.info("search_recipients: name=%s", name)
     matches = [r for r in _recipients_store if name.lower() in r.name.lower()]
     logger.info("search_recipients: found %d matches", len(matches))
@@ -331,7 +331,7 @@ async def create_recipient(
     kennitala: str = "",
 ) -> CreateRecipientResponse:
     logger.info("create_recipient: name=%s account=%s", name, account_number)
-    recipient = Receipient(
+    recipient = Recipient(
         id=str(uuid4()),
         name=name,
         accountNumber=account_number,

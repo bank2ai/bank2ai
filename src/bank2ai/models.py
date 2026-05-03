@@ -61,7 +61,7 @@ class AuthResponse(BaseModel):
     )
 
 
-class ReceipientInfo(BaseModel):
+class RecipientInfo(BaseModel):
     """Basic recipient information for transfers."""
 
     name: str = Field(description="Recipient's full name or business name")
@@ -71,7 +71,7 @@ class ReceipientInfo(BaseModel):
     accountNumber: str = Field(description="Recipient's bank account number")
 
 
-class Receipient(ReceipientInfo):
+class Recipient(RecipientInfo):
     """Payment recipient with account details"""
 
     id: Optional[str] = Field(default=None, description="Unique recipient identifier")
