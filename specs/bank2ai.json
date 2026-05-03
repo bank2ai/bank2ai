@@ -1,0 +1,1688 @@
+{
+  "$schema": "https://bank2ai.com/specs/bank2ai.schema.json",
+  "auth": {
+    "description": "If the bank requires credentials, the server MUST expose an `authenticate` tool whose JSON Schema is built from the `required_parameters` returned by an unauthenticated AuthResponse. Clients that support MCP elicitation MAY collect the same credentials inline. See bank2ai.spec.md for the full protocol.",
+    "protocol": "elicit-or-authenticate-tool"
+  },
+  "models": {
+    "Account": {
+      "$defs": {
+        "AccountType": {
+          "description": "Type of bank account.",
+          "enum": [
+            "Current",
+            "Credit",
+            "Savings"
+          ],
+          "title": "AccountType",
+          "type": "string"
+        }
+      },
+      "description": "Bank account with balance and metadata",
+      "properties": {
+        "accountNumber": {
+          "description": "Formatted account number (format varies by country)",
+          "examples": [
+            "1234-56-789012",
+            "GB29NWBK60161331926819"
+          ],
+          "title": "Accountnumber",
+          "type": "string"
+        },
+        "accountType": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AccountType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Type of account"
+        },
+        "availableBalance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Available balance (after pending transactions)",
+          "title": "Availablebalance"
+        },
+        "balance": {
+          "description": "Current account balance",
+          "title": "Balance",
+          "type": "number"
+        },
+        "currency": {
+          "description": "ISO 4217 currency code",
+          "examples": [
+            "USD",
+            "EUR",
+            "ISK",
+            "GBP"
+          ],
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique account identifier",
+          "title": "Id",
+          "type": "string"
+        },
+        "isDefaultAccount": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Whether this is the user's default account",
+          "title": "Isdefaultaccount"
+        },
+        "isWithdrawalAccount": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Whether this account can be used for withdrawals/transfers",
+          "title": "Iswithdrawalaccount"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable account name",
+          "examples": [
+            "Main Checking",
+            "Savings Account",
+            "Credit Card"
+          ],
+          "title": "Name"
+        },
+        "overdraftLimit": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Overdraft/credit limit (0 if none)",
+          "title": "Overdraftlimit"
+        }
+      },
+      "required": [
+        "id",
+        "accountNumber",
+        "currency",
+        "balance"
+      ],
+      "title": "Account",
+      "type": "object"
+    },
+    "AuthParam": {
+      "$defs": {
+        "AuthParamType": {
+          "description": "Type of authentication parameter input.",
+          "enum": [
+            "text",
+            "password"
+          ],
+          "title": "AuthParamType",
+          "type": "string"
+        }
+      },
+      "description": "Authentication parameter definition.",
+      "properties": {
+        "id": {
+          "description": "Identifier for this credential field",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "description": "Human-readable label shown to the user",
+          "title": "Title",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/AuthParamType",
+          "default": "text",
+          "description": "Input type \u2014 controls how the client renders the field"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "AuthParam",
+      "type": "object"
+    },
+    "AuthResponse": {
+      "$defs": {
+        "AuthParam": {
+          "description": "Authentication parameter definition.",
+          "properties": {
+            "id": {
+              "description": "Identifier for this credential field",
+              "title": "Id",
+              "type": "string"
+            },
+            "title": {
+              "description": "Human-readable label shown to the user",
+              "title": "Title",
+              "type": "string"
+            },
+            "type": {
+              "$ref": "#/$defs/AuthParamType",
+              "default": "text",
+              "description": "Input type \u2014 controls how the client renders the field"
+            }
+          },
+          "required": [
+            "id",
+            "title"
+          ],
+          "title": "AuthParam",
+          "type": "object"
+        },
+        "AuthParamType": {
+          "description": "Type of authentication parameter input.",
+          "enum": [
+            "text",
+            "password"
+          ],
+          "title": "AuthParamType",
+          "type": "string"
+        },
+        "AuthParamValue": {
+          "description": "Authentication parameter value from user.",
+          "properties": {
+            "id": {
+              "description": "Identifier matching an AuthParam.id",
+              "title": "Id",
+              "type": "string"
+            },
+            "value": {
+              "description": "User-supplied value for the parameter",
+              "title": "Value",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "value"
+          ],
+          "title": "AuthParamValue",
+          "type": "object"
+        }
+      },
+      "description": "Response from authentication endpoint.",
+      "properties": {
+        "authenticated": {
+          "default": false,
+          "description": "Whether authentication has succeeded",
+          "title": "Authenticated",
+          "type": "boolean"
+        },
+        "culture": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Locale/culture string returned by the adapter",
+          "title": "Culture"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Status or error message to surface to the user",
+          "title": "Message"
+        },
+        "required_parameters": {
+          "description": "Credential fields the adapter needs to authenticate",
+          "items": {
+            "$ref": "#/$defs/AuthParam"
+          },
+          "title": "Required Parameters",
+          "type": "array"
+        },
+        "session_parameters": {
+          "description": "Session parameters returned by the adapter for subsequent calls",
+          "items": {
+            "$ref": "#/$defs/AuthParamValue"
+          },
+          "title": "Session Parameters",
+          "type": "array"
+        },
+        "token": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Authentication token issued by the adapter, if any",
+          "title": "Token"
+        }
+      },
+      "title": "AuthResponse",
+      "type": "object"
+    },
+    "Category": {
+      "description": "Transaction category for spending classification",
+      "properties": {
+        "id": {
+          "description": "Unique category identifier",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Category name (localized)",
+          "examples": [
+            "Groceries",
+            "Transportation",
+            "Entertainment",
+            "Utilities"
+          ],
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "Category",
+      "type": "object"
+    },
+    "Receipient": {
+      "description": "Payment recipient with account details",
+      "properties": {
+        "accountNumber": {
+          "description": "Recipient's bank account number",
+          "examples": [
+            "5678-90-123456",
+            "GB29NWBK60161331926819"
+          ],
+          "title": "Accountnumber",
+          "type": "string"
+        },
+        "accountNumberType": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Type of account number",
+          "examples": [
+            "Domestic",
+            "IBAN",
+            "SWIFT"
+          ],
+          "title": "Accountnumbertype"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Recipient's address (if available)",
+          "title": "Address"
+        },
+        "bankInfo": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Bank name or identifier",
+          "examples": [
+            "Example Bank",
+            "Bank of America"
+          ],
+          "title": "Bankinfo"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "User-provided description or note",
+          "examples": [
+            "Friend",
+            "Landlord",
+            "Contractor"
+          ],
+          "title": "Description"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unique recipient identifier",
+          "title": "Id"
+        },
+        "isFavorite": {
+          "default": false,
+          "description": "Whether this recipient is marked as favorite",
+          "title": "Isfavorite",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "Recipient's full name or business name",
+          "title": "Name",
+          "type": "string"
+        },
+        "paymentType": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Type of payment supported",
+          "examples": [
+            "Domestic",
+            "International",
+            "SEPA"
+          ],
+          "title": "Paymenttype"
+        },
+        "socialSecurityNumber": {
+          "description": "National ID / SSN (format varies by country)",
+          "examples": [
+            "010190-1234",
+            "123-45-6789"
+          ],
+          "title": "Socialsecuritynumber",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "socialSecurityNumber",
+        "accountNumber"
+      ],
+      "title": "Receipient",
+      "type": "object"
+    },
+    "Transaction": {
+      "description": "Financial transaction with date, amount and metadata",
+      "properties": {
+        "amount": {
+          "description": "Transaction amount (negative for expenses, positive for income)",
+          "title": "Amount",
+          "type": "number"
+        },
+        "category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Category name",
+          "title": "Category"
+        },
+        "description": {
+          "description": "Transaction description, merchant name or recipient name",
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unique transaction identifier",
+          "title": "Id"
+        },
+        "transaction_date": {
+          "description": "Transaction date in ISO 8601 format (YYYY-MM-DD)",
+          "format": "date",
+          "title": "Transaction Date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description",
+        "amount",
+        "transaction_date"
+      ],
+      "title": "Transaction",
+      "type": "object"
+    }
+  },
+  "tools": [
+    {
+      "description": "Create a new payment recipient with their name, account number, and national ID. The recipient can then be used for transfers.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "account_number": {
+            "description": "Recipient's bank account number (format varies by country).",
+            "examples": [
+              "5678-90-123456"
+            ],
+            "type": "string"
+          },
+          "kennitala": {
+            "default": "",
+            "description": "Icelandic national ID for the recipient, if known.",
+            "examples": [
+              "010190-1234"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Recipient's full name or business name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "account_number"
+        ],
+        "type": "object"
+      },
+      "name": "create-recipient",
+      "outputSchema": {
+        "description": "Result of creating a payment recipient",
+        "properties": {
+          "content": {
+            "description": "Human-readable status message",
+            "type": "string"
+          },
+          "item": {
+            "anyOf": [
+              {
+                "description": "Payment recipient with account details",
+                "properties": {
+                  "accountNumber": {
+                    "description": "Recipient's bank account number",
+                    "examples": [
+                      "5678-90-123456",
+                      "GB29NWBK60161331926819"
+                    ],
+                    "type": "string"
+                  },
+                  "accountNumberType": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Type of account number",
+                    "examples": [
+                      "Domestic",
+                      "IBAN",
+                      "SWIFT"
+                    ]
+                  },
+                  "address": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Recipient's address (if available)"
+                  },
+                  "bankInfo": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Bank name or identifier",
+                    "examples": [
+                      "Example Bank",
+                      "Bank of America"
+                    ]
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "User-provided description or note",
+                    "examples": [
+                      "Friend",
+                      "Landlord",
+                      "Contractor"
+                    ]
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Unique recipient identifier"
+                  },
+                  "isFavorite": {
+                    "default": false,
+                    "description": "Whether this recipient is marked as favorite",
+                    "type": "boolean"
+                  },
+                  "name": {
+                    "description": "Recipient's full name or business name",
+                    "type": "string"
+                  },
+                  "paymentType": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Type of payment supported",
+                    "examples": [
+                      "Domestic",
+                      "International",
+                      "SEPA"
+                    ]
+                  },
+                  "socialSecurityNumber": {
+                    "description": "National ID / SSN (format varies by country)",
+                    "examples": [
+                      "010190-1234",
+                      "123-45-6789"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "socialSecurityNumber",
+                  "accountNumber"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "description": "Execute a money transfer after the user has confirmed the details. Use transfer-money-icelandic first to prepare and validate.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "description": "Transfer amount.",
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "description": {
+            "default": "Transfer",
+            "description": "Free-text note shown on the recipient's statement.",
+            "type": "string"
+          },
+          "recipient_account_number": {
+            "description": "Destination bank account number.",
+            "type": "string"
+          },
+          "withdrawal_account_id": {
+            "description": "Source account.id (from get-accounts).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "withdrawal_account_id",
+          "recipient_account_number",
+          "amount"
+        ],
+        "type": "object"
+      },
+      "name": "execute-transfer",
+      "outputSchema": {
+        "description": "Result of executing a transfer",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "item": {
+            "anyOf": [
+              {
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  },
+                  "timestamp": {
+                    "type": "string"
+                  },
+                  "transfer_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "transfer_id",
+                  "status",
+                  "timestamp"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "description": "Get bank accounts and cards. Returns a list of accounts with balances, account numbers, and types.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "account_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Current",
+                  "Savings",
+                  "Credit"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Filter by account type."
+          },
+          "only_withdrawal_accounts": {
+            "default": false,
+            "description": "If true, return only accounts usable for withdrawals/transfers.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get-accounts",
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "description": "Bank account with balance and metadata",
+              "properties": {
+                "accountNumber": {
+                  "description": "Formatted account number (format varies by country)",
+                  "examples": [
+                    "1234-56-789012",
+                    "GB29NWBK60161331926819"
+                  ],
+                  "type": "string"
+                },
+                "accountType": {
+                  "anyOf": [
+                    {
+                      "description": "Type of bank account.",
+                      "enum": [
+                        "Current",
+                        "Credit",
+                        "Savings"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Type of account"
+                },
+                "availableBalance": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Available balance (after pending transactions)"
+                },
+                "balance": {
+                  "description": "Current account balance",
+                  "type": "number"
+                },
+                "currency": {
+                  "description": "ISO 4217 currency code",
+                  "examples": [
+                    "USD",
+                    "EUR",
+                    "ISK",
+                    "GBP"
+                  ],
+                  "pattern": "^[A-Z]{3}$",
+                  "type": "string"
+                },
+                "id": {
+                  "description": "Unique account identifier",
+                  "type": "string"
+                },
+                "isDefaultAccount": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Whether this is the user's default account"
+                },
+                "isWithdrawalAccount": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Whether this account can be used for withdrawals/transfers"
+                },
+                "name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Human-readable account name",
+                  "examples": [
+                    "Main Checking",
+                    "Savings Account",
+                    "Credit Card"
+                  ]
+                },
+                "overdraftLimit": {
+                  "anyOf": [
+                    {
+                      "minimum": 0,
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Overdraft/credit limit (0 if none)"
+                }
+              },
+              "required": [
+                "id",
+                "accountNumber",
+                "currency",
+                "balance"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "description": "Get transaction categories. Returns a list of categories that transactions can be classified into.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "get-categories",
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "description": "Transaction category for spending classification",
+              "properties": {
+                "id": {
+                  "description": "Unique category identifier",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Category name (localized)",
+                  "examples": [
+                    "Groceries",
+                    "Transportation",
+                    "Entertainment",
+                    "Utilities"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "description": "Lookup recipient of a payment or transfer by name. Returns matching recipients with their account details.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Free-text search; matches partial names of saved recipients.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "name": "recipients-by-name",
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "description": "Payment recipient with account details",
+              "properties": {
+                "accountNumber": {
+                  "description": "Recipient's bank account number",
+                  "examples": [
+                    "5678-90-123456",
+                    "GB29NWBK60161331926819"
+                  ],
+                  "type": "string"
+                },
+                "accountNumberType": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Type of account number",
+                  "examples": [
+                    "Domestic",
+                    "IBAN",
+                    "SWIFT"
+                  ]
+                },
+                "address": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Recipient's address (if available)"
+                },
+                "bankInfo": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Bank name or identifier",
+                  "examples": [
+                    "Example Bank",
+                    "Bank of America"
+                  ]
+                },
+                "description": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "User-provided description or note",
+                  "examples": [
+                    "Friend",
+                    "Landlord",
+                    "Contractor"
+                  ]
+                },
+                "id": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Unique recipient identifier"
+                },
+                "isFavorite": {
+                  "default": false,
+                  "description": "Whether this recipient is marked as favorite",
+                  "type": "boolean"
+                },
+                "name": {
+                  "description": "Recipient's full name or business name",
+                  "type": "string"
+                },
+                "paymentType": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Type of payment supported",
+                  "examples": [
+                    "Domestic",
+                    "International",
+                    "SEPA"
+                  ]
+                },
+                "socialSecurityNumber": {
+                  "description": "National ID / SSN (format varies by country)",
+                  "examples": [
+                    "010190-1234",
+                    "123-45-6789"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "socialSecurityNumber",
+                "accountNumber"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "description": "Get an aggregated spending summary. Returns totals, counts, and averages grouped by category, category group, month, or merchant.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Restrict to these category names (the `name` field from get-categories, not the id)."
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive upper bound, ISO 8601 (YYYY-MM-DD).",
+            "examples": [
+              "2024-03-15"
+            ]
+          },
+          "group_by": {
+            "default": "category",
+            "description": "Aggregation key.",
+            "enum": [
+              "category",
+              "group",
+              "month",
+              "merchant"
+            ],
+            "type": "string"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive lower bound, ISO 8601 (YYYY-MM-DD).",
+            "examples": [
+              "2024-03-15"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "name": "spending-summary",
+      "outputSchema": {
+        "description": "Aggregated spending summary",
+        "properties": {
+          "period": {
+            "properties": {
+              "end_date": {
+                "type": "string"
+              },
+              "start_date": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "start_date",
+              "end_date"
+            ],
+            "type": "object"
+          },
+          "summary": {
+            "items": {
+              "properties": {
+                "average_amount": {
+                  "type": "number"
+                },
+                "group": {
+                  "type": "string"
+                },
+                "total_amount": {
+                  "type": "number"
+                },
+                "transaction_count": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "group",
+                "total_amount",
+                "transaction_count",
+                "average_amount"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "summary",
+          "period",
+          "total"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "description": "Get bank transactions. Returns a list of transactions with amounts, dates, descriptions, and categories.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Restrict to these category names (the `name` field from get-categories, not the id)."
+          },
+          "count": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Maximum number of transactions to return."
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Free-text search across merchant/recipient/reference/description."
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive upper bound, ISO 8601 (YYYY-MM-DD).",
+            "examples": [
+              "2024-03-15"
+            ]
+          },
+          "order": {
+            "default": "NewestFirst",
+            "description": "Sort order.",
+            "enum": [
+              "NewestFirst",
+              "OldestFirst"
+            ],
+            "type": "string"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive lower bound, ISO 8601 (YYYY-MM-DD).",
+            "examples": [
+              "2024-03-15"
+            ]
+          },
+          "type": {
+            "default": "Any",
+            "description": "Filter by direction.",
+            "enum": [
+              "Any",
+              "Income",
+              "Expenses",
+              "Savings"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "name": "transactions",
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "description": "Financial transaction with date, amount and metadata",
+              "properties": {
+                "amount": {
+                  "description": "Transaction amount (negative for expenses, positive for income)",
+                  "type": "number"
+                },
+                "category": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Category name"
+                },
+                "description": {
+                  "description": "Transaction description, merchant name or recipient name",
+                  "type": "string"
+                },
+                "id": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Unique transaction identifier"
+                },
+                "transaction_date": {
+                  "description": "Transaction date in ISO 8601 format (YYYY-MM-DD)",
+                  "format": "date",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description",
+                "amount",
+                "transaction_date"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "description": "Prepare a domestic money transfer. Validates recipient and prepares transfer details for confirmation.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "description": "Transfer amount in the source account's currency.",
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "currency": {
+            "default": "",
+            "description": "ISO 4217 currency code; if empty, source-account currency is used.",
+            "examples": [
+              "ISK",
+              "EUR",
+              "USD"
+            ],
+            "pattern": "^[A-Z]{3}$|^$",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "description": "Free-text note shown on the recipient's statement.",
+            "type": "string"
+          },
+          "recipient_account_number": {
+            "description": "Destination bank account number.",
+            "examples": [
+              "5678-90-123456"
+            ],
+            "type": "string"
+          },
+          "recipient_ssn": {
+            "description": "Recipient's Icelandic kennitala.",
+            "examples": [
+              "010190-1234"
+            ],
+            "type": "string"
+          },
+          "withdrawal_account_number": {
+            "default": "",
+            "description": "Source account number; if empty, the user's default withdrawal account is used.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount",
+          "recipient_ssn",
+          "recipient_account_number"
+        ],
+        "type": "object"
+      },
+      "name": "transfer-money-icelandic",
+      "outputSchema": {
+        "description": "Prepared transfer details awaiting confirmation",
+        "properties": {
+          "actions": {
+            "items": {
+              "properties": {
+                "link": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title",
+                "link"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "content": {
+            "description": "Human-readable status message",
+            "type": "string"
+          },
+          "item": {
+            "anyOf": [
+              {
+                "properties": {
+                  "amount": {
+                    "type": "number"
+                  },
+                  "currency": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "recipient_account_number": {
+                    "type": "string"
+                  },
+                  "recipient_name": {
+                    "type": "string"
+                  },
+                  "recipient_ssn": {
+                    "type": "string"
+                  },
+                  "withdrawal_account": {
+                    "description": "Bank account with balance and metadata",
+                    "properties": {
+                      "accountNumber": {
+                        "description": "Formatted account number (format varies by country)",
+                        "examples": [
+                          "1234-56-789012",
+                          "GB29NWBK60161331926819"
+                        ],
+                        "type": "string"
+                      },
+                      "accountType": {
+                        "anyOf": [
+                          {
+                            "description": "Type of bank account.",
+                            "enum": [
+                              "Current",
+                              "Credit",
+                              "Savings"
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Type of account"
+                      },
+                      "availableBalance": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Available balance (after pending transactions)"
+                      },
+                      "balance": {
+                        "description": "Current account balance",
+                        "type": "number"
+                      },
+                      "currency": {
+                        "description": "ISO 4217 currency code",
+                        "examples": [
+                          "USD",
+                          "EUR",
+                          "ISK",
+                          "GBP"
+                        ],
+                        "pattern": "^[A-Z]{3}$",
+                        "type": "string"
+                      },
+                      "id": {
+                        "description": "Unique account identifier",
+                        "type": "string"
+                      },
+                      "isDefaultAccount": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Whether this is the user's default account"
+                      },
+                      "isWithdrawalAccount": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Whether this account can be used for withdrawals/transfers"
+                      },
+                      "name": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Human-readable account name",
+                        "examples": [
+                          "Main Checking",
+                          "Savings Account",
+                          "Credit Card"
+                        ]
+                      },
+                      "overdraftLimit": {
+                        "anyOf": [
+                          {
+                            "minimum": 0,
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Overdraft/credit limit (0 if none)"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "accountNumber",
+                      "currency",
+                      "balance"
+                    ],
+                    "type": "object"
+                  },
+                  "withdrawal_account_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "amount",
+                  "description",
+                  "currency",
+                  "recipient_account_number",
+                  "recipient_ssn",
+                  "recipient_name",
+                  "withdrawal_account_id",
+                  "withdrawal_account"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "type": "object"
+      }
+    }
+  ],
+  "version": "0.1.0"
+}

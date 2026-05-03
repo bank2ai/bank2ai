@@ -15,7 +15,6 @@ import asyncio
 import logging
 import os
 from collections import defaultdict
-from pathlib import Path
 from typing import Optional
 from uuid import uuid4
 
@@ -24,13 +23,22 @@ import jwt
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 
-from bank2ai_mcp import (
+from bank2ai import (
+    Account,
+    AccountType,
+    AuthParam,
+    AuthParamType,
+    AuthParamValue,
+    AuthResponse,
     AuthState,
+    Category,
     CreateRecipientResponse,
     ExecuteTransferResponse,
+    Receipient,
     SpendingSummary,
     SpendingSummaryGroup,
     SpendingSummaryPeriod,
+    Transaction,
     TransferAction,
     TransferPreparedItem,
     TransferPreparedResponse,
@@ -38,24 +46,11 @@ from bank2ai_mcp import (
     register_authenticate_tool,
     register_tools,
 )
-from models import (
-    Account,
-    AccountType,
-    AuthParam,
-    AuthParamType,
-    AuthParamValue,
-    AuthResponse,
-    Category,
-    Receipient,
-    Transaction,
-)
 
 
 load_dotenv()
 
-_repo_root = Path(__file__).resolve().parent.parent
 logging.basicConfig(
-    filename=_repo_root / "bank2ai-server.log",
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
 )
@@ -435,5 +430,10 @@ async def main() -> None:
     await app.run_async()
 
 
-if __name__ == "__main__":
+def main_sync() -> None:
+    """Entry-point for the ``bank2ai-meniga`` console script."""
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    main_sync()

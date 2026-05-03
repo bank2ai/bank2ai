@@ -27,6 +27,11 @@ venv/
 env/
 ENV/
 
+# Docusaurus / Node
+node_modules/
+docs/build/
+docs/.docusaurus/
+
 # OS
 .DS_Store
 Thumbs.db

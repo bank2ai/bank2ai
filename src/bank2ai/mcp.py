@@ -24,7 +24,7 @@ from fastmcp.server.middleware import Middleware, MiddlewareContext
 from fastmcp.tools.base import Tool
 from pydantic import BaseModel, Field
 
-from models import (
+from .models import (
     Account,
     AuthParam,
     AuthParamType,

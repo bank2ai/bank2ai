@@ -1,41 +1,42 @@
 """Bank2AI Demo MCP Server.
 
 Reference implementation of the Bank2AI MCP spec backed by hardcoded
-demo data (see `demo_data.py`). The tool surface is provided by
-`bank2ai_mcp.register_tools`; this module only supplies handlers.
+demo data (see `data.py`). The tool surface is provided by
+`bank2ai.register_tools`; this module only supplies handlers.
 """
 
 import asyncio
 import logging
 from collections import defaultdict
 from datetime import datetime
-from pathlib import Path
 from typing import Optional
 
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 
-import demo_data
-from bank2ai_mcp import (
+from bank2ai import (
+    Account,
+    Category,
     CreateRecipientResponse,
     ExecuteTransferDetail,
     ExecuteTransferResponse,
+    Receipient,
     SpendingSummary,
     SpendingSummaryGroup,
     SpendingSummaryPeriod,
+    Transaction,
     TransferAction,
     TransferPreparedItem,
     TransferPreparedResponse,
     register_tools,
 )
-from models import Account, Category, Receipient, Transaction
+
+from . import data as demo_data
 
 
 load_dotenv()
 
-_repo_root = Path(__file__).resolve().parent.parent
 logging.basicConfig(
-    filename=_repo_root / "bank2ai-server.log",
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
 )
@@ -275,5 +276,10 @@ async def main() -> None:
     await app.run_async()
 
 
-if __name__ == "__main__":
+def main_sync() -> None:
+    """Entry-point for the ``bank2ai-demo`` console script."""
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    main_sync()

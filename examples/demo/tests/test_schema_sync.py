@@ -1,14 +1,30 @@
 """Tests that the registered MCP tool surface matches the Bank2AI spec.
 
-Run from the server/ directory:
-    pytest test_schema_sync.py -v
+Run from the examples/demo directory:
+    pytest -v
 """
 
 import asyncio
+import importlib.util
+import json
+from pathlib import Path
 
 import pytest
 
-import demo_server
+from bank2ai_demo import server as demo_server
+
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+SPEC_PATH = REPO_ROOT / "specs" / "bank2ai.json"
+GENERATOR_PATH = REPO_ROOT / "scripts" / "generate_spec.py"
+
+
+def _load_generator():
+    """Import scripts/generate_spec.py without putting it on sys.path."""
+    spec = importlib.util.spec_from_file_location("generate_spec", GENERATOR_PATH)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 # ---------------------------------------------------------------------------
@@ -60,3 +76,16 @@ def test_tool_has_object_output_schema(tools_by_name, tool_name):
     tool = tools_by_name[tool_name]
     assert tool.output_schema is not None, f"{tool_name} missing output_schema"
     assert tool.output_schema.get("type") == "object"
+
+
+# ---------------------------------------------------------------------------
+# specs/bank2ai.json stays in sync with the Python reference implementation
+# ---------------------------------------------------------------------------
+
+def test_committed_spec_matches_generator():
+    generator = _load_generator()
+    generated = generator.build_spec()
+    committed = json.loads(SPEC_PATH.read_text())
+    assert generated == committed, (
+        "specs/bank2ai.json is stale. Run `uv run python scripts/generate_spec.py`."
+    )
