@@ -36,7 +36,7 @@ const FEATURES: Feature[] = [
   {
     title: 'A shared banking vocabulary',
     description:
-      'Eight named MCP tools — accounts, transactions, categories, spending summaries, recipients, transfers — with fixed input/output schemas. Implement them once, get every Bank2AI client for free.',
+      'Standard banking MCP tools — accounts, transactions, categories, spending summaries, recipients, transfers — with fixed input/output schemas. Implement them once, get every Bank2AI client for free.',
     href: '/docs/specification/overview',
     cta: 'Read the spec →',
   },
