@@ -32,4 +32,4 @@ Bank2AI's value compounds with adoption. A budgeting skill written today should 
 
 ## Where it lives
 
-The marketplace registry is hosted at [github.com/bank2ai/bank2ai-marketplace](https://github.com/bank2ai/bank2ai-marketplace) and discoverable from any Claude Code client speaking the plugin marketplace format.
+The marketplace registry is hosted at [github.com/bank2ai/marketplace](https://github.com/bank2ai/marketplace) and discoverable from any Claude Code client speaking the plugin marketplace format.

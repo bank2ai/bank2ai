@@ -13,7 +13,7 @@ The marketplace is consumable from any Claude Code client speaking the [plugin m
 Once, in Claude Code:
 
 ```
-/plugin marketplace add bank2ai/bank2ai-marketplace
+/plugin marketplace add bank2ai/marketplace
 ```
 
 This subscribes Claude Code to the registry; new entries appear automatically.

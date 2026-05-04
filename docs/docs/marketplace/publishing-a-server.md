@@ -43,7 +43,7 @@ The `implements` field tells the registry which Bank2AI version your server spea
 
 ## Submit to the registry
 
-1. Fork [`bank2ai/bank2ai-marketplace`](https://github.com/bank2ai/bank2ai-marketplace).
+1. Fork [`bank2ai/marketplace`](https://github.com/bank2ai/marketplace).
 2. Add an entry pointing at your published plugin.
 3. Open a pull request. CI re-runs your drift test and validates `plugin.json`.
 

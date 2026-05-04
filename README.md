@@ -6,7 +6,7 @@ The language of banking is universal — accounts, transactions, transfers, bill
 
 📖 **Full documentation:** [bank2ai.com](https://bank2ai.com)
 📦 **Specification:** [`specs/`](./specs/)
-🛒 **Marketplace:** [github.com/bank2ai/bank2ai-marketplace](https://github.com/bank2ai/bank2ai-marketplace)
+🛒 **Marketplace:** [github.com/bank2ai/marketplace](https://github.com/bank2ai/marketplace)
 
 ## Stewarded by Bancony
 

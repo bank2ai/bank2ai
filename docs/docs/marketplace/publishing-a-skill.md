@@ -44,7 +44,7 @@ The `requires` field declares both the spec version and the specific tools your 
 
 ## Submit to the registry
 
-Same flow as servers — fork [`bank2ai/bank2ai-marketplace`](https://github.com/bank2ai/bank2ai-marketplace), add an entry, open a PR.
+Same flow as servers — fork [`bank2ai/marketplace`](https://github.com/bank2ai/marketplace), add an entry, open a PR.
 
 ## Skill review checklist
 
