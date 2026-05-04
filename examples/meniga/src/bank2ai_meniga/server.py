@@ -8,17 +8,18 @@ Optional environment variables:
     BANK2AI_MENIGA_EMAIL: Email; if set, used as the default credential
     BANK2AI_MENIGA_PASSWORD: Password; if set, used as the default credential
     BANK2AI_MENIGA_CULTURE: Locale (default: en-GB)
-    BANK2AI_LOG_RESPONSES: Set to 1/true to log full tool responses
 """
 
 import asyncio
 import logging
 import os
+import time
 from collections import defaultdict
 from typing import Optional
 from uuid import uuid4
 
 import httpx
+import jwt
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 from fastmcp.server.dependencies import get_access_token, get_context
@@ -49,8 +50,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("bank2ai-meniga")
 
-_log_responses = os.environ.get("BANK2AI_LOG_RESPONSES", "").lower() in ("1", "true", "yes")
-
 _BASE_URL = os.environ["BANK2AI_MENIGA_BASE_URL"].rstrip("/")
 _DEFAULT_EMAIL = os.environ.get("BANK2AI_MENIGA_EMAIL", "")
 _DEFAULT_PASSWORD = os.environ.get("BANK2AI_MENIGA_PASSWORD", "")
@@ -64,6 +63,21 @@ _categories_cache: list[Category] = []
 _recipients_store: list[Recipient] = []
 
 
+_TOKEN_REFRESH_LEEWAY_SECONDS = 60
+
+
+def _token_expired_or_expiring(token: str) -> bool:
+    """Return True if `token` is un-parseable, expired, or expires within the leeway."""
+    try:
+        claims = jwt.decode(token, options={"verify_signature": False})
+    except jwt.PyJWTError:
+        return True
+    exp = claims.get("exp")
+    if exp is None:
+        return False
+    return time.time() >= exp - _TOKEN_REFRESH_LEEWAY_SECONDS
+
+
 async def _client() -> httpx.AsyncClient:
     headers: dict[str, str] = {}
     token: Optional[str] = None
@@ -71,12 +85,7 @@ async def _client() -> httpx.AsyncClient:
     if access_token is not None:
         token = access_token.token
     else:
-        context = get_context()
-        token = await context.get_state("meniga_token")
-        if token is None:
-            token = await create_token()
-            if token:
-                await context.set_state("meniga_token", token)
+        token = await authenticate()
     if token:
         headers["Authorization"] = f"Bearer {token}"
     return httpx.AsyncClient(headers=headers, timeout=30.0)
@@ -84,7 +93,15 @@ async def _client() -> httpx.AsyncClient:
 
 # ---- Auth handler ----
 
-async def create_token() -> Optional[str]:
+async def authenticate() -> Optional[str]:
+    context = get_context()
+    token = await context.get_state("meniga_token")
+    if token:
+        if _token_expired_or_expiring(token):
+            logger.info("Cached Meniga token expired or expiring; re-authenticating")
+        else:
+            return token
+
     email = _DEFAULT_EMAIL
     password = _DEFAULT_PASSWORD
 
@@ -104,7 +121,9 @@ async def create_token() -> Optional[str]:
             return None
         response.raise_for_status()
         data = response.json()
-        return data["data"]["accessToken"]
+        token = data["data"]["accessToken"]
+        await context.set_state("meniga_token", token)
+        return token
 
 
 # ---- Bank2AI tool handlers ----

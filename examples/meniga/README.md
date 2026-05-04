@@ -16,7 +16,6 @@ cp .env.example .env
 | `BANK2AI_MENIGA_EMAIL`    | no       | Default credential email (otherwise prompted via MCP elicitation) |
 | `BANK2AI_MENIGA_PASSWORD` | no       | Default credential password                               |
 | `BANK2AI_MENIGA_CULTURE`  | no       | Locale, defaults to `en-GB`                               |
-| `BANK2AI_LOG_RESPONSES`   | no       | Set to `1`/`true` to log full tool responses              |
 
 ## Run
 
