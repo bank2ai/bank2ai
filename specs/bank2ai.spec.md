@@ -3,7 +3,11 @@
 > **Version:** 0.1.0 — draft, derived from the Python reference implementation.
 > **Companion artifact:** [`bank2ai.json`](./bank2ai.json) — canonical input/output JSON Schemas.
 
-Bank2AI defines a single [Model Context Protocol](https://modelcontextprotocol.io) tool surface that any bank can expose so AI agents (and through them, end customers) can read accounts and transactions, look up recipients, run spending summaries, and prepare/execute transfers — using the same tool surface across every bank.
+Bank2AI connects digital banking data and operations with AI agents. The language of banking — accounts, transactions, transfers, bill payments, recipients, loans, savings — is universally identical, and Bank2AI is the open standard that lets banks, fintechs, and AI builders collaborate on a single shared vocabulary instead of each reinventing one.
+
+This document defines that vocabulary as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface that any bank can expose so AI agents (and through them, end customers) can read accounts and transactions, look up recipients, run spending summaries, and prepare/execute transfers — using the same tool surface across every bank.
+
+Compliant servers and the agent skills built on top of them are distributed through the [Bank2AI marketplace](../README.md#marketplace), which is packaged as a [Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces) and consumable from any client that speaks the same plugin format.
 
 The contract has two parts:
 

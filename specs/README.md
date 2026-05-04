@@ -1,12 +1,16 @@
 # Bank2AI MCP Specification
 
-This directory holds the language-neutral specification for the **Bank2AI** [Model Context Protocol](https://modelcontextprotocol.io) tool surface — the same set of tools every Bank2AI server is expected to expose, regardless of programming language or backend.
+Bank2AI connects digital banking data and operations with AI agents. The language of banking — accounts, transactions, transfers, bill payments, recipients, loans, savings — is universal, and Bank2AI codifies that language as an open standard so banks and fintechs can collaborate on AI tools and skills instead of each rebuilding the same surface.
+
+This directory holds the language-neutral specification for the Bank2AI [Model Context Protocol](https://modelcontextprotocol.io) tool surface — the same set of tools every Bank2AI server is expected to expose, regardless of programming language or backend.
+
+> **Where the marketplace fits in.** The spec defines the *contract*; the [Bank2AI marketplace](../README.md#marketplace) is where compliant servers and skills are distributed. The marketplace is packaged as a [Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces), so any Claude Code user can install a Bank2AI server or skill with a single command — and any other client that speaks that plugin format can consume the same registry.
 
 ## Files
 
 | File                 | Purpose                                                                                |
 | -------------------- | -------------------------------------------------------------------------------------- |
-| `bank2ai.spec.md`    | Narrative spec — overview, lifecycle, per-tool semantics, auth protocol, error model.  |
+| `bank2ai.spec.md`    | Narrative spec — overview, lifecycle, per-tool semantics, error model.                 |
 | `bank2ai.json`       | Machine-readable: `version`, full `tools[]` (with `inputSchema` and `outputSchema` as JSON Schema), and reusable `models{}`. |
 
 ## Status
