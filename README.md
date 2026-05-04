@@ -1,19 +1,24 @@
-# bank2ai
+# Bank2AI
 
-**Bank2AI connects digital banking data and operations with AI agents.**
+**The open standard for connecting digital banking with AI agents.**
 
-The language of banking is universal — accounts, transactions, transfers, bill payments, recipients, loans, savings — and Bank2AI codifies that language as an open standard so banks and fintechs can collaborate on AI tools and skills instead of each rebuilding the same surface. Once a bank speaks Bank2AI over the [Model Context Protocol (MCP)](https://modelcontextprotocol.io), any compliant AI client can read accounts and transactions, look up recipients, run spending summaries, and prepare/execute transfers — using the same vocabulary across every bank.
+The language of banking is universal — accounts, transactions, transfers, bill payments, recipients, loans, savings — and Bank2AI codifies that language as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface. Once a bank speaks Bank2AI, any compliant AI client can read accounts, look up recipients, run spending summaries, and prepare/execute transfers — using the same vocabulary across every bank.
 
-Bank2AI is also an ecosystem. The Bank2AI **marketplace** is a registry of MCP servers and agent skills that implement this standard, distributed as a [Claude Code marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces) so any Claude Code user can install a bank or skill with one command (and any other client speaking the same plugin format can do the same).
+📖 **Full documentation:** [bank2ai.com](https://bank2ai.com)
+📦 **Specification:** [`specs/`](./specs/)
+🛒 **Marketplace:** [github.com/bank2ai/bank2ai-marketplace](https://github.com/bank2ai/bank2ai-marketplace)
 
-The repo contains:
+## Stewarded by Bancony
 
-* the **`bank2ai` Python library** (`src/bank2ai/`) — shared data models and a reusable MCP tool surface (`register_tools`) built on top of [FastMCP](https://github.com/jlowin/fastmcp);
-* the **language-neutral spec** (`specs/`) — JSON Schemas + a narrative document — so the same surface can be reimplemented in any language;
-* **example MCP servers** (`examples/`) backed by demo data and by the Meniga API; and
-* **docs** (`docs/`) — a Docusaurus site, planned for [bank2ai.com](https://bank2ai.com).
+Bank2AI is freely usable by any bank or fintech. Its development is stewarded by **[Bancony](https://bancony.com)**, which builds enterprise-ready MCP servers, an SDK, an in-channel chat agent (with Generative UI and RAG), and advisory agents on top of the standard. See the [enterprise overview](https://bank2ai.com/docs/enterprise/overview) for details.
 
-## Quick start
+## Install
+
+```bash
+pip install bank2ai
+```
+
+## Quickstart
 
 ```python
 from fastmcp import FastMCP
@@ -33,65 +38,21 @@ register_tools(
 )
 ```
 
+Walk through a full example in the [Quickstart guide](https://bank2ai.com/docs/getting-started/quickstart).
 
-## What's in the package
+## What's in this repo
 
-| Module           | Contents                                                  |
-| ---------------- | --------------------------------------------------------- |
-| `bank2ai.models` | Pydantic data models for the shared banking vocabulary: `Account`, `Transaction`, `Recipient`, `Category`, plus the request/response shapes for transfers and spending summaries. |
-| `bank2ai.mcp`    | Reusable MCP tool surface — `register_tools` wires the eight Bank2AI tools onto a FastMCP app and dispatches each call to handlers you provide. |
+| Path | Contents |
+| --- | --- |
+| [`src/bank2ai/`](./src/bank2ai/) | The Python library (`bank2ai` on PyPI) — Pydantic models + the `register_tools` MCP wiring. |
+| [`specs/`](./specs/) | Language-neutral specification — `bank2ai.spec.md` (narrative) and `bank2ai.json` (JSON Schemas). |
+| [`examples/demo/`](./examples/demo/) | Reference MCP server backed by hardcoded data. |
+| [`examples/meniga/`](./examples/meniga/) | Reference MCP server backed by the [Meniga](https://meniga.com) API. |
+| [`docs/`](./docs/) | Source for [bank2ai.com](https://bank2ai.com). |
 
-Authentication is intentionally outside this library: each server obtains credentials however suits its backend (inbound MCP `access_token`, server-configured API credentials, OAuth, etc.). See [§4 of the spec](./specs/bank2ai.spec.md#4-authentication).
+## Contributing
 
-## Specification
-
-The Bank2AI tool surface is specified independently of any single implementation under [`specs/`](./specs):
-
-* [`specs/bank2ai.spec.md`](./specs/bank2ai.spec.md) — narrative spec (overview, lifecycle, per-tool semantics, error model).
-* [`specs/bank2ai.json`](./specs/bank2ai.json) — machine-readable: tool list with full input/output JSON Schemas plus shared model schemas.
-
-The Python package in this repo is the reference implementation; alternative implementations in other languages are welcome and should track the spec.
-
-## Marketplace
-
-Bank2AI is more than a contract — it's an ecosystem. The Bank2AI marketplace is a registry of:
-
-* **MCP servers** that implement the Bank2AI tool surface for a specific bank or fintech, and
-* **agent skills** built on top of that surface (budgeting helpers, transfer assistants, statement explainers, …).
-
-Entries are packaged as [Claude Code plugins](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces), so installing a bank or skill is a single `/plugin install` away for Claude Code users — and any other client that speaks the same plugin format can consume the registry too.
-
-## Repo layout
-
-```
-.
-├── src/bank2ai/        # the library (PyPI: bank2ai)
-├── examples/
-│   ├── demo/           # MCP server backed by hardcoded data
-│   └── meniga/         # MCP server backed by Meniga APIs
-├── specs/              # language-neutral spec
-├── docs/               # Docusaurus site for bank2ai.com (planned)
-├── scripts/            # repo automation (e.g. spec regeneration)
-├── pyproject.toml      # uv workspace root + bank2ai library
-└── LICENSE
-```
-
-## Working in the monorepo
-
-This repo is a [uv workspace](https://docs.astral.sh/uv/concepts/projects/workspaces/). From the root:
-
-```bash
-uv sync                                       # install library + examples + dev deps
-uv run --package bank2ai-demo bank2ai-demo    # run the demo server
-uv run pytest examples/demo                   # run the demo example tests
-uv run python scripts/generate_spec.py        # regenerate specs/bank2ai.json
-```
-
-Each example also has its own README with run/test instructions.
-
-## Adding a new bank
-
-Copy `examples/demo` (or `examples/meniga` if you need authentication), rename the package, update `pyproject.toml`, and replace the handlers in `server.py` with calls into your bank's APIs. Because `register_tools` lives in `bank2ai`, you don't need to redefine schemas — just plug in handlers.
+Issues and PRs welcome at [github.com/bank2ai/bank2ai](https://github.com/bank2ai/bank2ai). For anything that touches the spec, please open an issue first — see [Contributing](https://bank2ai.com/docs/resources/contributing).
 
 ## License
 

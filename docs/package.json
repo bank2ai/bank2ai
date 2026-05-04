@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
+    "sync-spec": "node scripts/sync-spec.mjs",
+    "prestart": "npm run sync-spec",
     "start": "docusaurus start",
+    "prebuild": "npm run sync-spec",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
