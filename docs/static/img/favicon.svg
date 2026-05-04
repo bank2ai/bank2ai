@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="11" fill="#0a1f4d"/>
+  <rect width="64" height="64" rx="10" fill="#0a1f4d"/>
   <g font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
      font-weight="900"
      text-anchor="middle"
      letter-spacing="-0.5">
-    <text x="32" y="28" font-size="17" fill="#ffffff">bank</text>
-    <text x="32" y="53" font-size="23">
+    <text x="32" y="26" font-size="22" fill="#ffffff">bank</text>
+    <text x="32" y="58" font-size="30">
       <tspan fill="#30b0f0">2</tspan><tspan fill="#ffffff">AI</tspan>
     </text>
   </g>
