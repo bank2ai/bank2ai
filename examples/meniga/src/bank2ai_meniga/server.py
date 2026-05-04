@@ -19,18 +19,13 @@ from typing import Optional
 from uuid import uuid4
 
 import httpx
-import jwt
 from dotenv import load_dotenv
 from fastmcp import FastMCP
+from fastmcp.server.dependencies import get_access_token, get_context
 
 from bank2ai import (
     Account,
     AccountType,
-    AuthParam,
-    AuthParamType,
-    AuthParamValue,
-    AuthResponse,
-    AuthState,
     Category,
     CreateRecipientResponse,
     ExecuteTransferResponse,
@@ -42,8 +37,6 @@ from bank2ai import (
     TransferAction,
     TransferPreparedItem,
     TransferPreparedResponse,
-    make_auth_middleware,
-    register_authenticate_tool,
     register_tools,
 )
 
@@ -66,37 +59,38 @@ _DEFAULT_CULTURE = os.environ.get("BANK2AI_MENIGA_CULTURE", "en-GB")
 
 # ---- Per-server state ----
 
-_auth_state = AuthState()
-_token: Optional[str] = None
 _culture: str = _DEFAULT_CULTURE
 _categories_cache: list[Category] = []
 _recipients_store: list[Recipient] = []
 
 
-def _client() -> httpx.AsyncClient:
+async def _client() -> httpx.AsyncClient:
     headers: dict[str, str] = {}
-    if _token:
-        headers["Authorization"] = f"Bearer {_token}"
+    token: Optional[str] = None
+    access_token = get_access_token()
+    if access_token is not None:
+        token = access_token.token
+    else:
+        context = get_context()
+        token = await context.get_state("meniga_token")
+        if token is None:
+            token = await create_token()
+            if token:
+                await context.set_state("meniga_token", token)
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     return httpx.AsyncClient(headers=headers, timeout=30.0)
 
 
 # ---- Auth handler ----
 
-async def authenticate(param_values: list[AuthParamValue]) -> AuthResponse:
-    global _token, _culture
-    creds = {p.id: p.value for p in param_values}
-    email = creds.get("email") or _DEFAULT_EMAIL
-    password = creds.get("password") or _DEFAULT_PASSWORD
+async def create_token() -> Optional[str]:
+    email = _DEFAULT_EMAIL
+    password = _DEFAULT_PASSWORD
 
     if not email or not password:
         logger.warning("Missing email or password in authentication parameters")
-        return AuthResponse(
-            authenticated=False,
-            required_parameters=[
-                AuthParam(id="email", title="Email", type=AuthParamType.Text),
-                AuthParam(id="password", title="Password", type=AuthParamType.Password),
-            ],
-        )
+        return None
 
     logger.info("Authenticating with Meniga API at %s", _BASE_URL)
     async with httpx.AsyncClient(timeout=10.0) as client:
@@ -107,31 +101,10 @@ async def authenticate(param_values: list[AuthParamValue]) -> AuthResponse:
         logger.info("Auth response status: %d", response.status_code)
         if response.status_code in (400, 401):
             logger.error("Authentication failed: %d %s", response.status_code, response.text)
-            return AuthResponse(authenticated=False, message="Authentication failed")
+            return None
         response.raise_for_status()
         data = response.json()
-        _token = data["data"]["accessToken"]
-        decoded = jwt.decode(_token, options={"verify_signature": False})
-
-        _culture = _DEFAULT_CULTURE
-        try:
-            me_response = await client.get(
-                f"{_BASE_URL}/v1/me?includeAll=true",
-                headers={"Authorization": "Bearer " + _token},
-            )
-            me_response.raise_for_status()
-            person_id = decoded["context"]["personId"]
-            person = next(
-                (x for x in me_response.json()["data"] if x["personId"] == person_id),
-                None,
-            )
-            if person:
-                _culture = person["culture"]
-        except httpx.HTTPError as e:
-            logger.warning("Failed to fetch /v1/me, using default culture: %s", e)
-
-    logger.info("Authenticated successfully, culture=%s", _culture)
-    return AuthResponse(authenticated=True, token=_token, culture=_culture)
+        return data["data"]["accessToken"]
 
 
 # ---- Bank2AI tool handlers ----
@@ -145,7 +118,7 @@ async def get_accounts(
         "get_accounts: only_withdrawal=%s account_type=%s",
         only_withdrawal_accounts, account_type,
     )
-    async with _client() as client:
+    async with await _client() as client:
         response = await client.get(f"{_BASE_URL}/v1/accounts")
     response.raise_for_status()
 
@@ -194,7 +167,7 @@ async def get_categories() -> list[Category]:
         return _categories_cache
 
     logger.info("get_categories: fetching from API")
-    async with _client() as client:
+    async with await _client() as client:
         response = await client.get(
             f"{_BASE_URL}/v1/categories",
             params={"culture": _culture},
@@ -249,7 +222,7 @@ async def get_transactions(
         if category_ids:
             params["categoryIds"] = ",".join(category_ids)
 
-    async with _client() as client:
+    async with await _client() as client:
         response = await client.get(f"{_BASE_URL}/v1/transactions", params=params)
     response.raise_for_status()
 
@@ -408,9 +381,6 @@ async def execute_transfer(
 # ---- Wire up ----
 
 app = FastMCP("bank2ai-meniga")
-app.add_middleware(
-    make_auth_middleware(_auth_state, authenticate, logger, log_responses=_log_responses)
-)
 
 register_tools(
     app,
@@ -426,7 +396,6 @@ register_tools(
 
 
 async def main() -> None:
-    await register_authenticate_tool(app, _auth_state, authenticate)
     await app.run_async()
 
 

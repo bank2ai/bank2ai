@@ -25,8 +25,6 @@ from typing import Any
 from bank2ai_demo.server import app
 from bank2ai.models import (
     Account,
-    AuthParam,
-    AuthResponse,
     Category,
     Recipient,
     Transaction,
@@ -42,8 +40,6 @@ DOCUMENTED_MODELS = {
     "Transaction": Transaction,
     "Category": Category,
     "Recipient": Recipient,
-    "AuthParam": AuthParam,
-    "AuthResponse": AuthResponse,
 }
 
 VENDOR_PREFIXES = ("x-fastmcp-",)
@@ -88,16 +84,6 @@ def build_spec() -> dict[str, Any]:
     return {
         "$schema": "https://bank2ai.com/specs/bank2ai.schema.json",
         "version": SPEC_VERSION,
-        "auth": {
-            "protocol": "elicit-or-authenticate-tool",
-            "description": (
-                "If the bank requires credentials, the server MUST expose an "
-                "`authenticate` tool whose JSON Schema is built from the "
-                "`required_parameters` returned by an unauthenticated AuthResponse. "
-                "Clients that support MCP elicitation MAY collect the same "
-                "credentials inline. See bank2ai.spec.md for the full protocol."
-            ),
-        },
         "tools": tools,
         "models": _collect_models(),
     }

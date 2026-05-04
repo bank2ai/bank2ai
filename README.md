@@ -29,7 +29,6 @@ register_tools(
 )
 ```
 
-For credentialed servers, `make_auth_middleware` and `register_authenticate_tool` provide a drop-in authentication flow with MCP elicitation support. See [`examples/meniga`](./examples/meniga) for a worked example.
 
 ## What's in the package
 

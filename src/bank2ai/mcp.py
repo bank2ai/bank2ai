@@ -8,29 +8,17 @@ provides async handler callables and calls `register_tools(app, ...)`.
 Output schemas are inferred by FastMCP from the Pydantic response-model
 annotations on the registered tool functions.
 
-Auth helpers (middleware + dynamic `authenticate` tool) live alongside
-since they share the auth-param types.
 """
 
 from __future__ import annotations
 
-import json
-import logging
 from typing import Any, Awaitable, Callable, Literal, Optional
 
-from fastmcp import Context, FastMCP
-from fastmcp.exceptions import ToolError
-from fastmcp.server.middleware import Middleware, MiddlewareContext
-from fastmcp.tools.base import Tool
+from fastmcp import FastMCP
 from pydantic import Field
 
 from .models import (
     Account,
-    AuthenticateResponse,
-    AuthParam,
-    AuthParamType,
-    AuthParamValue,
-    AuthResponse,
     Category,
     CreateRecipientResponse,
     ExecuteTransferResponse,
@@ -305,185 +293,3 @@ def register_tools(
         )
 
 
-# ---- Authentication helpers ----
-
-AUTHENTICATE_TOOL_NAME = "authenticate"
-
-AuthenticateHandler = Callable[[list[AuthParamValue]], Awaitable[AuthResponse]]
-
-
-class AuthState:
-    """Mutable wrapper holding the latest AuthResponse for one server."""
-
-    def __init__(self) -> None:
-        self.response: Optional[AuthResponse] = None
-
-
-def _client_supports_elicitation(ctx: Context, logger: logging.Logger) -> bool:
-    session = ctx.session
-    client_caps = session.client_params.capabilities if session.client_params else None
-    logger.info("Client capabilities: %s", client_caps)
-    if client_caps and client_caps.elicitation:
-        logger.info("Client elicitation capability: %s", client_caps.elicitation)
-        return True
-    return False
-
-
-def _build_elicit_schema(auth_parameters: list[AuthParam]) -> dict:
-    properties: dict[str, dict] = {}
-    required: list[str] = []
-    for param in auth_parameters:
-        prop: dict = {"type": "string", "title": param.title}
-        if param.type == AuthParamType.Password:
-            prop["x-password"] = True
-        properties[param.id] = prop
-        required.append(param.id)
-    return {"type": "object", "properties": properties, "required": required}
-
-
-async def _elicit_credentials(
-    ctx: Context,
-    auth_parameters: list[AuthParam],
-    logger: logging.Logger,
-    authenticate: AuthenticateHandler,
-) -> AuthResponse:
-    schema = _build_elicit_schema(auth_parameters)
-    logger.info("Elicitation schema: %s", json.dumps(schema))
-    result = await ctx.session.elicit_form(
-        message="Please provide your banking credentials to continue.",
-        requestedSchema=schema,
-        related_request_id=ctx.request_id,
-    )
-    if result.action != "accept" or not result.content:
-        return AuthResponse(authenticated=False, message="Authentication cancelled by user")
-
-    param_values = [
-        AuthParamValue(id=key, value=str(value))
-        for key, value in result.content.items()
-        if value is not None
-    ]
-    return await authenticate(param_values)
-
-
-async def _ensure_authenticated(
-    ctx: Context,
-    state: AuthState,
-    authenticate: AuthenticateHandler,
-    logger: logging.Logger,
-) -> str | None:
-    if state.response is None:
-        state.response = await authenticate([])
-    if state.response.authenticated:
-        return None
-
-    if state.response.required_parameters and _client_supports_elicitation(ctx, logger):
-        logger.info("Client supports elicitation, collecting credentials interactively")
-        state.response = await _elicit_credentials(
-            ctx, state.response.required_parameters, logger, authenticate
-        )
-        if state.response.authenticated:
-            return None
-    elif state.response.required_parameters:
-        logger.info("Not authenticated, directing LLM to use authenticate tool")
-        return (
-            "Not authenticated. Please call the 'authenticate' tool first with the user's credentials."
-        )
-
-    if state.response.message:
-        logger.info("Auth response message: %s", state.response.message)
-        return "Communicate this to the end user:\n" + state.response.message
-
-    return state.response.message or "Authentication failed"
-
-
-def make_auth_middleware(
-    state: AuthState,
-    authenticate: AuthenticateHandler,
-    logger: logging.Logger,
-    *,
-    log_responses: bool = False,
-) -> Middleware:
-    """Build a FastMCP middleware that ensures auth before each non-auth tool
-    call and retries once on error after re-authenticating."""
-
-    class _AuthMiddleware(Middleware):
-        async def on_call_tool(self, mctx: MiddlewareContext, call_next):
-            tool_name = mctx.message.name
-            if tool_name == AUTHENTICATE_TOOL_NAME:
-                return await call_next(mctx)
-
-            ctx = mctx.fastmcp_context
-            last_error: Exception | None = None
-            for _ in range(2):
-                err = await _ensure_authenticated(ctx, state, authenticate, logger)
-                if err is not None:
-                    raise ToolError(err)
-                try:
-                    result = await call_next(mctx)
-                    if log_responses:
-                        logger.info("call_tool response: %s result=%s", tool_name, result)
-                    return result
-                except Exception as e:
-                    logger.info("Problem when calling tool, try again after re-authentication: %s", e)
-                    state.response = None
-                    last_error = e
-
-            raise last_error  # type: ignore[misc]
-
-    return _AuthMiddleware()
-
-
-async def register_authenticate_tool(
-    app: FastMCP,
-    state: AuthState,
-    authenticate: AuthenticateHandler,
-) -> None:
-    """Register the `authenticate` tool with a signature matching the
-    handler's required auth params. No-op when authentication needs no
-    user-supplied parameters (e.g. demo servers)."""
-
-    init = await authenticate([])
-    state.response = init
-    if not init.required_parameters:
-        return
-
-    async def _do_authenticate(creds: dict[str, str]) -> AuthenticateResponse:
-        param_values = [
-            AuthParamValue(id=p.id, value=creds.get(p.id, ""))
-            for p in (state.response.required_parameters if state.response else [])
-        ]
-        state.response = await authenticate(param_values)
-        if state.response.authenticated:
-            return AuthenticateResponse(message="Authentication successful")
-        return AuthenticateResponse(error=state.response.message or "Authentication failed")
-
-    sig = ", ".join(
-        f"{p.id}: str = Field(description={p.title!r})"
-        for p in init.required_parameters
-    )
-    body_args = ", ".join(
-        f'"{p.id}": {p.id}' for p in init.required_parameters
-    )
-    src = (
-        f"async def authenticate({sig}) -> AuthenticateResponse:\n"
-        f"    return await _do_authenticate({{{body_args}}})\n"
-    )
-    namespace: dict = {
-        "_do_authenticate": _do_authenticate,
-        "Field": Field,
-        "AuthenticateResponse": AuthenticateResponse,
-    }
-    exec(src, namespace)
-    fn = namespace["authenticate"]
-
-    titles = ", ".join(f"{p.id} ({p.title})" for p in init.required_parameters)
-    tool = Tool.from_function(
-        fn,
-        name=AUTHENTICATE_TOOL_NAME,
-        description=(
-            "Authenticate with the bank. Must be called before any other tool when the "
-            "server is not yet authenticated. Ask the user for the required credentials. "
-            f"Required fields: {titles}."
-        ),
-    )
-    app.add_tool(tool)

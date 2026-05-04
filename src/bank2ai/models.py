@@ -7,60 +7,6 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class AuthParamType(str, Enum):
-    """Type of authentication parameter input."""
-
-    Text = "text"
-    Password = "password"
-
-
-class AuthParam(BaseModel):
-    """Authentication parameter definition."""
-
-    id: str = Field(description="Identifier for this credential field")
-    title: str = Field(description="Human-readable label shown to the user")
-    type: AuthParamType = Field(
-        default=AuthParamType.Text,
-        description="Input type — controls how the client renders the field",
-    )
-
-
-class AuthParamValue(BaseModel):
-    """Authentication parameter value from user."""
-
-    id: str = Field(description="Identifier matching an AuthParam.id")
-    value: str = Field(description="User-supplied value for the parameter")
-
-
-class AuthResponse(BaseModel):
-    """Response from authentication endpoint."""
-
-    authenticated: bool = Field(
-        default=False,
-        description="Whether authentication has succeeded",
-    )
-    message: Optional[str] = Field(
-        default=None,
-        description="Status or error message to surface to the user",
-    )
-    required_parameters: list[AuthParam] = Field(
-        default_factory=list,
-        description="Credential fields the adapter needs to authenticate",
-    )
-    session_parameters: list[AuthParamValue] = Field(
-        default_factory=list,
-        description="Session parameters returned by the adapter for subsequent calls",
-    )
-    token: Optional[str] = Field(
-        default=None,
-        description="Authentication token issued by the adapter, if any",
-    )
-    culture: Optional[str] = Field(
-        default=None,
-        description="Locale/culture string returned by the adapter",
-    )
-
-
 class RecipientInfo(BaseModel):
     """Basic recipient information for transfers."""
 
@@ -326,19 +272,6 @@ class ExecuteTransferResponse(BaseModel):
     item: Optional[ExecuteTransferDetail] = Field(
         default=None,
         description="Receipt details when the transfer was accepted by the bank.",
-    )
-
-
-class AuthenticateResponse(BaseModel):
-    """Authentication result"""
-
-    message: Optional[str] = Field(
-        default=None,
-        description="Success message to surface to the user.",
-    )
-    error: Optional[str] = Field(
-        default=None,
-        description="Error message when authentication failed.",
     )
 
 
