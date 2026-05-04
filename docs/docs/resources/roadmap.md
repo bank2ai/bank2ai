@@ -21,7 +21,7 @@ The Bank2AI roadmap is intentionally narrow: keep the spec small, deepen the con
 
 ## Marketplace
 
-- **Public registry online.** [`github.com/bank2ai/marketplace`](https://github.com/bank2ai/marketplace) bootstrapped with the demo and Meniga servers.
+- **Public registry online.** [`github.com/bank2ai/marketplace`](https://github.com/bank2ai/marketplace) bootstrapped with the demo and reference bank servers.
 - **Compatibility matrix.** A page listing every published server with the spec versions and tools it supports.
 
 ## Out of scope

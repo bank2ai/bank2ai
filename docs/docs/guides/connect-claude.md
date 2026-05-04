@@ -48,26 +48,26 @@ Add the server to your Claude Code MCP config (project- or user-scoped, see [Cla
 
 ## Connecting to a real bank server
 
-Same config, different command — point at whatever entry point your server exposes. For the Meniga reference:
+Same config, different command — point at whatever entry point your server exposes:
 
 ```json
 {
   "mcpServers": {
-    "bank2ai-meniga": {
+    "bank2ai-yourbank": {
       "command": "uv",
       "args": [
-        "--directory", "/path/to/bank2ai/examples/meniga",
-        "run", "bank2ai-meniga"
+        "--directory", "/path/to/bank2ai/examples/yourbank",
+        "run", "bank2ai-yourbank"
       ],
       "env": {
-        "BANK2AI_MENIGA_BASE_URL": "https://api.meniga.cloud/user/core"
+        "BANK2AI_YOURBANK_BASE_URL": "https://api.yourbank.example/v1"
       }
     }
   }
 }
 ```
 
-See the [Meniga walkthrough](./wrap-a-real-bank) for credential handling.
+See the [real-bank guide](./wrap-a-real-bank) for credential handling.
 
 ## Installing from the marketplace
 

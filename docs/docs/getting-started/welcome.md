@@ -14,7 +14,7 @@ The language of banking is universal — accounts, transactions, transfers, bill
 
 - **A specification.** Eight named MCP tools with fixed input/output JSON Schemas, plus a small set of shared data models — see [Specification](/docs/specification/overview).
 - **A Python library.** [`bank2ai`](/docs/library/overview) ships the shared models and a `register_tools` helper on top of [FastMCP](https://github.com/jlowin/fastmcp). Plug in async handlers; the protocol layer is done.
-- **Reference implementations.** A demo server backed by hardcoded data and a Meniga server backed by real bank APIs — see [Guides](/docs/guides/run-the-demo).
+- **Reference implementations.** A demo server backed by hardcoded data and example servers backed by real bank APIs — see [Guides](/docs/guides/run-the-demo).
 - **A marketplace.** Compliant servers and the agent skills built on top are distributed as a [Claude Code plugin marketplace](/docs/marketplace/overview), installable in one command.
 
 ## Who Bank2AI is for

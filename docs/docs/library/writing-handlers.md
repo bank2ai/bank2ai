@@ -10,7 +10,7 @@ A handler is an async function that turns Bank2AI tool inputs into Bank2AI outpu
 
 ## Pattern: stateless handlers calling a backend client
 
-The simplest shape — and what the [Meniga example](/docs/guides/wrap-a-real-bank) uses. Handlers are top-level async functions; backend state lives in a client passed via closure.
+The simplest shape — and what the reference [real-bank guide](/docs/guides/wrap-a-real-bank) uses. Handlers are top-level async functions; backend state lives in a client passed via closure.
 
 ```python
 from bank2ai import Account, register_tools
@@ -46,7 +46,7 @@ async def get_accounts(ctx: Context, *, only_withdrawal_accounts, account_type):
     return await _list_accounts(api, only_withdrawal_accounts, account_type)
 ```
 
-If your backend requires an exchange (e.g. email/password → session token), do the exchange once at server startup and refresh as needed. See the [Meniga walkthrough](/docs/guides/wrap-a-real-bank) for a worked example.
+If your backend requires an exchange (e.g. email/password → session token), do the exchange once at server startup and refresh as needed. See the [real-bank guide](/docs/guides/wrap-a-real-bank) for a worked example.
 
 ## Pattern: mapping backend shapes to Bank2AI
 

@@ -24,7 +24,7 @@ Each agent is built as a [skill](/docs/marketplace/overview) in the Bank2AI sens
 
 Advice is only as good as the data behind it. Without a standard, every advisory product would have to integrate per-bank, with bespoke schemas, bespoke auth, bespoke transfers — and the cost of supporting more banks would scale linearly.
 
-Bank2AI fixes that. An advisory agent against `bank2ai-acme` works the same way against `bank2ai-meniga` or `bank2ai-yourbank`. The agent stays focused on advice; the standard handles the plumbing.
+Bank2AI fixes that. An advisory agent against `bank2ai-acme` works the same way against `bank2ai-yourbank` or any other compliant server. The agent stays focused on advice; the standard handles the plumbing.
 
 ## Bank-side controls
 

@@ -47,7 +47,7 @@ Walk through a full example in the [Quickstart guide](https://bank2ai.com/docs/g
 | [`src/bank2ai/`](./src/bank2ai/) | The Python library (`bank2ai` on PyPI) — Pydantic models + the `register_tools` MCP wiring. |
 | [`specs/`](./specs/) | Language-neutral specification — `bank2ai.spec.md` (narrative) and `bank2ai.json` (JSON Schemas). |
 | [`examples/demo/`](./examples/demo/) | Reference MCP server backed by hardcoded data. |
-| [`examples/meniga/`](./examples/meniga/) | Reference MCP server backed by the [Meniga](https://meniga.com) API. |
+| [`examples/meniga/`](./examples/meniga/) | Reference MCP server backed by a real bank API. |
 | [`docs/`](./docs/) | Source for [bank2ai.com](https://bank2ai.com). |
 
 ## Contributing

@@ -1,52 +1,49 @@
 ---
-title: Wrap a real bank (Meniga walkthrough)
+title: Wrap a real bank
 sidebar_position: 3
-description: How the Meniga reference server wires the Bank2AI surface to a real bank API.
+description: How to wire the Bank2AI surface to a real bank backend.
 ---
 
-# Wrap a real bank: the Meniga walkthrough
+# Wrap a real bank
 
-`bank2ai-meniga` is a reference MCP server backed by [Meniga](https://meniga.com) APIs (e.g. `api.meniga.cloud`). It demonstrates how to wire a real bank backend behind the shared `bank2ai` tool surface — and how to handle the most common authentication pattern (credentials → bearer token).
+This guide walks through the patterns for wiring a real bank backend behind the shared `bank2ai` tool surface — including how to handle the most common authentication pattern (credentials → bearer token).
 
 ## Configure
 
-Copy the env template and fill in values:
-
-```bash
-cd examples/meniga
-cp .env.example .env
-```
+Most banks expose a base URL and require some form of credentials. A typical env layout:
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `BANK2AI_MENIGA_BASE_URL` | yes | API base URL, e.g. `https://api.meniga.cloud/user/core` |
-| `BANK2AI_MENIGA_EMAIL` | no | Default credential email (otherwise prompted via MCP elicitation). |
-| `BANK2AI_MENIGA_PASSWORD` | no | Default credential password. |
-| `BANK2AI_MENIGA_CULTURE` | no | Locale, defaults to `en-GB`. |
+| `BANK2AI_<BANK>_BASE_URL` | yes | API base URL for the bank backend. |
+| `BANK2AI_<BANK>_EMAIL` | no | Default credential email (otherwise prompted via MCP elicitation). |
+| `BANK2AI_<BANK>_PASSWORD` | no | Default credential password. |
+| `BANK2AI_<BANK>_CULTURE` | no | Locale, e.g. `en-GB`. |
+
+Adjust the variable names for your bank, and copy `.env.example` → `.env` before running.
 
 ## Run
 
 ```bash
-uv run --package bank2ai-meniga bank2ai-meniga
+uv run --package bank2ai-<your-bank> bank2ai-<your-bank>
 ```
 
 ## How authentication works
 
-The Meniga server supports three credential paths, in order of preference:
+A typical Bank2AI server supports three credential paths, in order of preference:
 
-1. **Inbound MCP `access_token`.** If the MCP client forwards a Meniga bearer token, the server uses it directly. Best for clients that have already authenticated against Meniga's identity provider.
-2. **Server-configured email + password.** If `BANK2AI_MENIGA_EMAIL` and `BANK2AI_MENIGA_PASSWORD` are set, the server exchanges them for a Meniga bearer token at startup and refreshes as needed.
+1. **Inbound MCP `access_token`.** If the MCP client forwards a bearer token issued by the bank's identity provider, the server uses it directly. Best for clients that have already authenticated.
+2. **Server-configured email + password.** If credential env vars are set, the server exchanges them for a bearer token at startup and refreshes as needed.
 3. **MCP elicitation.** If the client supports elicitation, the server prompts the end user interactively for `email` / `password`. Otherwise it exposes a dynamic `authenticate` tool that the LLM can call once with credentials.
 
 This three-way fallback is a useful template — most real banks need at least options 1 and 2.
 
-## How handlers map onto the Meniga API
+## How handlers map onto a bank API
 
-Each Bank2AI tool is implemented as a thin async handler that calls the Meniga API and maps the response into the Bank2AI shape. The handler does the work the spec defines; the mapper does the work your backend shape forces.
+Each Bank2AI tool is implemented as a thin async handler that calls the bank API and maps the response into the Bank2AI shape. The handler does the work the spec defines; the mapper does the work your backend shape forces.
 
 ```python
 async def get_accounts(*, only_withdrawal_accounts, account_type):
-    rows = await meniga_client.list_accounts()
+    rows = await bank_client.list_accounts()
     if only_withdrawal_accounts:
         rows = [r for r in rows if r["IsActive"] and r["IsAvailable"]]
     if account_type:
@@ -54,11 +51,11 @@ async def get_accounts(*, only_withdrawal_accounts, account_type):
     return [_to_bank2ai_account(r) for r in rows]
 ```
 
-Read the full implementation in [`examples/meniga/src/bank2ai_meniga/server.py`](https://github.com/bank2ai/bank2ai/blob/main/examples/meniga/src/bank2ai_meniga/server.py).
+For a working reference implementation, see the example servers in the [`examples/`](https://github.com/bank2ai/bank2ai/tree/main/examples) directory.
 
 ## What to copy when wrapping your own bank
 
-1. **Project layout.** `pyproject.toml`, `src/<your_pkg>/server.py`, `src/<your_pkg>/__main__.py`. Mirror the Meniga example.
+1. **Project layout.** `pyproject.toml`, `src/<your_pkg>/server.py`, `src/<your_pkg>/__main__.py`. Mirror an existing reference server.
 2. **Credential handling.** Whichever of the three patterns above fits your backend.
 3. **Mappers.** One per Bank2AI shape — `_to_bank2ai_account`, `_to_bank2ai_transaction`, etc. Unit-test these.
 4. **The two-step transfer flow.** Cache the prepared transfer keyed by `(withdrawal_account_id, recipient_account_number, amount)` and reject `execute_transfer` calls without a matching preparation. See [Writing handlers → prepare → execute](/docs/library/writing-handlers#pattern-prepare--execute-for-transfers).

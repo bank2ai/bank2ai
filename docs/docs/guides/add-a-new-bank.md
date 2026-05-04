@@ -6,7 +6,7 @@ description: Bootstrap a fresh Bank2AI server for a bank that doesn't have one y
 
 # Add a new bank
 
-The fastest path is to copy [`examples/demo`](https://github.com/bank2ai/bank2ai/tree/main/examples/demo) (or `examples/meniga` if you need authentication) and replace the handlers.
+The fastest path is to copy [`examples/demo`](https://github.com/bank2ai/bank2ai/tree/main/examples/demo) (or one of the real-bank examples if you need authentication) and replace the handlers.
 
 ## 1. Copy a template
 
@@ -34,7 +34,7 @@ If you're adding to the bank2ai workspace, register the package in the root `pyp
 
 ```toml
 [tool.uv.workspace]
-members = ["examples/demo", "examples/meniga", "examples/yourbank"]
+members = ["examples/demo", "examples/yourbank"]
 
 [tool.uv.sources]
 bank2ai-yourbank = { workspace = true }

@@ -98,5 +98,5 @@ uv run --package bank2ai-demo python -m bank2ai_demo.client
 
 - Replace the stubs with real backend calls — see [Writing handlers](/docs/library/writing-handlers).
 - Read the [Specification](/docs/specification/overview) to understand the contract.
-- Walk through the [Meniga example](/docs/guides/wrap-a-real-bank) to see a real bank wired up.
+- Walk through the [real-bank guide](/docs/guides/wrap-a-real-bank) to see a real bank wired up.
 - Plan how your server will [authenticate against your backend](/docs/specification/overview#4-authentication).

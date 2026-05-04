@@ -21,7 +21,7 @@ Bank2AI's value compounds with adoption. A budgeting skill written today should 
 
 | Type | Examples |
 | --- | --- |
-| **Bank servers** | One per bank or fintech — `bank2ai-acme`, `bank2ai-meniga`, … |
+| **Bank servers** | One per bank or fintech — `bank2ai-acme`, `bank2ai-yourbank`, … |
 | **Skills** | Domain-specific agent skills — budgeting helpers, statement explainers, transfer assistants, subscription auditors, cash-flow forecasters. |
 
 ## How to participate
