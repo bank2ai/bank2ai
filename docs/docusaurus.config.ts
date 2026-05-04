@@ -8,7 +8,7 @@ const EDIT_URL = `${GITHUB_URL}/edit/main/docs/`;
 const config: Config = {
   title: 'Bank2AI',
   tagline: 'The open standard for connecting digital banking with AI agents',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.svg',
 
   future: {
     v4: true,
