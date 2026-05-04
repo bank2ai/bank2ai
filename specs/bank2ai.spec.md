@@ -91,4 +91,4 @@ The spec versioning policy lives in [`README.md`](./README.md). Notable additive
 ## 8. Reference implementations
 
 * [`examples/demo`](../examples/demo) — full surface backed by hardcoded data; useful for client conformance testing without a real bank.
-* [`examples/meniga`](../examples/meniga) — full surface backed by a real bank API; obtains a bearer token from server-configured `email` + `password` credentials (or forwards an inbound MCP `access_token`).
+

@@ -44,4 +44,4 @@ The Python package (`bank2ai`) versions independently of the spec.
 ## Reference implementations
 
 * [`examples/demo`](../examples/demo) — full surface backed by hardcoded data; useful for client-side conformance testing.
-* [`examples/meniga`](../examples/meniga) — full surface backed by a real bank API; obtains a bearer token from server-configured credentials (or an inbound MCP access token).
+
