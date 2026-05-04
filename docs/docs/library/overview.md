@@ -24,7 +24,7 @@ from bank2ai import (
 | Module | Responsibility |
 | --- | --- |
 | [`bank2ai.models`](./models) | Pydantic models for every Bank2AI input/output shape. |
-| [`bank2ai.mcp`](./register-tools) | `register_tools(app, ...)` — wires the eight Bank2AI tools onto a [FastMCP](https://github.com/jlowin/fastmcp) app. |
+| [`bank2ai.tools`](./register-tools) | `register_tools(app, ...)` — wires the eight Bank2AI tools onto a [FastMCP](https://github.com/jlowin/fastmcp) app. |
 
 That's it. There's no auth layer, no HTTP client, no framework lock-in. The library does one job: it makes sure your server speaks the spec correctly.
 

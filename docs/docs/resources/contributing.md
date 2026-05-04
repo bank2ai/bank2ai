@@ -23,7 +23,7 @@ uv run python scripts/generate_spec.py        # regenerate specs/bank2ai.json
 
 | If you're changing… | Edit… | Then run… |
 | --- | --- | --- |
-| Tool inputs/outputs | `src/bank2ai/mcp.py`, `src/bank2ai/models.py` | `uv run python scripts/generate_spec.py`; the drift test in `examples/demo/tests/test_schema_sync.py` should pass. |
+| Tool inputs/outputs | `src/bank2ai/tools.py`, `src/bank2ai/models.py` | `uv run python scripts/generate_spec.py`; the drift test in `examples/demo/tests/test_schema_sync.py` should pass. |
 | Spec narrative | `specs/bank2ai.spec.md` | Nothing — the docs site renders it directly. |
 | Library docs | `docs/docs/library/*.md` | `cd docs && npm run start` to preview. |
 | Tool / model reference pages | _Don't_ — they're generated from `specs/bank2ai.json` by `docs/scripts/sync-spec.mjs`. |

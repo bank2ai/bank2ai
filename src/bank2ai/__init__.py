@@ -4,11 +4,11 @@ The library exposes:
 
 * a Pydantic data model layer (`bank2ai.models`) shared by every Bank2AI
   MCP server, and
-* a reusable MCP tool surface (`bank2ai.mcp`) — `register_tools` — so each
+* a reusable MCP tool surface (`bank2ai.tools`) — `register_tools` — so each
   bank only has to supply async handlers backed by their own APIs.
 """
 
-from .mcp import (
+from .tools import (
     Handler,
     register_tools,
 )
