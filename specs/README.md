@@ -7,7 +7,7 @@ This directory holds the language-neutral specification for the **Bank2AI** [Mod
 | File                 | Purpose                                                                                |
 | -------------------- | -------------------------------------------------------------------------------------- |
 | `bank2ai.spec.md`    | Narrative spec — overview, lifecycle, per-tool semantics, auth protocol, error model.  |
-| `bank2ai.json`       | Machine-readable: `version`, full `tools[]` (with `inputSchema` and `outputSchema` as JSON Schema), reusable `models{}`, and the `auth` protocol descriptor. |
+| `bank2ai.json`       | Machine-readable: `version`, full `tools[]` (with `inputSchema` and `outputSchema` as JSON Schema), and reusable `models{}`. |
 
 ## Status
 
@@ -35,9 +35,9 @@ The Python package (`bank2ai`) versions independently of the spec.
 
 * **Building a new server (any language):** read `bank2ai.spec.md` for semantics, then validate request/response payloads against the JSON Schemas in `bank2ai.json`.
 * **Building a client / agent:** rely on each server's MCP `tools/list` response — but the schemas in `bank2ai.json` are authoritative and clients can use them to render forms, validate parameters, or generate typed bindings.
-* **Auto-generating bindings:** the `models{}` block contains standalone schemas for shared types (`Account`, `Transaction`, `Category`, `Recipient`, `AuthParam`, `AuthResponse`) suitable for JSON-Schema-based code generators.
+* **Auto-generating bindings:** the `models{}` block contains standalone schemas for shared types (`Account`, `Transaction`, `Category`, `Recipient`) suitable for JSON-Schema-based code generators.
 
 ## Reference implementations
 
 * [`examples/demo`](../examples/demo) — full surface backed by hardcoded data; useful for client-side conformance testing.
-* [`examples/meniga`](../examples/meniga) — full surface backed by the [Meniga](https://meniga.com) API; demonstrates the credential-based auth flow.
+* [`examples/meniga`](../examples/meniga) — full surface backed by the [Meniga](https://meniga.com) API; obtains a Meniga bearer token from server-configured credentials (or an inbound MCP access token).

@@ -5,11 +5,12 @@
 
 Bank2AI defines a single [Model Context Protocol](https://modelcontextprotocol.io) tool surface that any bank can expose so AI agents (and through them, end customers) can read accounts and transactions, look up recipients, run spending summaries, and prepare/execute transfers — using the same tool surface across every bank.
 
-The contract has three parts:
+The contract has two parts:
 
 1. The **tool surface** — eight named MCP tools whose input and output JSON Schemas are fixed by the spec.
-2. The **shared data models** — `Account`, `Transaction`, `Category`, `Recipient`, plus the auth types — used inside tool inputs and outputs.
-3. The **authentication protocol** — a small contract servers follow if they need credentials before serving the surface.
+2. The **shared data models** — `Account`, `Transaction`, `Category`, `Recipient` — used inside tool inputs and outputs.
+
+Authentication is intentionally outside the spec: servers obtain credentials however suits their backend (a bearer token from the inbound MCP `access_token`, server-configured API credentials, OAuth, etc.) and gate calls accordingly. See [§4](#4-authentication) for the rationale.
 
 > **About RFC 2119 keywords.** *MUST*, *SHOULD*, *MAY* are used per [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119).
 
@@ -36,10 +37,9 @@ Servers MAY register additional, vendor-specific tools, but they MUST NOT alter 
 
 A typical Bank2AI session looks like this:
 
-1. The MCP client connects and calls `tools/list`. The server returns the eight Bank2AI tools (plus, if applicable, an `authenticate` tool — see §4).
-2. If the server requires authentication, the client either invokes `authenticate` directly (LLM-driven) or has its `elicitation` capability used by the server to collect credentials interactively (§4).
-3. The client calls Bank2AI tools as the user requests them. The server applies the auth gate to every non-`authenticate` call.
-4. On a transfer, the client calls `transfer-money-icelandic` first to validate, surfaces the prepared details to the user, and only invokes `execute-transfer` after explicit confirmation.
+1. The MCP client connects and calls `tools/list`. The server returns the eight Bank2AI tools.
+2. The client calls Bank2AI tools as the user requests them. The server resolves credentials internally (see §4) and rejects calls it cannot authenticate.
+3. On a transfer, the client calls `transfer-money-icelandic` first to validate, surfaces the prepared details to the user, and only invokes `execute-transfer` after explicit confirmation.
 
 ## 3. Shared data models
 
@@ -49,32 +49,25 @@ The schemas in `bank2ai.json` under `models{}` define the canonical shapes for:
 * **`Transaction`** — id, description, amount (negative = expense), transaction_date (ISO 8601), category.
 * **`Category`** — id, name (localized).
 * **`Recipient`** — id, name, accountNumber, accountNumberType (`Domestic` | `IBAN` | `SWIFT`), socialSecurityNumber, optional bankInfo, paymentType, address, isFavorite, description.
-* **`AuthParam`** — id, title, type (`text` | `password`).
-* **`AuthResponse`** — authenticated, message, required_parameters, session_parameters, token, culture.
 
 Servers MAY return additional fields on these objects; clients MUST tolerate unknown fields. Servers MUST NOT omit fields marked `required` in the schemas.
 
-## 4. Authentication protocol
+## 4. Authentication
 
-A server that requires credentials MUST follow this flow:
+Bank2AI does not define an authentication protocol. How a server obtains the credentials it needs to talk to its backend is an implementation detail; servers MUST gate every Bank2AI tool call on having valid credentials and MUST surface authentication failures as MCP errors.
 
-1. **Initial unauthenticated state.** Before any non-`authenticate` tool call, the server attempts an internal `authenticate(parameters=[])` call. If it returns `authenticated=false` with a non-empty `required_parameters[]`, the server enters the *credentials-required* state.
+Common approaches used by reference implementations:
 
-2. **Exposing the dynamic `authenticate` tool.** The server MUST expose an `authenticate` tool whose input schema matches the `required_parameters` returned in step 1 (one string property per `AuthParam.id`, with `password`-typed params marked using `x-password: true` or equivalent). The tool's role is to receive the credentials and complete authentication.
+* **Inbound bearer token.** A token attached to the MCP request (`access_token`) is forwarded to the bank backend. Best when the MCP client is already authenticated against the bank's identity provider.
+* **Server-configured credentials.** The server reads credentials from its environment (e.g. `BANK2AI_*_EMAIL` / `BANK2AI_*_PASSWORD`) and exchanges them for a backend session token, refreshing as needed.
+* **Demo / no-auth.** Servers backed by hardcoded data MAY skip authentication entirely.
 
-3. **Inline collection via elicitation (optional).** If the MCP client advertises the `elicitation` capability, the server MAY call `elicit_form` with the same schema before each non-`authenticate` tool call, instead of (or in addition to) returning an "auth required" error. The server MUST honour user cancellation.
-
-4. **Per-call enforcement.** The server MUST gate every non-`authenticate` tool call on a successful auth state. On a tool error after a successful call, the server SHOULD invalidate the session and retry once after re-authenticating.
-
-5. **No-auth servers.** Servers backed by demo data or system credentials (no end-user authentication) MUST NOT register an `authenticate` tool. The `authenticate` tool's presence is the signal to clients that credentials are required.
-
-The reference implementations of this protocol are in [`src/bank2ai/mcp.py`](../src/bank2ai/mcp.py) — `make_auth_middleware` and `register_authenticate_tool`.
+Servers MUST NOT register a Bank2AI-defined `authenticate` tool — earlier drafts of this spec described one and it has been removed.
 
 ## 5. Error model
 
-* Servers SHOULD return MCP `ToolError` (or equivalent protocol-level error) for unrecoverable failures.
+* Servers SHOULD return MCP `ToolError` (or equivalent protocol-level error) for unrecoverable failures, including authentication failures.
 * For recoverable user-facing conditions (e.g. "Insufficient funds", "Invalid recipient"), servers SHOULD return a successful tool call whose response model includes a human-readable `content` field describing the problem. `transfer-money-icelandic` and `create-recipient` model this explicitly.
-* Authentication failures MUST surface a non-empty `AuthResponse.message` that the client can display to the end user.
 
 ## 6. Localization
 
@@ -94,4 +87,4 @@ The spec versioning policy lives in [`README.md`](./README.md). Notable additive
 ## 8. Reference implementations
 
 * [`examples/demo`](../examples/demo) — full surface backed by hardcoded data; useful for client conformance testing without a real bank.
-* [`examples/meniga`](../examples/meniga) — full surface backed by the [Meniga](https://meniga.com) API; demonstrates the auth protocol with `email` + `password`.
+* [`examples/meniga`](../examples/meniga) — full surface backed by the [Meniga](https://meniga.com) API; obtains a Meniga bearer token from server-configured `email` + `password` credentials (or forwards an inbound MCP `access_token`).
