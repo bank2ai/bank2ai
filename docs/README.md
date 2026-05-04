@@ -1,48 +1,41 @@
-# bank2ai docs
+# Website
 
-This directory will host the [Docusaurus](https://docusaurus.io/) site for [bank2ai.com](https://bank2ai.com).
+This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
 
-## Bootstrap (planned)
-
-```bash
-# from the repo root
-npx create-docusaurus@latest docs classic --typescript
-```
-
-The classic preset gives us a docs section, a blog (optional), and a landing page out of the box. After bootstrapping:
-
-* point `presets.docs.path` at the docs source directory and add the existing `bank2ai` library + example servers as documented surfaces;
-* configure deployment to bank2ai.com (GitHub Pages, Cloudflare Pages, or Vercel — TBD);
-* link to the per-package READMEs (`bank2ai/README.md`, `examples/demo/README.md`, `examples/meniga/README.md`) until the docs site is fleshed out.
-
-## Local development (once bootstrapped)
+## Installation
 
 ```bash
-cd docs
-npm install
-npm run start
+yarn
 ```
 
-## Sourcing content from `specs/`
+## Local Development
 
-The canonical spec lives in [`../specs`](../specs). The Docusaurus site SHOULD render — not duplicate — that content:
-
-* Surface [`../specs/bank2ai.spec.md`](../specs/bank2ai.spec.md) directly as a documentation page (e.g. via a Docusaurus `MDX` import or a small pre-build script that copies it into `docs/`).
-* Generate per-tool reference pages from [`../specs/bank2ai.json`](../specs/bank2ai.json) (e.g. with a custom plugin / pre-build script that turns each `tools[]` entry into an MDX page with the input/output schemas rendered as tables).
-
-Whatever pipeline we settle on, the rule of thumb is: `specs/` is the source of truth, `docs/` is presentation.
-
-## Layout (intended)
-
+```bash
+yarn start
 ```
-docs/
-├── docusaurus.config.ts
-├── sidebars.ts
-├── docs/                # markdown sources (some auto-generated from ../specs)
-│   ├── intro.md
-│   ├── library/
-│   ├── tools/           # generated from ../specs/bank2ai.json
-│   └── examples/
-├── src/                 # custom React components, theme overrides
-└── static/              # images, favicons
+
+This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+
+## Build
+
+```bash
+yarn build
 ```
+
+This command generates static content into the `build` directory and can be served using any static contents hosting service.
+
+## Deployment
+
+Using SSH:
+
+```bash
+USE_SSH=true yarn deploy
+```
+
+Not using SSH:
+
+```bash
+GIT_USER=<Your GitHub username> yarn deploy
+```
+
+If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
