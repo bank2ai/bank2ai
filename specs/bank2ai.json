@@ -658,8 +658,10 @@
       },
       "name": "get-accounts",
       "outputSchema": {
+        "description": "Envelope for a list of accounts",
         "properties": {
-          "result": {
+          "items": {
+            "description": "Accounts matching the request.",
             "items": {
               "description": "Bank account with balance and metadata",
               "properties": {
@@ -787,7 +789,7 @@
           }
         },
         "required": [
-          "result"
+          "items"
         ],
         "type": "object"
       }
@@ -801,8 +803,10 @@
       },
       "name": "get-categories",
       "outputSchema": {
+        "description": "Envelope for a list of categories",
         "properties": {
-          "result": {
+          "items": {
+            "description": "Available transaction categories.",
             "items": {
               "description": "Transaction category for spending classification",
               "properties": {
@@ -831,7 +835,7 @@
           }
         },
         "required": [
-          "result"
+          "items"
         ],
         "type": "object"
       }
@@ -853,8 +857,10 @@
       },
       "name": "recipients-by-name",
       "outputSchema": {
+        "description": "Envelope for a list of recipients",
         "properties": {
-          "result": {
+          "items": {
+            "description": "Recipients matching the request.",
             "items": {
               "description": "Payment recipient with account details",
               "properties": {
@@ -986,7 +992,7 @@
           }
         },
         "required": [
-          "result"
+          "items"
         ],
         "type": "object"
       }
@@ -1233,8 +1239,10 @@
       },
       "name": "transactions",
       "outputSchema": {
+        "description": "Envelope for a list of transactions",
         "properties": {
-          "result": {
+          "items": {
+            "description": "Transactions matching the request.",
             "items": {
               "description": "Financial transaction with date, amount and metadata",
               "properties": {
@@ -1287,7 +1295,7 @@
           }
         },
         "required": [
-          "result"
+          "items"
         ],
         "type": "object"
       }

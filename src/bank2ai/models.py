@@ -137,6 +137,30 @@ class Category(BaseModel):
     )
 
 
+class AccountList(BaseModel):
+    """Envelope for a list of accounts"""
+
+    items: list[Account] = Field(description="Accounts matching the request.")
+
+
+class TransactionList(BaseModel):
+    """Envelope for a list of transactions"""
+
+    items: list[Transaction] = Field(description="Transactions matching the request.")
+
+
+class CategoryList(BaseModel):
+    """Envelope for a list of categories"""
+
+    items: list[Category] = Field(description="Available transaction categories.")
+
+
+class RecipientList(BaseModel):
+    """Envelope for a list of recipients"""
+
+    items: list[Recipient] = Field(description="Recipients matching the request.")
+
+
 class TransactionType(str, Enum):
     """Filter type for transactions."""
 

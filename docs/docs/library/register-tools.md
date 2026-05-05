@@ -18,11 +18,11 @@ from bank2ai import register_tools
 def register_tools(
     app: FastMCP,
     *,
-    get_accounts:         Handler | None = None,  # → list[Account]
-    get_transactions:     Handler | None = None,  # → list[Transaction]
-    get_categories:       Handler | None = None,  # → list[Category]
+    get_accounts:         Handler | None = None,  # → AccountList
+    get_transactions:     Handler | None = None,  # → TransactionList
+    get_categories:       Handler | None = None,  # → CategoryList
     get_spending_summary: Handler | None = None,  # → SpendingSummary
-    search_recipients:    Handler | None = None,  # → list[Recipient]
+    search_recipients:    Handler | None = None,  # → RecipientList
     create_recipient:     Handler | None = None,  # → CreateRecipientResponse
     prepare_transfer:     Handler | None = None,  # → TransferPreparedResponse
     execute_transfer:     Handler | None = None,  # → ExecuteTransferResponse
@@ -48,7 +48,7 @@ def register_tools(
 
 ```python
 from fastmcp import FastMCP
-from bank2ai import register_tools
+from bank2ai import AccountList, register_tools
 
 app = FastMCP("acme-bank")
 
@@ -58,7 +58,7 @@ async def get_accounts(*, only_withdrawal_accounts, account_type):
         rows = [r for r in rows if r.is_withdrawal]
     if account_type:
         rows = [r for r in rows if r.type == account_type]
-    return [to_bank2ai_account(r) for r in rows]
+    return AccountList(items=[to_bank2ai_account(r) for r in rows])
 
 # … define the other seven handlers …
 
@@ -71,6 +71,19 @@ register_tools(
 if __name__ == "__main__":
     app.run()
 ```
+
+## Response envelopes
+
+The MCP spec requires `structuredContent` to be a JSON object, so list-returning tools use an envelope model with an `items` field. Handlers return the envelope directly — this leaves room to add `nextCursor`, `total`, or other pagination metadata later without breaking the tool contract.
+
+| Tool | Response model | Wire shape |
+| --- | --- | --- |
+| `get-accounts` | `AccountList` | `{ "items": Account[] }` |
+| `transactions` | `TransactionList` | `{ "items": Transaction[] }` |
+| `get-categories` | `CategoryList` | `{ "items": Category[] }` |
+| `recipients-by-name` | `RecipientList` | `{ "items": Recipient[] }` |
+
+Single-object tools (`spending-summary`, `create-recipient`, `transfer-money-icelandic`, `execute-transfer`) return their natural response model.
 
 ## What `register_tools` does *not* do
 

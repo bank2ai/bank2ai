@@ -26,15 +26,19 @@ from fastmcp.server.dependencies import get_access_token, get_context
 
 from bank2ai import (
     Account,
+    AccountList,
     AccountType,
     Category,
+    CategoryList,
     CreateRecipientResponse,
     ExecuteTransferResponse,
     Recipient,
+    RecipientList,
     SpendingSummary,
     SpendingSummaryGroup,
     SpendingSummaryPeriod,
     Transaction,
+    TransactionList,
     TransferAction,
     TransferPreparedItem,
     TransferPreparedResponse,
@@ -132,7 +136,7 @@ async def get_accounts(
     *,
     only_withdrawal_accounts: bool = False,
     account_type: Optional[str] = None,
-) -> list[Account]:
+) -> AccountList:
     logger.info(
         "get_accounts: only_withdrawal=%s account_type=%s",
         only_withdrawal_accounts, account_type,
@@ -178,12 +182,12 @@ async def get_accounts(
         accounts = [a for a in accounts if a.accountType == account_type]
 
     logger.info("get_accounts: returning %d accounts", len(accounts))
-    return accounts
+    return AccountList(items=accounts)
 
 
-async def get_categories() -> list[Category]:
+async def get_categories() -> CategoryList:
     if _categories_cache:
-        return _categories_cache
+        return CategoryList(items=_categories_cache)
 
     logger.info("get_categories: fetching from API")
     async with await _client() as client:
@@ -199,7 +203,7 @@ async def get_categories() -> list[Category]:
             _categories_cache.append(Category(id=str(sub["id"]), name=sub["name"]))
 
     logger.info("get_categories: loaded %d categories", len(_categories_cache))
-    return _categories_cache
+    return CategoryList(items=_categories_cache)
 
 
 async def get_transactions(
@@ -211,7 +215,7 @@ async def get_transactions(
     end_date: Optional[str] = None,
     description: Optional[str] = None,
     categories: Optional[list[str]] = None,
-) -> list[Transaction]:
+) -> TransactionList:
     logger.info(
         "get_transactions: count=%s type=%s order=%s start=%s end=%s desc=%s cats=%s",
         count, type, order, start_date, end_date, description, categories,
@@ -234,7 +238,7 @@ async def get_transactions(
     if order == "OldestFirst":
         params["ascendingOrder"] = "true"
 
-    all_categories = await get_categories()
+    all_categories = (await get_categories()).items
 
     if categories:
         category_ids = {c.id for c in all_categories if c.name in categories}
@@ -264,7 +268,7 @@ async def get_transactions(
         ))
 
     logger.info("get_transactions: returning %d transactions", len(transactions))
-    return transactions
+    return TransactionList(items=transactions)
 
 
 async def get_spending_summary(
@@ -275,12 +279,12 @@ async def get_spending_summary(
     categories: Optional[list[str]] = None,
 ) -> SpendingSummary:
     logger.info("get_spending_summary: group_by=%s", group_by)
-    transactions = await get_transactions(
+    transactions = (await get_transactions(
         type="Expenses",
         start_date=start_date,
         end_date=end_date,
         categories=categories,
-    )
+    )).items
 
     groups: dict[str, dict[str, float]] = defaultdict(lambda: {"total": 0, "count": 0})
     for t in transactions:
@@ -309,11 +313,11 @@ async def get_spending_summary(
     )
 
 
-async def search_recipients(*, name: str) -> list[Recipient]:
+async def search_recipients(*, name: str) -> RecipientList:
     logger.info("search_recipients: name=%s", name)
     matches = [r for r in _recipients_store if name.lower() in r.name.lower()]
     logger.info("search_recipients: found %d matches", len(matches))
-    return matches
+    return RecipientList(items=matches)
 
 
 async def create_recipient(
@@ -346,7 +350,7 @@ async def prepare_transfer(
     currency: str = "",
 ) -> TransferPreparedResponse:
     logger.info("prepare_transfer: amount=%s recipient_ssn=%s", amount, recipient_ssn)
-    accounts = await get_accounts()
+    accounts = (await get_accounts()).items
     if withdrawal_account_number:
         account = next(
             (a for a in accounts if a.accountNumber == withdrawal_account_number),
@@ -363,7 +367,7 @@ async def prepare_transfer(
         logger.warning("prepare_transfer: insufficient funds")
         return TransferPreparedResponse(content="Insufficient funds.")
 
-    recipients = await search_recipients(name=recipient_ssn)
+    recipients = (await search_recipients(name=recipient_ssn)).items
     recipient = next(
         (r for r in recipients if r.socialSecurityNumber == recipient_ssn), None
     )

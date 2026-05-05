@@ -18,13 +18,13 @@ from fastmcp import FastMCP
 from pydantic import Field
 
 from .models import (
-    Account,
-    Category,
+    AccountList,
+    CategoryList,
     CreateRecipientResponse,
     ExecuteTransferResponse,
-    Recipient,
+    RecipientList,
     SpendingSummary,
-    Transaction,
+    TransactionList,
     TransferPreparedResponse,
 )
 
@@ -80,7 +80,7 @@ def register_tools(
                 default=None,
                 description="Filter by account type.",
             ),
-        ) -> list[Account]:
+        ) -> AccountList:
             return await _get_accounts_handler(
                 only_withdrawal_accounts=only_withdrawal_accounts,
                 account_type=account_type,
@@ -130,7 +130,7 @@ def register_tools(
                 default=None,
                 description="Restrict to these category names (the `name` field from get-categories, not the id).",
             ),
-        ) -> list[Transaction]:
+        ) -> TransactionList:
             return await _get_transactions_handler(
                 count=count,
                 type=type,
@@ -151,7 +151,7 @@ def register_tools(
                 "that transactions can be classified into."
             ),
         )
-        async def _get_categories() -> list[Category]:
+        async def _get_categories() -> CategoryList:
             return await _get_categories_handler()
 
     if get_spending_summary is not None:
@@ -207,7 +207,7 @@ def register_tools(
             name: str = Field(
                 description="Free-text search; matches partial names of saved recipients.",
             ),
-        ) -> list[Recipient]:
+        ) -> RecipientList:
             return await _search_recipients_handler(name=name)
 
     if create_recipient is not None:

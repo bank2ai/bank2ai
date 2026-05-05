@@ -25,3 +25,15 @@ uv run --package bank2ai-demo python -m bank2ai_demo.client
 ```bash
 uv run --package bank2ai-demo pytest
 ```
+
+## Inspect
+Run this in a terminal
+```bash
+npx @modelcontextprotocol/inspector
+```
+In the UI, enter the following:
+* Transport: `STDIO`
+* Command: `uv`
+* Arguments: `--directory /path/to/bank2ai run --package bank2ai-demo bank2ai-demo`
+
+Click **Connect**.

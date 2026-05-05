@@ -16,15 +16,19 @@ from fastmcp import FastMCP
 
 from bank2ai import (
     Account,
+    AccountList,
     Category,
+    CategoryList,
     CreateRecipientResponse,
     ExecuteTransferDetail,
     ExecuteTransferResponse,
     Recipient,
+    RecipientList,
     SpendingSummary,
     SpendingSummaryGroup,
     SpendingSummaryPeriod,
     Transaction,
+    TransactionList,
     TransferAction,
     TransferPreparedItem,
     TransferPreparedResponse,
@@ -49,7 +53,7 @@ async def get_accounts(
     *,
     only_withdrawal_accounts: bool = False,
     account_type: Optional[str] = None,
-) -> list[Account]:
+) -> AccountList:
     logger.info(
         "get_accounts: only_withdrawal=%s account_type=%s",
         only_withdrawal_accounts, account_type,
@@ -59,7 +63,7 @@ async def get_accounts(
         accounts = [a for a in accounts if a["isWithdrawalAccount"]]
     if account_type:
         accounts = [a for a in accounts if a["accountType"] == account_type]
-    return [Account(**a) for a in accounts]
+    return AccountList(items=[Account(**a) for a in accounts])
 
 
 async def get_transactions(
@@ -71,7 +75,7 @@ async def get_transactions(
     end_date: Optional[str] = None,
     description: Optional[str] = None,
     categories: Optional[list[str]] = None,
-) -> list[Transaction]:
+) -> TransactionList:
     logger.info("get_transactions: count=%s type=%s order=%s", count, type, order)
     transactions = list(demo_data.TRANSACTIONS)
 
@@ -103,12 +107,12 @@ async def get_transactions(
     if count:
         transactions = transactions[:count]
 
-    return [Transaction(**t) for t in transactions]
+    return TransactionList(items=[Transaction(**t) for t in transactions])
 
 
-async def get_categories() -> list[Category]:
+async def get_categories() -> CategoryList:
     logger.info("get_categories")
-    return [Category(**c) for c in demo_data.CATEGORIES]
+    return CategoryList(items=[Category(**c) for c in demo_data.CATEGORIES])
 
 
 async def get_spending_summary(
@@ -160,10 +164,12 @@ async def get_spending_summary(
     )
 
 
-async def search_recipients(*, name: str) -> list[Recipient]:
+async def search_recipients(*, name: str) -> RecipientList:
     logger.info("search_recipients: name=%s", name)
     search = name.lower()
-    return [Recipient(**r) for r in demo_data.RECIPIENTS if search in r["name"].lower()]
+    return RecipientList(
+        items=[Recipient(**r) for r in demo_data.RECIPIENTS if search in r["name"].lower()],
+    )
 
 
 async def create_recipient(

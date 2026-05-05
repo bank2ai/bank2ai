@@ -84,7 +84,7 @@ async def main():
             data = json.loads(result.content[0].text)
             print(f"Found {len(data['items'])} recipients matching 'Smith':")
             for recipient in data["items"]:
-                print(f"  {recipient['name']}: {recipient['accountNumber']} ({recipient['description']})")
+                print(f"  {recipient['name']}: {recipient['accountNumber']} ({recipient.get('description') or ''})")
             print()
 
             # Test 6: Prepare transfer (not executing!)
