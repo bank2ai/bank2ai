@@ -10,7 +10,7 @@ description: register_tools wires the eight Bank2AI tools onto a FastMCP app.
 from bank2ai import register_tools
 ```
 
-`register_tools(app, *, get_accounts, get_transactions, get_categories, get_spending_summary, search_recipients, create_recipient, prepare_transfer, execute_transfer)` registers all eight Bank2AI MCP tools on a [FastMCP](https://github.com/jlowin/fastmcp) `app`, dispatching each call to the handler you provide.
+`register_tools(app, *, get_accounts=None, get_transactions=None, get_categories=None, get_spending_summary=None, search_recipients=None, create_recipient=None, prepare_transfer=None, execute_transfer=None)` registers Bank2AI MCP tools on a [FastMCP](https://github.com/jlowin/fastmcp) `app`, dispatching each call to the handler you provide. Tools whose handler is omitted are not registered, so a server can expose only the subset of the spec it implements.
 
 ## Signature
 
@@ -18,18 +18,18 @@ from bank2ai import register_tools
 def register_tools(
     app: FastMCP,
     *,
-    get_accounts:         Handler,  # → list[Account]
-    get_transactions:     Handler,  # → list[Transaction]
-    get_categories:       Handler,  # → list[Category]
-    get_spending_summary: Handler,  # → SpendingSummary
-    search_recipients:    Handler,  # → list[Recipient]
-    create_recipient:     Handler,  # → CreateRecipientResponse
-    prepare_transfer:     Handler,  # → TransferPreparedResponse
-    execute_transfer:     Handler,  # → ExecuteTransferResponse
+    get_accounts:         Handler | None = None,  # → list[Account]
+    get_transactions:     Handler | None = None,  # → list[Transaction]
+    get_categories:       Handler | None = None,  # → list[Category]
+    get_spending_summary: Handler | None = None,  # → SpendingSummary
+    search_recipients:    Handler | None = None,  # → list[Recipient]
+    create_recipient:     Handler | None = None,  # → CreateRecipientResponse
+    prepare_transfer:     Handler | None = None,  # → TransferPreparedResponse
+    execute_transfer:     Handler | None = None,  # → ExecuteTransferResponse
 ) -> None
 ```
 
-`Handler` is `Callable[..., Awaitable[Any]]`. Each handler receives keyword arguments matching the tool's input schema (using snake_case parameter names).
+`Handler` is `Callable[..., Awaitable[Any]]`. Each handler receives keyword arguments matching the tool's input schema (using snake_case parameter names). Pass only the handlers you want to expose — the corresponding tools are registered, and the rest are skipped.
 
 ## Handler contract
 
