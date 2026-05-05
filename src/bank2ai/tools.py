@@ -134,6 +134,13 @@ def register_tools(
                 default=None,
                 description="Restrict to transactions on this account.id (from get-accounts).",
             ),
+            cursor: Optional[str] = Field(
+                default=None,
+                description=(
+                    "Opaque pagination cursor returned as `nextCursor` from a "
+                    "previous call. Omit to fetch the first page."
+                ),
+            ),
         ) -> TransactionList:
             return await _get_transactions_handler(
                 count=count,
@@ -144,6 +151,7 @@ def register_tools(
                 description=description,
                 categories=categories,
                 account_id=account_id,
+                cursor=cursor,
             )
 
     if get_categories is not None:

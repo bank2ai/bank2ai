@@ -1182,6 +1182,18 @@
             "default": null,
             "description": "Maximum number of transactions to return."
           },
+          "cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Opaque pagination cursor returned as `nextCursor` from a previous call. Omit to fetch the first page."
+          },
           "description": {
             "anyOf": [
               {
@@ -1304,6 +1316,18 @@
               "type": "object"
             },
             "type": "array"
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Opaque cursor to pass back as `cursor` to fetch the next page. Absent or null when there are no more results."
           }
         },
         "required": [

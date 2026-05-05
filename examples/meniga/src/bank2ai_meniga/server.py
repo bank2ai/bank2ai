@@ -216,10 +216,11 @@ async def get_transactions(
     description: Optional[str] = None,
     categories: Optional[list[str]] = None,
     account_id: Optional[str] = None,
+    cursor: Optional[str] = None,
 ) -> TransactionList:
     logger.info(
-        "get_transactions: count=%s type=%s order=%s start=%s end=%s desc=%s cats=%s account_id=%s",
-        count, type, order, start_date, end_date, description, categories, account_id,
+        "get_transactions: count=%s type=%s order=%s start=%s end=%s desc=%s cats=%s account_id=%s cursor=%s",
+        count, type, order, start_date, end_date, description, categories, account_id, cursor,
     )
     params: dict[str, str] = {
         "fields": "id,amount,categoryId,text,date",
@@ -229,6 +230,8 @@ async def get_transactions(
         params["categoryTypes"] = type
     if count is not None:
         params["take"] = str(count)
+    if cursor:
+        params["pageToken"] = cursor
     if start_date is not None:
         params["periodFrom"] = start_date
     if end_date is not None:
@@ -255,7 +258,8 @@ async def get_transactions(
     cat_by_id = {c.id: c.name for c in all_categories}
 
     transactions: list[Transaction] = []
-    for t in response.json()["data"]:
+    response_json = response.json()
+    for t in response_json["data"]:
         cat_name = cat_by_id.get(str(t["categoryId"]))
         if categories:
             lower_cats = {c.lower() for c in categories}
@@ -270,8 +274,10 @@ async def get_transactions(
             category=cat_name,
         ))
 
+    next_cursor: Optional[str] = response_json["meta"]["pageToken"]
+
     logger.info("get_transactions: returning %d transactions", len(transactions))
-    return TransactionList(items=transactions)
+    return TransactionList(items=transactions, nextCursor=next_cursor)
 
 
 async def get_spending_summary(

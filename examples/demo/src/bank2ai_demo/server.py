@@ -76,10 +76,11 @@ async def get_transactions(
     description: Optional[str] = None,
     categories: Optional[list[str]] = None,
     account_id: Optional[str] = None,
+    cursor: Optional[str] = None,
 ) -> TransactionList:
     logger.info(
-        "get_transactions: count=%s type=%s order=%s account_id=%s",
-        count, type, order, account_id,
+        "get_transactions: count=%s type=%s order=%s account_id=%s cursor=%s",
+        count, type, order, account_id, cursor,
     )
     transactions = list(demo_data.TRANSACTIONS)
 
@@ -111,10 +112,23 @@ async def get_transactions(
         reverse=(order == "NewestFirst"),
     )
 
-    if count:
+    try:
+        offset = max(int(cursor), 0) if cursor else 0
+    except ValueError:
+        offset = 0
+
+    if offset:
+        transactions = transactions[offset:]
+
+    next_cursor: Optional[str] = None
+    if count is not None and len(transactions) > count:
+        next_cursor = str(offset + count)
         transactions = transactions[:count]
 
-    return TransactionList(items=[Transaction(**t) for t in transactions])
+    return TransactionList(
+        items=[Transaction(**t) for t in transactions],
+        nextCursor=next_cursor,
+    )
 
 
 async def get_categories() -> CategoryList:

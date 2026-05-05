@@ -147,6 +147,13 @@ class TransactionList(BaseModel):
     """Envelope for a list of transactions"""
 
     items: list[Transaction] = Field(description="Transactions matching the request.")
+    nextCursor: Optional[str] = Field(
+        default=None,
+        description=(
+            "Opaque cursor to pass back as `cursor` to fetch the next page. "
+            "Absent or null when there are no more results."
+        ),
+    )
 
 
 class CategoryList(BaseModel):
