@@ -1142,17 +1142,20 @@
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
-          "account_id": {
+          "account_ids": {
             "anyOf": [
               {
-                "type": "string"
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
             "default": null,
-            "description": "Restrict to transactions on this account.id (from get-accounts)."
+            "description": "Restrict to transactions on these account.id values (from get-accounts)."
           },
           "categories": {
             "anyOf": [

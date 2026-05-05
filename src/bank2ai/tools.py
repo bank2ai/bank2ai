@@ -130,9 +130,9 @@ def register_tools(
                 default=None,
                 description="Restrict to these category names (the `name` field from get-categories, not the id).",
             ),
-            account_id: Optional[str] = Field(
+            account_ids: Optional[list[str]] = Field(
                 default=None,
-                description="Restrict to transactions on this account.id (from get-accounts).",
+                description="Restrict to transactions on these account.id values (from get-accounts).",
             ),
             cursor: Optional[str] = Field(
                 default=None,
@@ -150,7 +150,7 @@ def register_tools(
                 end_date=end_date,
                 description=description,
                 categories=categories,
-                account_id=account_id,
+                account_ids=account_ids,
                 cursor=cursor,
             )
 

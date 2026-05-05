@@ -36,7 +36,7 @@ def register_tools(
 | Tool | Handler keyword arguments |
 | --- | --- |
 | [`get-accounts`](/docs/specification/tools/get-accounts) | `only_withdrawal_accounts: bool`, `account_type: Literal["Current","Savings","Credit"] \| None` |
-| [`transactions`](/docs/specification/tools/transactions) | `count: int \| None`, `type: Literal["Any","Income","Expenses","Savings"]`, `order: Literal["NewestFirst","OldestFirst"]`, `start_date: str \| None`, `end_date: str \| None`, `description: str \| None`, `categories: list[str] \| None`, `account_id: str \| None`, `cursor: str \| None` |
+| [`transactions`](/docs/specification/tools/transactions) | `count: int \| None`, `type: Literal["Any","Income","Expenses","Savings"]`, `order: Literal["NewestFirst","OldestFirst"]`, `start_date: str \| None`, `end_date: str \| None`, `description: str \| None`, `categories: list[str] \| None`, `account_ids: list[str] \| None`, `cursor: str \| None` |
 | [`get-categories`](/docs/specification/tools/get-categories) | _(none)_ |
 | [`spending-summary`](/docs/specification/tools/spending-summary) | `group_by: Literal["category","group","month","merchant"]`, `start_date: str \| None`, `end_date: str \| None`, `categories: list[str] \| None` |
 | [`recipients-by-name`](/docs/specification/tools/recipients-by-name) | `name: str` |

@@ -75,17 +75,18 @@ async def get_transactions(
     end_date: Optional[str] = None,
     description: Optional[str] = None,
     categories: Optional[list[str]] = None,
-    account_id: Optional[str] = None,
+    account_ids: Optional[list[str]] = None,
     cursor: Optional[str] = None,
 ) -> TransactionList:
     logger.info(
-        "get_transactions: count=%s type=%s order=%s account_id=%s cursor=%s",
-        count, type, order, account_id, cursor,
+        "get_transactions: count=%s type=%s order=%s account_ids=%s cursor=%s",
+        count, type, order, account_ids, cursor,
     )
     transactions = list(demo_data.TRANSACTIONS)
 
-    if account_id:
-        transactions = [t for t in transactions if t.get("account_id") == account_id]
+    if account_ids:
+        wanted = set(account_ids)
+        transactions = [t for t in transactions if t.get("account_id") in wanted]
 
     if type == "Income":
         transactions = [t for t in transactions if t["amount"] > 0]
