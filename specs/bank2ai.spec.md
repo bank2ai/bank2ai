@@ -25,7 +25,7 @@ Every Bank2AI server MUST register the following tools, with the names below. In
 | Name                       | Purpose                                                            |
 | -------------------------- | ------------------------------------------------------------------ |
 | `get-accounts`             | List bank accounts and cards, optionally filtered by type or by withdrawal-eligibility. |
-| `transactions`             | List transactions, with filters for date range, direction, categories, free-text search, and result count. |
+| `transactions`             | List transactions, with filters for account, date range, direction, categories, free-text search, and result count. |
 | `get-categories`           | List the bank's transaction categories.                            |
 | `spending-summary`         | Aggregated spending grouped by category, group, month, or merchant. |
 | `recipients-by-name`       | Lookup saved payment recipients by partial name match.             |

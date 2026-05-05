@@ -130,6 +130,10 @@ def register_tools(
                 default=None,
                 description="Restrict to these category names (the `name` field from get-categories, not the id).",
             ),
+            account_id: Optional[str] = Field(
+                default=None,
+                description="Restrict to transactions on this account.id (from get-accounts).",
+            ),
         ) -> TransactionList:
             return await _get_transactions_handler(
                 count=count,
@@ -139,6 +143,7 @@ def register_tools(
                 end_date=end_date,
                 description=description,
                 categories=categories,
+                account_id=account_id,
             )
 
     if get_categories is not None:

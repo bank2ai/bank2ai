@@ -55,6 +55,7 @@ def generate_transactions():
     # Recurring monthly transactions
     transactions.append({
         "id": "tx_001",
+        "account_id": "acc_checking_001",
         "description": "Monthly Salary",
         "amount": 4500.00,
         "transaction_date": (today - timedelta(days=5)).isoformat(),
@@ -63,6 +64,7 @@ def generate_transactions():
 
     transactions.append({
         "id": "tx_002",
+        "account_id": "acc_checking_001",
         "description": "Rent Payment",
         "amount": -1200.00,
         "transaction_date": (today - timedelta(days=3)).isoformat(),
@@ -74,6 +76,7 @@ def generate_transactions():
     for i, days_ago in enumerate([2, 7, 14, 21, 28, 35]):
         transactions.append({
             "id": f"tx_grocery_{i:03d}",
+            "account_id": "acc_checking_001",
             "description": grocery_stores[i % len(grocery_stores)],
             "amount": -85.50 - (i * 5),
             "transaction_date": (today - timedelta(days=days_ago)).isoformat(),
@@ -84,6 +87,7 @@ def generate_transactions():
     transactions.extend([
         {
             "id": "tx_gas_001",
+            "account_id": "acc_checking_001",
             "description": "Shell Gas Station",
             "amount": -45.00,
             "transaction_date": (today - timedelta(days=4)).isoformat(),
@@ -91,6 +95,7 @@ def generate_transactions():
         },
         {
             "id": "tx_transit_001",
+            "account_id": "acc_checking_001",
             "description": "Monthly Metro Pass",
             "amount": -120.00,
             "transaction_date": (today - timedelta(days=1)).isoformat(),
@@ -98,10 +103,11 @@ def generate_transactions():
         },
     ])
 
-    # Entertainment
+    # Entertainment (charged to credit card)
     transactions.extend([
         {
             "id": "tx_netflix_001",
+            "account_id": "acc_credit_001",
             "description": "Netflix Subscription",
             "amount": -15.99,
             "transaction_date": (today - timedelta(days=10)).isoformat(),
@@ -109,6 +115,7 @@ def generate_transactions():
         },
         {
             "id": "tx_movie_001",
+            "account_id": "acc_credit_001",
             "description": "Cinema Tickets",
             "amount": -32.00,
             "transaction_date": (today - timedelta(days=12)).isoformat(),
@@ -116,6 +123,7 @@ def generate_transactions():
         },
         {
             "id": "tx_spotify_001",
+            "account_id": "acc_credit_001",
             "description": "Spotify Premium",
             "amount": -9.99,
             "transaction_date": (today - timedelta(days=8)).isoformat(),
@@ -127,6 +135,7 @@ def generate_transactions():
     transactions.extend([
         {
             "id": "tx_electric_001",
+            "account_id": "acc_checking_001",
             "description": "Electric Company",
             "amount": -85.00,
             "transaction_date": (today - timedelta(days=15)).isoformat(),
@@ -134,6 +143,7 @@ def generate_transactions():
         },
         {
             "id": "tx_internet_001",
+            "account_id": "acc_checking_001",
             "description": "Internet Service Provider",
             "amount": -60.00,
             "transaction_date": (today - timedelta(days=18)).isoformat(),
@@ -141,11 +151,12 @@ def generate_transactions():
         },
     ])
 
-    # Dining
+    # Dining (charged to credit card)
     restaurants = ["Pizza Place", "Sushi Bar", "Burger Joint", "Thai Restaurant", "Coffee Shop"]
     for i, days_ago in enumerate([1, 6, 9, 13, 20, 25, 30]):
         transactions.append({
             "id": f"tx_dining_{i:03d}",
+            "account_id": "acc_credit_001",
             "description": restaurants[i % len(restaurants)],
             "amount": -25.00 - (i * 3),
             "transaction_date": (today - timedelta(days=days_ago)).isoformat(),
@@ -155,16 +166,18 @@ def generate_transactions():
     # Healthcare
     transactions.append({
         "id": "tx_pharmacy_001",
+        "account_id": "acc_checking_001",
         "description": "Pharmacy Co-pay",
         "amount": -20.00,
         "transaction_date": (today - timedelta(days=22)).isoformat(),
         "category": "Healthcare",
     })
 
-    # Shopping
+    # Shopping (charged to credit card)
     transactions.extend([
         {
             "id": "tx_amazon_001",
+            "account_id": "acc_credit_001",
             "description": "Amazon.com",
             "amount": -78.50,
             "transaction_date": (today - timedelta(days=11)).isoformat(),
@@ -172,6 +185,7 @@ def generate_transactions():
         },
         {
             "id": "tx_clothing_001",
+            "account_id": "acc_credit_001",
             "description": "Clothing Store",
             "amount": -125.00,
             "transaction_date": (today - timedelta(days=16)).isoformat(),

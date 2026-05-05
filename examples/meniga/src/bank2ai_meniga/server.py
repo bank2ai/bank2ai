@@ -215,10 +215,11 @@ async def get_transactions(
     end_date: Optional[str] = None,
     description: Optional[str] = None,
     categories: Optional[list[str]] = None,
+    account_id: Optional[str] = None,
 ) -> TransactionList:
     logger.info(
-        "get_transactions: count=%s type=%s order=%s start=%s end=%s desc=%s cats=%s",
-        count, type, order, start_date, end_date, description, categories,
+        "get_transactions: count=%s type=%s order=%s start=%s end=%s desc=%s cats=%s account_id=%s",
+        count, type, order, start_date, end_date, description, categories, account_id,
     )
     params: dict[str, str] = {
         "fields": "id,amount,categoryId,text,date",
@@ -237,6 +238,8 @@ async def get_transactions(
         params["useAccentInsensitiveSearch"] = "true"
     if order == "OldestFirst":
         params["ascendingOrder"] = "true"
+    if account_id:
+        params["accountIds"] = account_id
 
     all_categories = (await get_categories()).items
 
