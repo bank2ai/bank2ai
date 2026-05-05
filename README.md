@@ -15,7 +15,7 @@ Bank2AI is freely usable by any bank or fintech. Its development is stewarded by
 ## Install
 
 ```bash
-pip install bank2ai
+uv add bank2ai
 ```
 
 ## Quickstart

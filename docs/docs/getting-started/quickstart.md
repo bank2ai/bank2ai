@@ -11,7 +11,7 @@ Stand up a Bank2AI MCP server, point a client at it, and watch it answer "what d
 ## 1. Install
 
 ```bash
-pip install bank2ai fastmcp
+uv add bank2ai fastmcp
 ```
 
 ## 2. Write a server

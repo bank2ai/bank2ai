@@ -8,12 +8,6 @@ description: Install the bank2ai Python library.
 
 Bank2AI's reference implementation is a Python package. It requires **Python 3.11+**.
 
-## With pip
-
-```bash
-pip install bank2ai
-```
-
 ## With uv
 
 ```bash
