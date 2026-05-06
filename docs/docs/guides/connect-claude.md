@@ -26,7 +26,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 }
 ```
 
-Restart Claude Desktop. The eight bank2ai tools should appear in the tool picker, try asking *"What did I spend on groceries last month?"*.
+Restart Claude Desktop. The bank2ai tools should appear in the tool picker, try asking *"What did I spend on groceries last month?"*.
 
 ## Claude Code
 

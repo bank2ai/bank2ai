@@ -15,7 +15,7 @@ Entries are packaged as [Claude Code plugins](https://docs.claude.com/en/docs/cl
 
 ## Why a marketplace?
 
-Bank2ai's value compounds with adoption. A budgeting skill written today should keep working tomorrow when a new bank publishes its server, with zero changes from the skill author. The marketplace is the contract that makes that possible: every entry implements the same eight-tool surface, so skills depend on *tool names*, never on *server identity*.
+Bank2ai's value compounds with adoption. A budgeting skill written today should keep working tomorrow when a new bank publishes its server, with zero changes from the skill author. The marketplace is the contract that makes that possible: every entry implements the same tool surface, so skills depend on *tool names*, never on *server identity*.
 
 ## What's in it
 

@@ -11,7 +11,7 @@ Compliant servers and the agent skills built on top of them are distributed thro
 
 The contract has two parts:
 
-1. The **tool surface**, eight named MCP tools whose input and output JSON Schemas are fixed by the spec.
+1. The **tool surface**, a set of named MCP tools whose input and output JSON Schemas are fixed by the spec.
 2. The **shared data models** (`Account`, `Transaction`, `Category`, `Recipient`) used inside tool inputs and outputs.
 
 Authentication is intentionally outside the spec: servers obtain credentials however suits their backend (a bearer token from the inbound MCP `access_token`, server-configured API credentials, OAuth, etc.) and gate calls accordingly. See [§4](#4-authentication) for the rationale.
@@ -33,7 +33,7 @@ A bank2ai server MAY register any subset of the following tools. Tools that are 
 | `transfer-money-icelandic` | **Prepare** a domestic transfer; validates inputs and returns details for confirmation. Does **not** execute. |
 | `execute-transfer`         | Execute a transfer that the user has already confirmed.            |
 
-Servers MAY also register additional, vendor-specific tools, but they MUST NOT alter the names, inputs, or outputs of the above eight.
+Servers MAY also register additional, vendor-specific tools, but they MUST NOT alter the names, inputs, or outputs of the tools above.
 
 > **Why "prepare → execute"?** Splitting transfers into two tools keeps the AI agent on a safe rail: the agent gathers details, the user confirms in their UI, and only then is `execute-transfer` called. Servers SHOULD reject `execute-transfer` calls that don't correspond to a recently prepared transfer.
 
@@ -41,7 +41,7 @@ Servers MAY also register additional, vendor-specific tools, but they MUST NOT a
 
 A typical bank2ai session looks like this:
 
-1. The MCP client connects and calls `tools/list`. The server returns the bank2ai tools it has registered (any subset of the eight in §1).
+1. The MCP client connects and calls `tools/list`. The server returns the bank2ai tools it has registered (any subset of those listed in §1).
 2. The client calls bank2ai tools as the user requests them. The server resolves credentials internally (see §4) and rejects calls it cannot authenticate.
 3. On a transfer, the client calls `transfer-money-icelandic` first to validate, surfaces the prepared details to the user, and only invokes `execute-transfer` after explicit confirmation.
 

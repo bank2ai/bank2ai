@@ -24,7 +24,7 @@ This subscribes Claude Code to the registry; new entries appear automatically.
 /plugin install bank2ai/yourbank
 ```
 
-Claude Code installs the plugin, wires the MCP server into your session, and prompts for any required configuration (e.g. credentials, API base URL). The eight bank2ai tools then appear in your tool picker.
+Claude Code installs the plugin, wires the MCP server into your session, and prompts for any required configuration (e.g. credentials, API base URL). The bank2ai tools then appear in your tool picker.
 
 ## Install a skill
 

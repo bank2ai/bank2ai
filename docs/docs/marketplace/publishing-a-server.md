@@ -10,7 +10,7 @@ Got a working bank2ai server for a bank or fintech? Here's how to ship it throug
 
 ## Prerequisites
 
-- Your server registers all eight tools defined by the [spec](/docs/specification/overview). Run the [drift test](/docs/library/testing#1-spec-drift-test), it should pass.
+- Your server registers the tools defined by the [spec](/docs/specification/overview). Run the [drift test](/docs/library/testing#1-spec-drift-test), it should pass.
 - Your server has a stable entry point, a CLI or `python -m` invocation, ideally a single command.
 - A short README explaining what the server is for, who it's for, and how authentication works.
 

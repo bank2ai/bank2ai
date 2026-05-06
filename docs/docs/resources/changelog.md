@@ -15,7 +15,7 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 ### 0.1.0, Draft
 
 - Initial draft, derived from the Python reference implementation.
-- Eight tools: `get-accounts`, `transactions`, `get-categories`, `spending-summary`, `recipients-by-name`, `create-recipient`, `transfer-money-icelandic`, `execute-transfer`.
+- Tools: `get-accounts`, `transactions`, `get-categories`, `spending-summary`, `recipients-by-name`, `create-recipient`, `transfer-money-icelandic`, `execute-transfer`.
 - Four shared models: `Account`, `Transaction`, `Category`, `Recipient`.
 - Authentication declared out of scope.
 - A previously specified bank2ai-defined `authenticate` tool was removed.
@@ -34,7 +34,7 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 - Initial release.
 - Pydantic models for every bank2ai shape.
-- `register_tools(app, ...)` wiring all eight tools onto a FastMCP app.
+- `register_tools(app, ...)` wiring the spec's tools onto a FastMCP app.
 
 ## Versioning policy
 

@@ -95,7 +95,7 @@ async function writeToolsIndex(tools) {
     '---',
     'title: Tool surface',
     'sidebar_position: 1',
-    'description: The eight MCP tools every bank2ai server registers.',
+    'description: The MCP tools every bank2ai server registers.',
     '---',
     '',
     BANNER('specs/bank2ai.json').trim(),

@@ -6,7 +6,7 @@ description: Pydantic models for every bank2ai input and output shape.
 
 # Models
 
-`bank2ai.models` exposes Pydantic models for every shape used in the spec, both the four shared data models (`Account`, `Transaction`, `Category`, `Recipient`) and the request/response shapes for the eight tools.
+`bank2ai.models` exposes Pydantic models for every shape used in the spec, both the four shared data models (`Account`, `Transaction`, `Category`, `Recipient`) and the request/response shapes for each tool.
 
 For canonical field-by-field documentation, see [Specification → Data models](/docs/specification/models). This page covers what's specific to using the models from Python.
 

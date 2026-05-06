@@ -10,13 +10,13 @@ Five ideas underpin everything else.
 
 ## 1. Bank2ai is a contract, not a framework
 
-Bank2ai is an [open specification](/docs/specification/overview): eight named MCP tools with fixed input/output JSON Schemas, plus four shared data models (`Account`, `Transaction`, `Category`, `Recipient`).
+Bank2ai is an [open specification](/docs/specification/overview): a set of named MCP tools with fixed input/output JSON Schemas, plus four shared data models (`Account`, `Transaction`, `Category`, `Recipient`).
 
 The Python library is a *reference implementation* of that contract. Implementations in any language are welcome, track the JSON Schemas in [`specs/bank2ai.json`](https://github.com/bank2ai/bank2ai/blob/main/specs/bank2ai.json).
 
-## 2. The eight-tool surface
+## 2. The tool surface
 
-Every compliant server registers exactly these tools, with these names:
+Every compliant server registers these tools, with these names:
 
 | Tool | What it does |
 | --- | --- |
@@ -29,7 +29,7 @@ Every compliant server registers exactly these tools, with these names:
 | [`transfer-money-icelandic`](/docs/specification/tools/transfer-money-icelandic) | **Prepare** a domestic transfer. Does not execute. |
 | [`execute-transfer`](/docs/specification/tools/execute-transfer) | Execute a transfer the user has confirmed. |
 
-Servers MAY add vendor-specific tools but MUST NOT alter the names, inputs, or outputs of these eight.
+Servers MAY add vendor-specific tools but MUST NOT alter the names, inputs, or outputs of the tools above.
 
 ## 3. Transfers split into prepare → execute
 
