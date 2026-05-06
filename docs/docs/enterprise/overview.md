@@ -19,7 +19,7 @@ Bank2ai is an open standard, freely usable by any bank or fintech. Its developme
 
 ## Where the line sits
 
-The **standard** lives at [bank2ai.com](https://bank2ai.com) and on [GitHub](https://github.com/bank2ai/bank2ai), open, vendor-neutral, MIT-licensed, and free to implement.
+The **standard** lives at [bank2ai.com](https://bank2ai.com) and on [GitHub](https://github.com/bank2ai/bank2ai), open, vendor-neutral, Apache 2.0-licensed, and free to implement.
 
 The **products** above are commercial. They are *not* required to use bank2ai; they exist for banks that want enterprise support, an integrated chat experience, or pre-built advisory agents instead of building them in-house.
 
