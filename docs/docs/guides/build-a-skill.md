@@ -6,7 +6,7 @@ description: How to build agent skills on top of the bank2ai tool surface.
 
 # Build an agent skill on top of bank2ai
 
-A *skill* is a small package of prompts, tool conventions, and orchestration logic that an AI agent can use to do something useful with a bank2ai server. Skills are the high-leverage layer — once a bank speaks bank2ai, every skill works against it for free.
+A *skill* is a small package of prompts, tool conventions, and orchestration logic that an AI agent can use to do something useful with a bank2ai server. Skills are the high-leverage layer, once a bank speaks bank2ai, every skill works against it for free.
 
 ## What a skill is
 

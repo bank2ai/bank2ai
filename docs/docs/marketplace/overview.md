@@ -1,7 +1,7 @@
 ---
 title: Overview
 sidebar_position: 1
-description: The bank2ai marketplace — a registry of compliant servers and the agent skills built on top.
+description: The bank2ai marketplace, a registry of compliant servers and the agent skills built on top.
 ---
 
 # The bank2ai marketplace
@@ -11,7 +11,7 @@ A spec is only as useful as the surface area it covers. The **bank2ai marketplac
 - **MCP servers** that implement the bank2ai tool surface for a specific bank or fintech, and
 - **agent skills** built on top of that surface (budgeting helpers, transfer assistants, statement explainers, …).
 
-Entries are packaged as [Claude Code plugins](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces), so installing a bank or skill is a single command for Claude Code users — and any other client that speaks the same plugin format can consume the registry too.
+Entries are packaged as [Claude Code plugins](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces), so installing a bank or skill is a single command for Claude Code users, and any other client that speaks the same plugin format can consume the registry too.
 
 ## Why a marketplace?
 
@@ -21,8 +21,8 @@ Bank2ai's value compounds with adoption. A budgeting skill written today should 
 
 | Type | Examples |
 | --- | --- |
-| **Bank servers** | One per bank or fintech — `bank2ai-acme`, `bank2ai-yourbank`, … |
-| **Skills** | Domain-specific agent skills — budgeting helpers, statement explainers, transfer assistants, subscription auditors, cash-flow forecasters. |
+| **Bank servers** | One per bank or fintech, `bank2ai-acme`, `bank2ai-yourbank`, … |
+| **Skills** | Domain-specific agent skills, budgeting helpers, statement explainers, transfer assistants, subscription auditors, cash-flow forecasters. |
 
 ## How to participate
 

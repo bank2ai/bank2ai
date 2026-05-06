@@ -1,7 +1,7 @@
 """Reusable bank2ai MCP tool specification.
 
-This module isolates the bank2ai tool spec — names, descriptions, input
-parameter signatures, and Pydantic response models — so multiple MCP
+This module isolates the bank2ai tool spec, names, descriptions, input
+parameter signatures, and Pydantic response models, so multiple MCP
 servers can expose the same surface without duplicating it. Each server
 provides async handler callables and calls `register_tools(app, ...)`.
 
@@ -58,7 +58,7 @@ def register_tools(
     Each handler is invoked with keyword arguments matching the tool's
     input schema (using the snake_case names declared below). Handlers
     may return either dicts shaped like the response model or model
-    instances directly — FastMCP serializes both via Pydantic.
+    instances directly, FastMCP serializes both via Pydantic.
     """
 
     if get_accounts is not None:

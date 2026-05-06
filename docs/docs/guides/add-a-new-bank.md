@@ -42,7 +42,7 @@ bank2ai-yourbank = { workspace = true }
 
 ## 3. Replace the handlers
 
-In `server.py`, replace the demo handlers with calls into your bank's APIs. You don't need to redefine any schemas — `register_tools` lives in `bank2ai` and is fixed by the spec.
+In `server.py`, replace the demo handlers with calls into your bank's APIs. You don't need to redefine any schemas, `register_tools` lives in `bank2ai` and is fixed by the spec.
 
 ```python
 from bank2ai import register_tools
@@ -58,7 +58,7 @@ async def get_accounts(*, only_withdrawal_accounts, account_type):
 register_tools(app, get_accounts=get_accounts, ...)
 ```
 
-Every `register_tools` keyword argument is optional, so you can land tools incrementally — start with `get-accounts` and add the rest as the backend integration matures.
+Every `register_tools` keyword argument is optional, so you can land tools incrementally, start with `get-accounts` and add the rest as the backend integration matures.
 
 See [Writing handlers](/docs/library/writing-handlers) for patterns and [Wrap a real bank](./wrap-a-real-bank) for a worked example.
 

@@ -6,7 +6,7 @@ description: Stand up the bank2ai demo server backed by hardcoded data.
 
 # Run the demo server
 
-`bank2ai-demo` is a reference MCP server backed by hardcoded data — useful for developing or testing AI clients against the full bank2ai surface without a real bank in the loop.
+`bank2ai-demo` is a reference MCP server backed by hardcoded data, useful for developing or testing AI clients against the full bank2ai surface without a real bank in the loop.
 
 ## Clone the repo
 
@@ -40,7 +40,7 @@ The client lists tools, fetches accounts/transactions/categories, runs a spendin
 
 ## Customise the data
 
-Edit `examples/demo/src/bank2ai_demo/data.py` — `ACCOUNTS`, `TRANSACTIONS`, `CATEGORIES`, `RECIPIENTS`, and the `generate_transactions()` helper.
+Edit `examples/demo/src/bank2ai_demo/data.py`, `ACCOUNTS`, `TRANSACTIONS`, `CATEGORIES`, `RECIPIENTS`, and the `generate_transactions()` helper.
 
 ## Use it from Claude Desktop / Claude Code
 

@@ -79,7 +79,7 @@ def _collect_models() -> dict[str, Any]:
 
 
 def build_spec() -> dict[str, Any]:
-    """Build the full spec dict. Pure function — no I/O."""
+    """Build the full spec dict. Pure function, no I/O."""
     tools = asyncio.run(_collect_tools())
     return {
         "$schema": "https://bank2ai.com/specs/bank2ai.schema.json",

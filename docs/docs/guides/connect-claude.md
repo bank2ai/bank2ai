@@ -26,7 +26,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 }
 ```
 
-Restart Claude Desktop. The eight bank2ai tools should appear in the tool picker — try asking *"What did I spend on groceries last month?"*.
+Restart Claude Desktop. The eight bank2ai tools should appear in the tool picker, try asking *"What did I spend on groceries last month?"*.
 
 ## Claude Code
 
@@ -48,7 +48,7 @@ Add the server to your Claude Code MCP config (project- or user-scoped, see [Cla
 
 ## Connecting to a real bank server
 
-Same config, different command — point at whatever entry point your server exposes:
+Same config, different command, point at whatever entry point your server exposes:
 
 ```json
 {

@@ -16,7 +16,7 @@ uv add bank2ai fastmcp
 
 ## 2. Write a server
 
-Create `server.py`. Bank2ai ships shared schemas — you only supply handlers for the tools you implement. Every handler is optional, so you can start with a couple and grow into the full surface:
+Create `server.py`. Bank2ai ships shared schemas, you only supply handlers for the tools you implement. Every handler is optional, so you can start with a couple and grow into the full surface:
 
 ```python
 from fastmcp import FastMCP
@@ -86,7 +86,7 @@ uv run --package bank2ai-demo python -m bank2ai_demo.client
 
 ## Next steps
 
-- Add handlers for the remaining tools — see [Writing handlers](/docs/library/writing-handlers).
+- Add handlers for the remaining tools, see [Writing handlers](/docs/library/writing-handlers).
 - Read the [Specification](/docs/specification/overview) to understand the contract.
 - Walk through the [real-bank guide](/docs/guides/wrap-a-real-bank) to see a real bank wired up.
 - Plan how your server will [authenticate against your backend](/docs/specification/overview#4-authentication).

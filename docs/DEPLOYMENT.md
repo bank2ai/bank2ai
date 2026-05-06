@@ -14,7 +14,7 @@ The site is built with Docusaurus and deployed via **Azure Static Web Apps** (th
 1. **Create a Static Web App in Azure** for `bank2ai.com`. Choose the "Custom" build option (not GitHub-managed Oryx) since we build the site ourselves in CI.
 2. **Add the deployment token to GitHub** as a repository secret named `AZURE_STATIC_WEB_APPS_API_TOKEN_BANK2AI`.
 3. **Wire the custom domain** in the Azure portal: add `bank2ai.com` (and optionally `www.bank2ai.com`) to the Static Web App and create the `CNAME` / `ALIAS` records in DNS as instructed.
-4. **Enable HTTPS** — Azure SWA provisions a managed cert automatically once the DNS records are in place.
+4. **Enable HTTPS**, Azure SWA provisions a managed cert automatically once the DNS records are in place.
 
 ## Local preview
 
@@ -29,4 +29,4 @@ This runs `prebuild` → `sync-spec` → `docusaurus build` → static server on
 
 ## Spec → docs sync
 
-`docs/scripts/sync-spec.mjs` runs automatically before `npm start` and `npm run build`. It reads `../specs/bank2ai.spec.md` and `../specs/bank2ai.json` and regenerates `docs/docs/specification/`. The generated directory is gitignored — `specs/` is the source of truth.
+`docs/scripts/sync-spec.mjs` runs automatically before `npm start` and `npm run build`. It reads `../specs/bank2ai.spec.md` and `../specs/bank2ai.json` and regenerates `docs/docs/specification/`. The generated directory is gitignored, `specs/` is the source of truth.

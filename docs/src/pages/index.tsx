@@ -13,7 +13,7 @@ from bank2ai import register_tools
 
 app = FastMCP("my-bank")
 
-# Every handler is optional — pass only the tools you've implemented.
+# Every handler is optional, pass only the tools you've implemented.
 register_tools(
     app,
     get_accounts=...,
@@ -35,7 +35,7 @@ const FEATURES: Feature[] = [
   {
     title: 'A shared banking vocabulary',
     description:
-      'Standard banking MCP tools — accounts, transactions, categories, spending summaries, recipients, transfers — with fixed input/output schemas. Implement them once, get every bank2ai client for free.',
+      'Standard banking MCP tools (accounts, transactions, categories, spending summaries, recipients, transfers) with fixed input/output schemas. Implement them once, get every bank2ai client for free.',
     href: '/docs/specification/overview',
     cta: 'Read the spec →',
   },
@@ -73,7 +73,7 @@ function Hero() {
         <p className={styles.heroSubtitle}>{siteConfig.tagline}</p>
         <p className={styles.heroLede}>
           Bank2ai is the open standard that lets banks, fintechs, and AI builders share a single
-          banking vocabulary instead of reinventing one — exposed over the{' '}
+          banking vocabulary instead of reinventing one, exposed over the{' '}
           <a href="https://modelcontextprotocol.io">Model Context Protocol</a>.
         </p>
         <div className={styles.heroButtons}>

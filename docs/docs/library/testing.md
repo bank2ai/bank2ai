@@ -49,5 +49,5 @@ End-to-end tests are how you catch things like "I forgot to wire up `execute-tra
 
 ## Don't test what you don't own
 
-- The library's tool schemas come from `bank2ai`. If you find yourself writing a test for "the `get-accounts` input schema has the right fields", you're testing the wrong layer — that's the library's job.
+- The library's tool schemas come from `bank2ai`. If you find yourself writing a test for "the `get-accounts` input schema has the right fields", you're testing the wrong layer, that's the library's job.
 - The protocol layer is FastMCP's responsibility. Trust it; don't write tests that re-implement schema validation.

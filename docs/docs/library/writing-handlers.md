@@ -6,11 +6,11 @@ description: Patterns for plugging bank2ai handlers into a real bank backend.
 
 # Writing handlers
 
-A handler is an async function that turns bank2ai tool inputs into bank2ai outputs. The library doesn't care how you do it — call REST APIs, query a database, hit a GraphQL endpoint, mock everything for tests. This page collects the patterns we've seen work.
+A handler is an async function that turns bank2ai tool inputs into bank2ai outputs. The library doesn't care how you do it, call REST APIs, query a database, hit a GraphQL endpoint, mock everything for tests. This page collects the patterns we've seen work.
 
 ## Pattern: stateless handlers calling a backend client
 
-The simplest shape — and what the reference [real-bank guide](/docs/guides/wrap-a-real-bank) uses. Handlers are top-level async functions; backend state lives in a client passed via closure.
+The simplest shape, and what the reference [real-bank guide](/docs/guides/wrap-a-real-bank) uses. Handlers are top-level async functions; backend state lives in a client passed via closure.
 
 ```python
 from bank2ai import Account, register_tools
@@ -33,7 +33,7 @@ def make_app(api: AcmeBankClient) -> FastMCP:
     return app
 ```
 
-Every keyword argument to `register_tools` is optional, so during development you can register only the handlers you've written — unimplemented tools are simply not exposed.
+Every keyword argument to `register_tools` is optional, so during development you can register only the handlers you've written, unimplemented tools are simply not exposed.
 
 ## Pattern: per-request authentication
 
@@ -52,7 +52,7 @@ If your backend requires an exchange (e.g. email/password → session token), do
 
 ## Pattern: mapping backend shapes to bank2ai
 
-Banks rarely expose the exact bank2ai shape on the wire. Write small mappers and unit-test them — your spec compliance lives or dies in those mappers.
+Banks rarely expose the exact bank2ai shape on the wire. Write small mappers and unit-test them, your spec compliance lives or dies in those mappers.
 
 ```python
 def _to_bank2ai_account(row: AcmeAccountRow) -> Account:
@@ -74,10 +74,10 @@ def _to_bank2ai_account(row: AcmeAccountRow) -> Account:
 
 The two-step transfer flow exists so the user can confirm a structured preview before money moves. A reasonable implementation:
 
-1. `prepare_transfer` — validate everything (amount, recipient, source account), then return a `TransferPreparedResponse` with a populated `item` and a short, idempotent token (e.g. a UUID) embedded somewhere your `execute_transfer` can recognize. Cache the prepared transfer server-side keyed by that token.
-2. `execute_transfer` — look up the prepared transfer by `(withdrawal_account_id, recipient_account_number, amount)` (or by the token if your client surfaces it) and call your backend's transfer API. Return an `ExecuteTransferResponse` with the bank-issued receipt.
+1. `prepare_transfer`, validate everything (amount, recipient, source account), then return a `TransferPreparedResponse` with a populated `item` and a short, idempotent token (e.g. a UUID) embedded somewhere your `execute_transfer` can recognize. Cache the prepared transfer server-side keyed by that token.
+2. `execute_transfer`, look up the prepared transfer by `(withdrawal_account_id, recipient_account_number, amount)` (or by the token if your client surfaces it) and call your backend's transfer API. Return an `ExecuteTransferResponse` with the bank-issued receipt.
 
-Reject `execute_transfer` calls with no matching preparation. This is the single most important safety property of the surface — don't shortcut it.
+Reject `execute_transfer` calls with no matching preparation. This is the single most important safety property of the surface, don't shortcut it.
 
 ## Pattern: returning user-facing errors
 
@@ -94,6 +94,6 @@ This keeps the AI client conversational instead of forcing it to interpret proto
 
 ## What not to do
 
-- **Don't reshape responses.** If the spec says `accountNumber`, your output must say `accountNumber` — not `account_number`, not `iban`. The library and FastMCP enforce this; don't fight it.
+- **Don't reshape responses.** If the spec says `accountNumber`, your output must say `accountNumber`, not `account_number`, not `iban`. The library and FastMCP enforce this; don't fight it.
 - **Don't add a bank2ai-defined `authenticate` tool.** Earlier drafts of the spec described one; it has been removed. Authentication is a server concern.
 - **Don't trust client-supplied `withdrawal_account_id` blindly.** Re-resolve the account on the server side and check it belongs to the authenticated user.

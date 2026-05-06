@@ -6,7 +6,7 @@ description: Pydantic models for every bank2ai input and output shape.
 
 # Models
 
-`bank2ai.models` exposes Pydantic models for every shape used in the spec — both the four shared data models (`Account`, `Transaction`, `Category`, `Recipient`) and the request/response shapes for the eight tools.
+`bank2ai.models` exposes Pydantic models for every shape used in the spec, both the four shared data models (`Account`, `Transaction`, `Category`, `Recipient`) and the request/response shapes for the eight tools.
 
 For canonical field-by-field documentation, see [Specification → Data models](/docs/specification/models). This page covers what's specific to using the models from Python.
 
@@ -18,10 +18,10 @@ from bank2ai import Account, Transaction, Category, Recipient
 
 These are the types most handlers return. Each is a `BaseModel`:
 
-- `Account` — id, accountNumber, currency, balance, optional availableBalance/overdraftLimit/isWithdrawalAccount/isDefaultAccount/accountType.
-- `Transaction` — id, description, amount (negative = expense), transaction_date, optional category.
-- `Category` — id, name (localized).
-- `Recipient` — id, name, accountNumber, accountNumberType, socialSecurityNumber, optional bankInfo/paymentType/address/isFavorite/description.
+- `Account`, id, accountNumber, currency, balance, optional availableBalance/overdraftLimit/isWithdrawalAccount/isDefaultAccount/accountType.
+- `Transaction`, id, description, amount (negative = expense), transaction_date, optional category.
+- `Category`, id, name (localized).
+- `Recipient`, id, name, accountNumber, accountNumberType, socialSecurityNumber, optional bankInfo/paymentType/address/isFavorite/description.
 
 ## Enums
 
@@ -29,9 +29,9 @@ These are the types most handlers return. Each is a `BaseModel`:
 from bank2ai import AccountType, TransactionType, TransactionOrder
 ```
 
-- `AccountType` — `Current`, `Savings`, `Credit`.
-- `TransactionType` — `Any`, `Income`, `Expenses`, `Savings` (filter on `transactions`).
-- `TransactionOrder` — `NewestFirst`, `OldestFirst`.
+- `AccountType`, `Current`, `Savings`, `Credit`.
+- `TransactionType`, `Any`, `Income`, `Expenses`, `Savings` (filter on `transactions`).
+- `TransactionOrder`, `NewestFirst`, `OldestFirst`.
 
 ## Tool-response shapes
 
@@ -77,4 +77,4 @@ Pydantic / FastMCP validates either against the output schema before sending.
 
 ## Tolerating unknown fields
 
-Per the [spec](/docs/specification/overview), clients MUST tolerate unknown fields on `Account`, `Transaction`, `Category`, and `Recipient`. If your bank exposes useful extras (e.g. an `iban` on `Account`), feel free to include them — old clients ignore unknowns; future clients can adopt them.
+Per the [spec](/docs/specification/overview), clients MUST tolerate unknown fields on `Account`, `Transaction`, `Category`, and `Recipient`. If your bank exposes useful extras (e.g. an `iban` on `Account`), feel free to include them, old clients ignore unknowns; future clients can adopt them.

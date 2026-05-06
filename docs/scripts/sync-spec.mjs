@@ -57,7 +57,7 @@ async function writeOverview(spec) {
     '---',
     'title: Specification overview',
     'sidebar_position: 1',
-    'description: The bank2ai MCP specification — narrative source of truth.',
+    'description: The bank2ai MCP specification, narrative source of truth.',
     '---',
     '',
   ].join('\n');
@@ -145,7 +145,7 @@ async function writeModelsIndex(models) {
     '---',
     'title: Data models',
     'sidebar_position: 1',
-    'description: Shared bank2ai data models — Account, Transaction, Category, Recipient.',
+    'description: Shared bank2ai data models, Account, Transaction, Category, Recipient.',
     '---',
     '',
     BANNER('specs/bank2ai.json').trim(),

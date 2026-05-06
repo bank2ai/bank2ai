@@ -1,7 +1,7 @@
 ---
 title: register_tools
 sidebar_position: 2
-description: register_tools wires bank2ai tools onto a FastMCP app — pass handlers for the subset you implement.
+description: register_tools wires bank2ai tools onto a FastMCP app, pass handlers for the subset you implement.
 ---
 
 # `register_tools`
@@ -29,7 +29,7 @@ def register_tools(
 ) -> None
 ```
 
-`Handler` is `Callable[..., Awaitable[Any]]`. Each handler receives keyword arguments matching the tool's input schema (using snake_case parameter names). Pass only the handlers you want to expose — the corresponding tools are registered, and the rest are skipped.
+`Handler` is `Callable[..., Awaitable[Any]]`. Each handler receives keyword arguments matching the tool's input schema (using snake_case parameter names). Pass only the handlers you want to expose, the corresponding tools are registered, and the rest are skipped.
 
 ## Handler contract
 
@@ -46,7 +46,7 @@ def register_tools(
 
 ## Example
 
-Handlers are optional — pass only the ones you implement. Here's a minimal server that exposes just `get-accounts`:
+Handlers are optional, pass only the ones you implement. Here's a minimal server that exposes just `get-accounts`:
 
 ```python
 from fastmcp import FastMCP
@@ -68,11 +68,11 @@ if __name__ == "__main__":
     app.run()
 ```
 
-To expose the full surface, define the other seven handlers and pass them as additional keyword arguments — `register_tools(app, get_accounts=..., get_transactions=..., …)`.
+To expose the full surface, define the other seven handlers and pass them as additional keyword arguments, `register_tools(app, get_accounts=..., get_transactions=..., …)`.
 
 ## Response envelopes
 
-The MCP spec requires `structuredContent` to be a JSON object, so list-returning tools use an envelope model with an `items` field. Handlers return the envelope directly — this leaves room to add `nextCursor`, `total`, or other pagination metadata later without breaking the tool contract.
+The MCP spec requires `structuredContent` to be a JSON object, so list-returning tools use an envelope model with an `items` field. Handlers return the envelope directly, this leaves room to add `nextCursor`, `total`, or other pagination metadata later without breaking the tool contract.
 
 | Tool | Response model | Wire shape |
 | --- | --- | --- |

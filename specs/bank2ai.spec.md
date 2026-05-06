@@ -1,18 +1,18 @@
 # Bank2ai MCP Specification
 
-> **Version:** 0.1.0 — draft, derived from the Python reference implementation.
-> **Companion artifact:** [`bank2ai.json`](./bank2ai.json) — canonical input/output JSON Schemas.
+> **Version:** 0.1.0, draft, derived from the Python reference implementation.
+> **Companion artifact:** [`bank2ai.json`](./bank2ai.json), canonical input/output JSON Schemas.
 
-Bank2ai connects digital banking data and operations with AI agents. The language of banking — accounts, transactions, transfers, bill payments, recipients, loans, savings — is universally identical, and bank2ai is the open standard that lets banks, fintechs, and AI builders collaborate on a single shared vocabulary instead of each reinventing one.
+Bank2ai connects digital banking data and operations with AI agents. The language of banking (accounts, transactions, transfers, bill payments, recipients, loans, savings) is universally identical, and bank2ai is the open standard that lets banks, fintechs, and AI builders collaborate on a single shared vocabulary instead of each reinventing one.
 
-This document defines that vocabulary as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface that any bank can expose so AI agents (and through them, end customers) can read accounts and transactions, look up recipients, run spending summaries, and prepare/execute transfers — using the same tool surface across every bank.
+This document defines that vocabulary as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface that any bank can expose so AI agents (and through them, end customers) can read accounts and transactions, look up recipients, run spending summaries, and prepare/execute transfers, using the same tool surface across every bank.
 
 Compliant servers and the agent skills built on top of them are distributed through the [bank2ai marketplace](../README.md#marketplace), which is packaged as a [Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces) and consumable from any client that speaks the same plugin format.
 
 The contract has two parts:
 
-1. The **tool surface** — eight named MCP tools whose input and output JSON Schemas are fixed by the spec.
-2. The **shared data models** — `Account`, `Transaction`, `Category`, `Recipient` — used inside tool inputs and outputs.
+1. The **tool surface**, eight named MCP tools whose input and output JSON Schemas are fixed by the spec.
+2. The **shared data models** (`Account`, `Transaction`, `Category`, `Recipient`) used inside tool inputs and outputs.
 
 Authentication is intentionally outside the spec: servers obtain credentials however suits their backend (a bearer token from the inbound MCP `access_token`, server-configured API credentials, OAuth, etc.) and gate calls accordingly. See [§4](#4-authentication) for the rationale.
 
@@ -49,10 +49,10 @@ A typical bank2ai session looks like this:
 
 The schemas in `bank2ai.json` under `models{}` define the canonical shapes for:
 
-* **`Account`** — id, accountNumber, currency, balance, optional availableBalance, overdraftLimit, isWithdrawalAccount, isDefaultAccount, accountType (`Current` | `Savings` | `Credit`).
-* **`Transaction`** — id, description, amount (negative = expense), transaction_date (ISO 8601), category.
-* **`Category`** — id, name (localized).
-* **`Recipient`** — id, name, accountNumber, accountNumberType (`Domestic` | `IBAN` | `SWIFT`), socialSecurityNumber, optional bankInfo, paymentType, address, isFavorite, description.
+* **`Account`**, id, accountNumber, currency, balance, optional availableBalance, overdraftLimit, isWithdrawalAccount, isDefaultAccount, accountType (`Current` | `Savings` | `Credit`).
+* **`Transaction`**, id, description, amount (negative = expense), transaction_date (ISO 8601), category.
+* **`Category`**, id, name (localized).
+* **`Recipient`**, id, name, accountNumber, accountNumberType (`Domestic` | `IBAN` | `SWIFT`), socialSecurityNumber, optional bankInfo, paymentType, address, isFavorite, description.
 
 Servers MAY return additional fields on these objects; clients MUST tolerate unknown fields. Servers MUST NOT omit fields marked `required` in the schemas.
 
@@ -66,7 +66,7 @@ Common approaches used by reference implementations:
 * **Server-configured credentials.** The server reads credentials from its environment (e.g. `BANK2AI_*_EMAIL` / `BANK2AI_*_PASSWORD`) and exchanges them for a backend session token, refreshing as needed.
 * **Demo / no-auth.** Servers backed by hardcoded data MAY skip authentication entirely.
 
-Servers MUST NOT register a bank2ai-defined `authenticate` tool — earlier drafts of this spec described one and it has been removed.
+Servers MUST NOT register a bank2ai-defined `authenticate` tool, earlier drafts of this spec described one and it has been removed.
 
 ## 5. Error model
 
@@ -90,5 +90,5 @@ The spec versioning policy lives in [`README.md`](./README.md). Notable additive
 
 ## 8. Reference implementations
 
-* [`examples/demo`](../examples/demo) — full surface backed by hardcoded data; useful for client conformance testing without a real bank.
+* [`examples/demo`](../examples/demo), full surface backed by hardcoded data; useful for client conformance testing without a real bank.
 

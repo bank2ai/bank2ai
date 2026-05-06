@@ -8,13 +8,13 @@ description: Bank2ai is the open standard for connecting digital banking with AI
 
 **Bank2ai is the open standard for connecting digital banking with AI agents.**
 
-The language of banking is universal — accounts, transactions, transfers, bill payments, recipients, loans, savings — and bank2ai codifies that language as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface. Once a bank speaks bank2ai, any compliant AI client can read accounts, look up recipients, run spending summaries, and prepare/execute transfers — using the same vocabulary across every bank.
+The language of banking is universal (accounts, transactions, transfers, bill payments, recipients, loans, savings) and bank2ai codifies that language as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface. Once a bank speaks bank2ai, any compliant AI client can read accounts, look up recipients, run spending summaries, and prepare/execute transfers, using the same vocabulary across every bank.
 
 ## What bank2ai gives you
 
-- **A specification.** Eight named MCP tools with fixed input/output JSON Schemas, plus a small set of shared data models — see [Specification](/docs/specification/overview).
-- **A Python library.** [`bank2ai`](/docs/library/overview) ships the shared models and a `register_tools` helper on top of [FastMCP](https://github.com/jlowin/fastmcp). Plug in async handlers for the tools you implement — every handler is optional, so you can grow into the full surface incrementally.
-- **Reference implementations.** A demo server backed by hardcoded data and example servers backed by real bank APIs — see [Guides](/docs/guides/run-the-demo).
+- **A specification.** Eight named MCP tools with fixed input/output JSON Schemas, plus a small set of shared data models, see [Specification](/docs/specification/overview).
+- **A Python library.** [`bank2ai`](/docs/library/overview) ships the shared models and a `register_tools` helper on top of [FastMCP](https://github.com/jlowin/fastmcp). Plug in async handlers for the tools you implement, every handler is optional, so you can grow into the full surface incrementally.
+- **Reference implementations.** A demo server backed by hardcoded data and example servers backed by real bank APIs, see [Guides](/docs/guides/run-the-demo).
 - **A marketplace.** Compliant servers and the agent skills built on top are distributed as a [Claude Code plugin marketplace](/docs/marketplace/overview), installable in one command.
 
 ## Who bank2ai is for

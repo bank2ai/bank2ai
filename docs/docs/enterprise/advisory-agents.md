@@ -6,7 +6,7 @@ description: A suite of advisory agents that consume the bank2ai surface to give
 
 # Advisory Agents
 
-Bancony's Advisory Agents are a suite of domain-specific AI agents that consume the [bank2ai](/docs/specification/overview) tool surface to give grounded financial advice — with the bank's data and the bank's policies in the loop.
+Bancony's Advisory Agents are a suite of domain-specific AI agents that consume the [bank2ai](/docs/specification/overview) tool surface to give grounded financial advice, with the bank's data and the bank's policies in the loop.
 
 ## The current suite
 
@@ -18,11 +18,11 @@ Bancony's Advisory Agents are a suite of domain-specific AI agents that consume 
 | **Retirement Agent** | Long-horizon planning grounded in the customer's contribution and balance history. |
 | **Cash-flow Agent** | Forecasts upcoming inflows and outflows from transaction patterns. |
 
-Each agent is built as a [skill](/docs/marketplace/overview) in the bank2ai sense — it depends on tool *names*, not on bank identity. Run any of them against any compliant bank2ai server.
+Each agent is built as a [skill](/docs/marketplace/overview) in the bank2ai sense, it depends on tool *names*, not on bank identity. Run any of them against any compliant bank2ai server.
 
 ## Why advisory agents need a standard
 
-Advice is only as good as the data behind it. Without a standard, every advisory product would have to integrate per-bank, with bespoke schemas, bespoke auth, bespoke transfers — and the cost of supporting more banks would scale linearly.
+Advice is only as good as the data behind it. Without a standard, every advisory product would have to integrate per-bank, with bespoke schemas, bespoke auth, bespoke transfers, and the cost of supporting more banks would scale linearly.
 
 Bank2ai fixes that. An advisory agent against `bank2ai-acme` works the same way against `bank2ai-yourbank` or any other compliant server. The agent stays focused on advice; the standard handles the plumbing.
 

@@ -8,7 +8,7 @@
 .docusaurus
 .cache-loader
 
-# Spec mirror — regenerated from ../specs by scripts/sync-spec.mjs
+# Spec mirror, regenerated from ../specs by scripts/sync-spec.mjs
 /docs/specification
 
 # Misc
