@@ -1,12 +1,12 @@
 ---
 title: Welcome
 sidebar_position: 1
-description: Bank2ai is the open standard for connecting digital banking with AI agents over MCP.
+description: Bank2ai is the open standard for AI driven banking.
 ---
 
 # Welcome to bank2ai
 
-**Bank2ai is the open standard for connecting digital banking with AI agents.**
+**Bank2ai is the open standard for AI driven banking.**
 
 The language of banking is universal (accounts, transactions, transfers, bill payments, recipients, loans, savings) and bank2ai codifies that language as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface. Once a bank speaks bank2ai, any compliant AI client can read accounts, look up recipients, run spending summaries, and prepare/execute transfers, using the same vocabulary across every bank.
 
