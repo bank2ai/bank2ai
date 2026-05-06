@@ -22,6 +22,10 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Python library (`bank2ai`)
 
+### 0.3.0
+
+- **Breaking:** the wire-level tool name `transactions` was renamed to `get-transactions` to align with `get-accounts` and `get-categories`. The `register_tools` handler keyword (`get_transactions=`) is unchanged; only MCP clients calling the tool by name need to update.
+
 ### 0.2.0
 
 - **Breaking:** the MCP tool surface moved from `bank2ai.mcp` to `bank2ai.tools`. Update imports accordingly.
