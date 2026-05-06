@@ -35,7 +35,7 @@ const FEATURES: Feature[] = [
   {
     title: 'A shared banking vocabulary',
     description:
-      'Standard banking MCP tools — accounts, transactions, categories, spending summaries, recipients, transfers — with fixed input/output schemas. Implement them once, get every Bank2AI client for free.',
+      'Standard banking MCP tools — accounts, transactions, categories, spending summaries, recipients, transfers — with fixed input/output schemas. Implement them once, get every bank2ai client for free.',
     href: '/docs/specification/overview',
     cta: 'Read the spec →',
   },
@@ -62,17 +62,17 @@ function Hero() {
       <div className="container">
         <img
           src="/img/logo.svg"
-          alt="Bank2AI"
+          alt="bank2ai"
           className={clsx(styles.heroLogo, styles.heroLogoLight)}
         />
         <img
           src="/img/logo-dark.svg"
-          alt="Bank2AI"
+          alt="bank2ai"
           className={clsx(styles.heroLogo, styles.heroLogoDark)}
         />
         <p className={styles.heroSubtitle}>{siteConfig.tagline}</p>
         <p className={styles.heroLede}>
-          Bank2AI is the open standard that lets banks, fintechs, and AI builders share a single
+          Bank2ai is the open standard that lets banks, fintechs, and AI builders share a single
           banking vocabulary instead of reinventing one — exposed over the{' '}
           <a href="https://modelcontextprotocol.io">Model Context Protocol</a>.
         </p>
@@ -122,7 +122,7 @@ function Quickstart() {
             <Heading as="h2">A bank server in ten lines</Heading>
             <p>
               Install <code>bank2ai</code>, supply async handlers for your backend, and{' '}
-              <code>register_tools</code> wires the full Bank2AI surface onto a FastMCP app.
+              <code>register_tools</code> wires the full bank2ai surface onto a FastMCP app.
             </p>
             <Link className="button button--primary" to="/docs/getting-started/quickstart">
               Full quickstart →
@@ -143,10 +143,10 @@ function BanconyStrip() {
       <div className="container">
         <Heading as="h2">Stewarded by Bancony</Heading>
         <p>
-          Bank2AI is an open standard, freely usable by any bank or fintech. Its development is
+          Bank2ai is an open standard, freely usable by any bank or fintech. Its development is
           stewarded by <a href="https://bancony.com">Bancony</a>, which builds enterprise-ready MCP
           servers, an SDK, an in-channel chat agent (with Generative UI and RAG), and advisory
-          agents on top of the Bank2AI surface.
+          agents on top of the bank2ai surface.
         </p>
         <div className={styles.heroButtons}>
           <Link className="button button--primary" to="/docs/enterprise/overview">

@@ -1,7 +1,7 @@
-"""Regenerate the language-neutral Bank2AI MCP spec.
+"""Regenerate the language-neutral bank2ai MCP spec.
 
 Reads the FastMCP tool registrations from the ``bank2ai-demo`` reference
-implementation (which exposes the full Bank2AI surface without auth) plus
+implementation (which exposes the full bank2ai surface without auth) plus
 the shared Pydantic models from ``bank2ai.models``, and writes a
 JSON-Schema-based spec to ``specs/bank2ai.json``.
 

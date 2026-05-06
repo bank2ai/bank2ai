@@ -1,7 +1,7 @@
 ---
 title: Changelog
 sidebar_position: 2
-description: Notable changes to the Bank2AI specification and library.
+description: Notable changes to the bank2ai specification and library.
 ---
 
 # Changelog
@@ -18,7 +18,7 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 - Eight tools: `get-accounts`, `transactions`, `get-categories`, `spending-summary`, `recipients-by-name`, `create-recipient`, `transfer-money-icelandic`, `execute-transfer`.
 - Four shared models: `Account`, `Transaction`, `Category`, `Recipient`.
 - Authentication declared out of scope.
-- A previously specified Bank2AI-defined `authenticate` tool was removed.
+- A previously specified bank2ai-defined `authenticate` tool was removed.
 
 ## Python library (`bank2ai`)
 
@@ -33,7 +33,7 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 ### 0.1.0
 
 - Initial release.
-- Pydantic models for every Bank2AI shape.
+- Pydantic models for every bank2ai shape.
 - `register_tools(app, ...)` wiring all eight tools onto a FastMCP app.
 
 ## Versioning policy

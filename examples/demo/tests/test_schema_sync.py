@@ -1,4 +1,4 @@
-"""Tests that the registered MCP tool surface matches the Bank2AI spec.
+"""Tests that the registered MCP tool surface matches the bank2ai spec.
 
 Run from the examples/demo directory:
     pytest -v
@@ -28,7 +28,7 @@ def _load_generator():
 
 
 # ---------------------------------------------------------------------------
-# register_tools produces the full Bank2AI surface with the right inputs
+# register_tools produces the full bank2ai surface with the right inputs
 # ---------------------------------------------------------------------------
 
 EXPECTED_TOOL_INPUTS = {
@@ -71,7 +71,7 @@ def test_tool_input_properties(tools_by_name, tool_name, expected_props):
 
 @pytest.mark.parametrize("tool_name", list(EXPECTED_TOOL_INPUTS.keys()))
 def test_tool_has_object_output_schema(tools_by_name, tool_name):
-    """Every Bank2AI tool exposes an object output schema (inferred by FastMCP
+    """Every bank2ai tool exposes an object output schema (inferred by FastMCP
     from the Pydantic response-model annotation)."""
     tool = tools_by_name[tool_name]
     assert tool.output_schema is not None, f"{tool_name} missing output_schema"

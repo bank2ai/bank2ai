@@ -1,4 +1,4 @@
-"""Bank2AI MCP server backed by Meniga APIs."""
+"""Bank2ai MCP server backed by Meniga APIs."""
 
 from .server import app
 

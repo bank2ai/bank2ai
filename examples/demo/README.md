@@ -1,6 +1,6 @@
 # bank2ai-demo
 
-Reference Bank2AI MCP server backed by hardcoded data. Use it to develop or test AI agents without a real bank.
+Reference bank2ai MCP server backed by hardcoded data. Use it to develop or test AI agents without a real bank.
 
 📖 Full guide: [bank2ai.com/docs/guides/run-the-demo](https://bank2ai.com/docs/guides/run-the-demo)
 

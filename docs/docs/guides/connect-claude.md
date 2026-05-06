@@ -1,12 +1,12 @@
 ---
 title: Connect from Claude
 sidebar_position: 2
-description: Point Claude Desktop or Claude Code at a Bank2AI server.
+description: Point Claude Desktop or Claude Code at a bank2ai server.
 ---
 
 # Connect from Claude
 
-Bank2AI servers speak MCP, so any MCP-aware client can use them. Below are the minimal configurations for the two most common Claude clients.
+Bank2ai servers speak MCP, so any MCP-aware client can use them. Below are the minimal configurations for the two most common Claude clients.
 
 ## Claude Desktop
 
@@ -26,7 +26,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 }
 ```
 
-Restart Claude Desktop. The eight Bank2AI tools should appear in the tool picker — try asking *"What did I spend on groceries last month?"*.
+Restart Claude Desktop. The eight bank2ai tools should appear in the tool picker — try asking *"What did I spend on groceries last month?"*.
 
 ## Claude Code
 
@@ -71,7 +71,7 @@ See the [real-bank guide](./wrap-a-real-bank) for credential handling.
 
 ## Installing from the marketplace
 
-When a Bank2AI server is published to the [marketplace](/docs/marketplace/overview), Claude Code users install it with one command:
+When a bank2ai server is published to the [marketplace](/docs/marketplace/overview), Claude Code users install it with one command:
 
 ```
 /plugin install bank2ai/<server-name>

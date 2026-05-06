@@ -1,17 +1,17 @@
 ---
 title: Publishing a skill
 sidebar_position: 3
-description: How to publish an agent skill that consumes Bank2AI to the marketplace.
+description: How to publish an agent skill that consumes bank2ai to the marketplace.
 ---
 
 # Publishing a skill
 
-Skills are the high-leverage layer of Bank2AI: write once, work against every compliant bank server. Here's how to ship one.
+Skills are the high-leverage layer of bank2ai: write once, work against every compliant bank server. Here's how to ship one.
 
 ## Prerequisites
 
 - A working skill (a `SKILL.md` plus any supporting prompts/resources).
-- A clear declaration of which Bank2AI tools the skill needs.
+- A clear declaration of which bank2ai tools the skill needs.
 - A demo or test against `bank2ai-demo` showing the skill behaves correctly with the reference server.
 
 ## Package as a Claude Code plugin
@@ -48,7 +48,7 @@ Same flow as servers — fork [`bank2ai/marketplace`](https://github.com/bank2ai
 
 ## Skill review checklist
 
-- **Tool-only dependencies.** The skill works against any compliant Bank2AI server, not just one bank.
+- **Tool-only dependencies.** The skill works against any compliant bank2ai server, not just one bank.
 - **Honest in `requires`.** It declares every tool it actually uses, no more.
 - **Confirms before executing.** If the skill triggers transfers, it always goes through `transfer-money-icelandic` first and surfaces the prepared item to the user.
 - **Tolerates unknown fields.** Doesn't break when a server returns extras on `Account` / `Transaction` / `Recipient`.

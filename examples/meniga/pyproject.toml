@@ -1,7 +1,7 @@
 [project]
 name = "bank2ai-meniga"
 version = "0.1.0"
-description = "Bank2AI MCP server backed by Meniga APIs"
+description = "bank2ai MCP server backed by Meniga APIs"
 readme = "README.md"
 license = { file = "../../LICENSE" }
 requires-python = ">=3.11"

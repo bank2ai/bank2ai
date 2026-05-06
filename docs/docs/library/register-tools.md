@@ -1,7 +1,7 @@
 ---
 title: register_tools
 sidebar_position: 2
-description: register_tools wires Bank2AI tools onto a FastMCP app — pass handlers for the subset you implement.
+description: register_tools wires bank2ai tools onto a FastMCP app — pass handlers for the subset you implement.
 ---
 
 # `register_tools`
@@ -10,7 +10,7 @@ description: register_tools wires Bank2AI tools onto a FastMCP app — pass hand
 from bank2ai import register_tools
 ```
 
-`register_tools(app, *, get_accounts=None, get_transactions=None, get_categories=None, get_spending_summary=None, search_recipients=None, create_recipient=None, prepare_transfer=None, execute_transfer=None)` registers Bank2AI MCP tools on a [FastMCP](https://github.com/jlowin/fastmcp) `app`, dispatching each call to the handler you provide. Tools whose handler is omitted are not registered, so a server can expose only the subset of the spec it implements.
+`register_tools(app, *, get_accounts=None, get_transactions=None, get_categories=None, get_spending_summary=None, search_recipients=None, create_recipient=None, prepare_transfer=None, execute_transfer=None)` registers bank2ai MCP tools on a [FastMCP](https://github.com/jlowin/fastmcp) `app`, dispatching each call to the handler you provide. Tools whose handler is omitted are not registered, so a server can expose only the subset of the spec it implements.
 
 ## Signature
 

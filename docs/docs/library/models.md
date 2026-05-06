@@ -1,7 +1,7 @@
 ---
 title: Models
 sidebar_position: 3
-description: Pydantic models for every Bank2AI input and output shape.
+description: Pydantic models for every bank2ai input and output shape.
 ---
 
 # Models

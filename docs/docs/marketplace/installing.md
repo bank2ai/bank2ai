@@ -1,7 +1,7 @@
 ---
 title: Installing servers and skills
 sidebar_position: 4
-description: How end users install Bank2AI servers and skills from the marketplace.
+description: How end users install bank2ai servers and skills from the marketplace.
 ---
 
 # Installing from the marketplace
@@ -24,7 +24,7 @@ This subscribes Claude Code to the registry; new entries appear automatically.
 /plugin install bank2ai/yourbank
 ```
 
-Claude Code installs the plugin, wires the MCP server into your session, and prompts for any required configuration (e.g. credentials, API base URL). The eight Bank2AI tools then appear in your tool picker.
+Claude Code installs the plugin, wires the MCP server into your session, and prompts for any required configuration (e.g. credentials, API base URL). The eight bank2ai tools then appear in your tool picker.
 
 ## Install a skill
 

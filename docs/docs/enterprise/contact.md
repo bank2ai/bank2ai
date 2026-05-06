@@ -28,4 +28,4 @@ We respond within a few business days.
 
 ## Open source first
 
-If you want to evaluate Bank2AI itself rather than commercial products, you don't need to talk to us — start with the [Quickstart](/docs/getting-started/quickstart). The open spec, the Python library, and the demo server are all you need to build a working server. Reach out only when you want enterprise support.
+If you want to evaluate bank2ai itself rather than commercial products, you don't need to talk to us — start with the [Quickstart](/docs/getting-started/quickstart). The open spec, the Python library, and the demo server are all you need to build a working server. Reach out only when you want enterprise support.

@@ -1,10 +1,10 @@
-# Bank2AI MCP Specification
+# Bank2ai MCP Specification
 
-Bank2AI connects digital banking data and operations with AI agents. The language of banking — accounts, transactions, transfers, bill payments, recipients, loans, savings — is universal, and Bank2AI codifies that language as an open standard so banks and fintechs can collaborate on AI tools and skills instead of each rebuilding the same surface.
+Bank2ai connects digital banking data and operations with AI agents. The language of banking — accounts, transactions, transfers, bill payments, recipients, loans, savings — is universal, and bank2ai codifies that language as an open standard so banks and fintechs can collaborate on AI tools and skills instead of each rebuilding the same surface.
 
-This directory holds the language-neutral specification for the Bank2AI [Model Context Protocol](https://modelcontextprotocol.io) tool surface — the same set of tools every Bank2AI server is expected to expose, regardless of programming language or backend.
+This directory holds the language-neutral specification for the bank2ai [Model Context Protocol](https://modelcontextprotocol.io) tool surface — the same set of tools every bank2ai server is expected to expose, regardless of programming language or backend.
 
-> **Where the marketplace fits in.** The spec defines the *contract*; the [Bank2AI marketplace](../README.md#marketplace) is where compliant servers and skills are distributed. The marketplace is packaged as a [Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces), so any Claude Code user can install a Bank2AI server or skill with a single command — and any other client that speaks that plugin format can consume the same registry.
+> **Where the marketplace fits in.** The spec defines the *contract*; the [bank2ai marketplace](../README.md#marketplace) is where compliant servers and skills are distributed. The marketplace is packaged as a [Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces), so any Claude Code user can install a bank2ai server or skill with a single command — and any other client that speaks that plugin format can consume the same registry.
 
 ## Files
 

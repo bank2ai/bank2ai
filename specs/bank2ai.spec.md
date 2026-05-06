@@ -1,13 +1,13 @@
-# Bank2AI MCP Specification
+# Bank2ai MCP Specification
 
 > **Version:** 0.1.0 — draft, derived from the Python reference implementation.
 > **Companion artifact:** [`bank2ai.json`](./bank2ai.json) — canonical input/output JSON Schemas.
 
-Bank2AI connects digital banking data and operations with AI agents. The language of banking — accounts, transactions, transfers, bill payments, recipients, loans, savings — is universally identical, and Bank2AI is the open standard that lets banks, fintechs, and AI builders collaborate on a single shared vocabulary instead of each reinventing one.
+Bank2ai connects digital banking data and operations with AI agents. The language of banking — accounts, transactions, transfers, bill payments, recipients, loans, savings — is universally identical, and bank2ai is the open standard that lets banks, fintechs, and AI builders collaborate on a single shared vocabulary instead of each reinventing one.
 
 This document defines that vocabulary as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface that any bank can expose so AI agents (and through them, end customers) can read accounts and transactions, look up recipients, run spending summaries, and prepare/execute transfers — using the same tool surface across every bank.
 
-Compliant servers and the agent skills built on top of them are distributed through the [Bank2AI marketplace](../README.md#marketplace), which is packaged as a [Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces) and consumable from any client that speaks the same plugin format.
+Compliant servers and the agent skills built on top of them are distributed through the [bank2ai marketplace](../README.md#marketplace), which is packaged as a [Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces) and consumable from any client that speaks the same plugin format.
 
 The contract has two parts:
 
@@ -20,7 +20,7 @@ Authentication is intentionally outside the spec: servers obtain credentials how
 
 ## 1. Tool surface
 
-Every Bank2AI server MUST register the following tools, with the names below. Input and output shapes are defined by the JSON Schemas in [`bank2ai.json`](./bank2ai.json) under `tools[].inputSchema` and `tools[].outputSchema`.
+Every bank2ai server MUST register the following tools, with the names below. Input and output shapes are defined by the JSON Schemas in [`bank2ai.json`](./bank2ai.json) under `tools[].inputSchema` and `tools[].outputSchema`.
 
 | Name                       | Purpose                                                            |
 | -------------------------- | ------------------------------------------------------------------ |
@@ -39,10 +39,10 @@ Servers MAY register additional, vendor-specific tools, but they MUST NOT alter 
 
 ## 2. Lifecycle
 
-A typical Bank2AI session looks like this:
+A typical bank2ai session looks like this:
 
-1. The MCP client connects and calls `tools/list`. The server returns the eight Bank2AI tools.
-2. The client calls Bank2AI tools as the user requests them. The server resolves credentials internally (see §4) and rejects calls it cannot authenticate.
+1. The MCP client connects and calls `tools/list`. The server returns the eight bank2ai tools.
+2. The client calls bank2ai tools as the user requests them. The server resolves credentials internally (see §4) and rejects calls it cannot authenticate.
 3. On a transfer, the client calls `transfer-money-icelandic` first to validate, surfaces the prepared details to the user, and only invokes `execute-transfer` after explicit confirmation.
 
 ## 3. Shared data models
@@ -58,7 +58,7 @@ Servers MAY return additional fields on these objects; clients MUST tolerate unk
 
 ## 4. Authentication
 
-Bank2AI does not define an authentication protocol. How a server obtains the credentials it needs to talk to its backend is an implementation detail; servers MUST gate every Bank2AI tool call on having valid credentials and MUST surface authentication failures as MCP errors.
+Bank2ai does not define an authentication protocol. How a server obtains the credentials it needs to talk to its backend is an implementation detail; servers MUST gate every bank2ai tool call on having valid credentials and MUST surface authentication failures as MCP errors.
 
 Common approaches used by reference implementations:
 
@@ -66,7 +66,7 @@ Common approaches used by reference implementations:
 * **Server-configured credentials.** The server reads credentials from its environment (e.g. `BANK2AI_*_EMAIL` / `BANK2AI_*_PASSWORD`) and exchanges them for a backend session token, refreshing as needed.
 * **Demo / no-auth.** Servers backed by hardcoded data MAY skip authentication entirely.
 
-Servers MUST NOT register a Bank2AI-defined `authenticate` tool — earlier drafts of this spec described one and it has been removed.
+Servers MUST NOT register a bank2ai-defined `authenticate` tool — earlier drafts of this spec described one and it has been removed.
 
 ## 5. Error model
 

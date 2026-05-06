@@ -1,18 +1,18 @@
 ---
 title: Roadmap
 sidebar_position: 1
-description: What's next for the Bank2AI specification, library, and marketplace.
+description: What's next for the bank2ai specification, library, and marketplace.
 ---
 
 # Roadmap
 
-The Bank2AI roadmap is intentionally narrow: keep the spec small, deepen the conformance story, and grow the marketplace.
+The bank2ai roadmap is intentionally narrow: keep the spec small, deepen the conformance story, and grow the marketplace.
 
 ## Specification
 
 - **Flip the source-of-truth relationship.** Today the spec is *derived from* the Python reference implementation; a drift test prevents desync. Long-term, the spec should be hand-authored and implementations validated against it. Tracked in the repo under [`specs/README.md`](https://github.com/bank2ai/bank2ai/blob/main/specs/README.md#status).
 - **International transfers.** `transfer-money-icelandic` is the current domestic-transfer tool. We expect to add SEPA / SWIFT / domestic equivalents in other markets as additive minor versions.
-- **Loans, savings products, cards-as-objects.** Bank2AI today covers accounts, transactions, and transfers. Loans and dedicated savings products are the most-requested next domains.
+- **Loans, savings products, cards-as-objects.** bank2ai today covers accounts, transactions, and transfers. Loans and dedicated savings products are the most-requested next domains.
 
 ## Library
 
@@ -26,7 +26,7 @@ The Bank2AI roadmap is intentionally narrow: keep the spec small, deepen the con
 
 ## Out of scope
 
-- **Authentication standardization.** Banks differ; Bank2AI deliberately stays out of authentication. See [Authentication](/docs/specification/overview#4-authentication).
+- **Authentication standardization.** Banks differ; bank2ai deliberately stays out of authentication. See [Authentication](/docs/specification/overview#4-authentication).
 - **A bespoke transport.** MCP is the transport; we're not inventing another one.
 
 ## Suggesting changes

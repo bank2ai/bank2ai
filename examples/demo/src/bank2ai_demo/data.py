@@ -1,7 +1,7 @@
-"""Hardcoded test data for Bank2AI demo server.
+"""Hardcoded test data for bank2ai demo server.
 
 This module provides realistic banking test data that can be used
-to demonstrate the Bank2AI specification without requiring a real bank.
+to demonstrate the bank2ai specification without requiring a real bank.
 """
 
 from datetime import date, timedelta

@@ -1,6 +1,6 @@
-"""Reusable Bank2AI MCP tool specification.
+"""Reusable bank2ai MCP tool specification.
 
-This module isolates the Bank2AI tool spec — names, descriptions, input
+This module isolates the bank2ai tool spec — names, descriptions, input
 parameter signatures, and Pydantic response models — so multiple MCP
 servers can expose the same surface without duplicating it. Each server
 provides async handler callables and calls `register_tools(app, ...)`.
@@ -51,7 +51,7 @@ def register_tools(
     prepare_transfer: Optional[Handler] = None,
     execute_transfer: Optional[Handler] = None,
 ) -> None:
-    """Register Bank2AI MCP tools on `app`, dispatching to the handlers
+    """Register bank2ai MCP tools on `app`, dispatching to the handlers
     that were passed in. Tools whose handler is omitted are not
     registered, allowing servers to expose only a subset of the spec.
 

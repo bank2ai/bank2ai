@@ -1,7 +1,7 @@
 ---
 title: Add a new bank
 sidebar_position: 4
-description: Bootstrap a fresh Bank2AI server for a bank that doesn't have one yet.
+description: Bootstrap a fresh bank2ai server for a bank that doesn't have one yet.
 ---
 
 # Add a new bank

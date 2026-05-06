@@ -1,7 +1,7 @@
-"""Bank2AI Demo Client
+"""Bank2ai Demo Client
 
-A simple client to test the Bank2AI demo server.
-This demonstrates how to connect to and use Bank2AI MCP tools.
+A simple client to test the bank2ai demo server.
+This demonstrates how to connect to and use bank2ai MCP tools.
 """
 
 import asyncio
@@ -13,7 +13,7 @@ from mcp.client.stdio import stdio_client
 
 async def main():
     """Run the demo client."""
-    print("Bank2AI Demo Client")
+    print("bank2ai Demo Client")
     print("=" * 50)
     print()
 
@@ -28,7 +28,7 @@ async def main():
             # Initialize the connection
             await session.initialize()
 
-            print("Connected to Bank2AI demo server!")
+            print("Connected to bank2ai demo server!")
             print()
 
             # List available tools

@@ -1,12 +1,12 @@
 ---
 title: Writing handlers
 sidebar_position: 4
-description: Patterns for plugging Bank2AI handlers into a real bank backend.
+description: Patterns for plugging bank2ai handlers into a real bank backend.
 ---
 
 # Writing handlers
 
-A handler is an async function that turns Bank2AI tool inputs into Bank2AI outputs. The library doesn't care how you do it — call REST APIs, query a database, hit a GraphQL endpoint, mock everything for tests. This page collects the patterns we've seen work.
+A handler is an async function that turns bank2ai tool inputs into bank2ai outputs. The library doesn't care how you do it — call REST APIs, query a database, hit a GraphQL endpoint, mock everything for tests. This page collects the patterns we've seen work.
 
 ## Pattern: stateless handlers calling a backend client
 
@@ -50,9 +50,9 @@ async def get_accounts(ctx: Context, *, only_withdrawal_accounts, account_type):
 
 If your backend requires an exchange (e.g. email/password → session token), do the exchange once at server startup and refresh as needed. See the [real-bank guide](/docs/guides/wrap-a-real-bank) for a worked example.
 
-## Pattern: mapping backend shapes to Bank2AI
+## Pattern: mapping backend shapes to bank2ai
 
-Banks rarely expose the exact Bank2AI shape on the wire. Write small mappers and unit-test them — your spec compliance lives or dies in those mappers.
+Banks rarely expose the exact bank2ai shape on the wire. Write small mappers and unit-test them — your spec compliance lives or dies in those mappers.
 
 ```python
 def _to_bank2ai_account(row: AcmeAccountRow) -> Account:
@@ -95,5 +95,5 @@ This keeps the AI client conversational instead of forcing it to interpret proto
 ## What not to do
 
 - **Don't reshape responses.** If the spec says `accountNumber`, your output must say `accountNumber` — not `account_number`, not `iban`. The library and FastMCP enforce this; don't fight it.
-- **Don't add a Bank2AI-defined `authenticate` tool.** Earlier drafts of the spec described one; it has been removed. Authentication is a server concern.
+- **Don't add a bank2ai-defined `authenticate` tool.** Earlier drafts of the spec described one; it has been removed. Authentication is a server concern.
 - **Don't trust client-supplied `withdrawal_account_id` blindly.** Re-resolve the account on the server side and check it belongs to the authenticated user.

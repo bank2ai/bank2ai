@@ -10,7 +10,7 @@ Three layers of tests we recommend.
 
 ## 1. Spec drift test
 
-Verify your server registers the full Bank2AI tool surface. The reference test pattern (used by [`bank2ai-demo`](https://github.com/bank2ai/bank2ai/blob/main/examples/demo/tests/test_schema_sync.py)):
+Verify your server registers the full bank2ai tool surface. The reference test pattern (used by [`bank2ai-demo`](https://github.com/bank2ai/bank2ai/blob/main/examples/demo/tests/test_schema_sync.py)):
 
 ```python
 import json
@@ -31,7 +31,7 @@ Run it in CI. If you upgrade `bank2ai`, this catches a missing tool registration
 
 ## 2. Handler unit tests
 
-Unit-test the mappers between your backend shape and the Bank2AI shape. These are the components most likely to drift when your bank's API changes.
+Unit-test the mappers between your backend shape and the bank2ai shape. These are the components most likely to drift when your bank's API changes.
 
 ```python
 def test_account_mapper_marks_credit_cards_non_withdrawal():

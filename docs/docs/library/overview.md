@@ -6,7 +6,7 @@ description: The bank2ai Python package — what's in it and when to use it.
 
 # The `bank2ai` Python library
 
-`bank2ai` is the **reference implementation** of the [Bank2AI specification](/docs/specification/overview). It exists to make the easiest path to a compliant server also the safest one.
+`bank2ai` is the **reference implementation** of the [bank2ai specification](/docs/specification/overview). It exists to make the easiest path to a compliant server also the safest one.
 
 ## What's in the box
 
@@ -23,8 +23,8 @@ from bank2ai import (
 
 | Module | Responsibility |
 | --- | --- |
-| [`bank2ai.models`](./models) | Pydantic models for every Bank2AI input/output shape. |
-| [`bank2ai.tools`](./register-tools) | `register_tools(app, ...)` — wires Bank2AI tools onto a [FastMCP](https://github.com/jlowin/fastmcp) app. Pass handlers for the subset of the surface you implement. |
+| [`bank2ai.models`](./models) | Pydantic models for every bank2ai input/output shape. |
+| [`bank2ai.tools`](./register-tools) | `register_tools(app, ...)` — wires bank2ai tools onto a [FastMCP](https://github.com/jlowin/fastmcp) app. Pass handlers for the subset of the surface you implement. |
 
 That's it. There's no auth layer, no HTTP client, no framework lock-in. The library does one job: it makes sure your server speaks the spec correctly.
 
@@ -32,9 +32,9 @@ That's it. There's no auth layer, no HTTP client, no framework lock-in. The libr
 
 | Scenario | Use the library? |
 | --- | --- |
-| Building a Bank2AI server in Python | **Yes** — start here. |
+| Building a bank2ai server in Python | **Yes** — start here. |
 | Building a server in another language | No — implement against [`specs/bank2ai.json`](https://github.com/bank2ai/bank2ai/blob/main/specs/bank2ai.json) directly. |
-| Building a Bank2AI client | No — clients use the MCP `tools/list` response from each server. The schemas in `bank2ai.json` are useful for code generation. |
+| Building a bank2ai client | No — clients use the MCP `tools/list` response from each server. The schemas in `bank2ai.json` are useful for code generation. |
 | Building agent skills on top | No — skills consume tool calls; they don't import this library. |
 
 ## Design principles

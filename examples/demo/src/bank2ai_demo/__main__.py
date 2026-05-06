@@ -1,4 +1,4 @@
-"""Run the Bank2AI demo MCP server: ``python -m bank2ai_demo``."""
+"""Run the bank2ai demo MCP server: ``python -m bank2ai_demo``."""
 
 import asyncio
 

@@ -1,12 +1,12 @@
 ---
 title: Publishing a server
 sidebar_position: 2
-description: How to publish a Bank2AI MCP server to the marketplace.
+description: How to publish a bank2ai MCP server to the marketplace.
 ---
 
 # Publishing a server
 
-Got a working Bank2AI server for a bank or fintech? Here's how to ship it through the marketplace so any Claude Code user can install it.
+Got a working bank2ai server for a bank or fintech? Here's how to ship it through the marketplace so any Claude Code user can install it.
 
 ## Prerequisites
 
@@ -30,7 +30,7 @@ Example `plugin.json`:
 {
   "name": "bank2ai-yourbank",
   "version": "0.1.0",
-  "description": "Bank2AI MCP server for Acme Bank",
+  "description": "bank2ai MCP server for Acme Bank",
   "type": "mcp-server",
   "implements": ["bank2ai/0.1"],
   "command": "uv",
@@ -39,7 +39,7 @@ Example `plugin.json`:
 }
 ```
 
-The `implements` field tells the registry which Bank2AI version your server speaks; this is what lets skills declare compatibility.
+The `implements` field tells the registry which bank2ai version your server speaks; this is what lets skills declare compatibility.
 
 ## Submit to the registry
 

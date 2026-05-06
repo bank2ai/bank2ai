@@ -1,12 +1,12 @@
 ---
 title: Run the demo server
 sidebar_position: 1
-description: Stand up the Bank2AI demo server backed by hardcoded data.
+description: Stand up the bank2ai demo server backed by hardcoded data.
 ---
 
 # Run the demo server
 
-`bank2ai-demo` is a reference MCP server backed by hardcoded data — useful for developing or testing AI clients against the full Bank2AI surface without a real bank in the loop.
+`bank2ai-demo` is a reference MCP server backed by hardcoded data — useful for developing or testing AI clients against the full bank2ai surface without a real bank in the loop.
 
 ## Clone the repo
 
@@ -68,4 +68,4 @@ See [Connect from Claude](./connect-claude) for screenshots and step-by-step ins
 uv run --package bank2ai-demo pytest
 ```
 
-`test_schema_sync.py` verifies the demo server registers the full Bank2AI tool surface defined by the `bank2ai` library.
+`test_schema_sync.py` verifies the demo server registers the full bank2ai tool surface defined by the `bank2ai` library.

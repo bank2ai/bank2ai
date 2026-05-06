@@ -1,8 +1,8 @@
-# Bank2AI
+# Bank2ai
 
 **The open standard for connecting digital banking with AI agents.**
 
-The language of banking is universal — accounts, transactions, transfers, bill payments, recipients, loans, savings — and Bank2AI codifies that language as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface. Once a bank speaks Bank2AI, any compliant AI client can read accounts, look up recipients, run spending summaries, and prepare/execute transfers — using the same vocabulary across every bank.
+The language of banking is universal — accounts, transactions, transfers, bill payments, recipients, loans, savings — and bank2ai codifies that language as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface. Once a bank speaks bank2ai, any compliant AI client can read accounts, look up recipients, run spending summaries, and prepare/execute transfers — using the same vocabulary across every bank.
 
 📖 **Full documentation:** [bank2ai.com](https://bank2ai.com)
 📦 **Specification:** [`specs/`](./specs/)
@@ -10,7 +10,7 @@ The language of banking is universal — accounts, transactions, transfers, bill
 
 ## Stewarded by Bancony
 
-Bank2AI is freely usable by any bank or fintech. Its development is stewarded by **[Bancony](https://bancony.com)**, which builds enterprise-ready MCP servers, an SDK, an in-channel chat agent (with Generative UI and RAG), and advisory agents on top of the standard. See the [enterprise overview](https://bank2ai.com/docs/enterprise/overview) for details.
+Bank2ai is freely usable by any bank or fintech. Its development is stewarded by **[Bancony](https://bancony.com)**, which builds enterprise-ready MCP servers, an SDK, an in-channel chat agent (with Generative UI and RAG), and advisory agents on top of the standard. See the [enterprise overview](https://bank2ai.com/docs/enterprise/overview) for details.
 
 ## Install
 

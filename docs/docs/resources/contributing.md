@@ -1,12 +1,12 @@
 ---
 title: Contributing
 sidebar_position: 3
-description: How to contribute to Bank2AI — the spec, the library, and the docs.
+description: How to contribute to bank2ai — the spec, the library, and the docs.
 ---
 
 # Contributing
 
-Bank2AI is an open standard maintained at [github.com/bank2ai/bank2ai](https://github.com/bank2ai/bank2ai). Contributions are welcome.
+Bank2ai is an open standard maintained at [github.com/bank2ai/bank2ai](https://github.com/bank2ai/bank2ai). Contributions are welcome.
 
 ## Working in the monorepo
 

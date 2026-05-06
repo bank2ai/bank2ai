@@ -1,12 +1,12 @@
 ---
 title: Quickstart
 sidebar_position: 3
-description: Stand up a Bank2AI MCP server in under five minutes.
+description: Stand up a bank2ai MCP server in under five minutes.
 ---
 
 # Quickstart
 
-Stand up a Bank2AI MCP server, point a client at it, and watch it answer "what did I spend on groceries last month?".
+Stand up a bank2ai MCP server, point a client at it, and watch it answer "what did I spend on groceries last month?".
 
 ## 1. Install
 
@@ -16,7 +16,7 @@ uv add bank2ai fastmcp
 
 ## 2. Write a server
 
-Create `server.py`. Bank2AI ships shared schemas — you only supply handlers for the tools you implement. Every handler is optional, so you can start with a couple and grow into the full surface:
+Create `server.py`. Bank2ai ships shared schemas — you only supply handlers for the tools you implement. Every handler is optional, so you can start with a couple and grow into the full surface:
 
 ```python
 from fastmcp import FastMCP
@@ -71,7 +71,7 @@ Tools whose handler is omitted are simply not registered. Add `get_transactions`
 python server.py
 ```
 
-You now have an MCP server exposing the two Bank2AI tools you implemented, with their schemas validated by FastMCP and Pydantic.
+You now have an MCP server exposing the two bank2ai tools you implemented, with their schemas validated by FastMCP and Pydantic.
 
 ## 4. Try it from a client
 

@@ -1,6 +1,6 @@
-"""Bank2AI Demo MCP Server.
+"""Bank2ai Demo MCP Server.
 
-Reference implementation of the Bank2AI MCP spec backed by hardcoded
+Reference implementation of the bank2ai MCP spec backed by hardcoded
 demo data (see `data.py`). The tool surface is provided by
 `bank2ai.register_tools`; this module only supplies handlers.
 """

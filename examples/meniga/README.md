@@ -1,6 +1,6 @@
 # bank2ai-meniga
 
-Reference Bank2AI MCP server backed by [Meniga](https://meniga.com) APIs. Demonstrates wiring a real bank backend behind the Bank2AI tool surface, including credential-based authentication.
+Reference bank2ai MCP server backed by [Meniga](https://meniga.com) APIs. Demonstrates wiring a real bank backend behind the bank2ai tool surface, including credential-based authentication.
 
 📖 Full walkthrough: [bank2ai.com/docs/guides/wrap-a-real-bank](https://bank2ai.com/docs/guides/wrap-a-real-bank)
 

@@ -1,4 +1,4 @@
-"""Bank2AI MCP server backed by Meniga APIs.
+"""Bank2ai MCP server backed by Meniga APIs.
 
 Required environment variables:
     BANK2AI_MENIGA_BASE_URL: Base URL for the Meniga API
@@ -130,7 +130,7 @@ async def authenticate() -> Optional[str]:
         return token
 
 
-# ---- Bank2AI tool handlers ----
+# ---- bank2ai tool handlers ----
 
 async def get_accounts(
     *,

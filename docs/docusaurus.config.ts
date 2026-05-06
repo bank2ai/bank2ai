@@ -6,7 +6,7 @@ const GITHUB_URL = 'https://github.com/bank2ai/bank2ai';
 const EDIT_URL = `${GITHUB_URL}/edit/main/docs/`;
 
 const config: Config = {
-  title: 'Bank2AI',
+  title: 'bank2ai',
   tagline: 'The open standard for connecting digital banking with AI agents',
   favicon: 'img/favicon.svg',
 
@@ -52,7 +52,7 @@ const config: Config = {
     },
     navbar: {
       logo: {
-        alt: 'Bank2AI',
+        alt: 'bank2ai',
         src: 'img/logo.svg',
         srcDark: 'img/logo-dark.svg',
         width: 130,
@@ -91,7 +91,7 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Bank2AI',
+          title: 'bank2ai',
           items: [
             {label: 'Welcome', to: '/docs/getting-started/welcome'},
             {label: 'Quickstart', to: '/docs/getting-started/quickstart'},
@@ -116,7 +116,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Bank2AI is an open standard stewarded by Bancony. © ${new Date().getFullYear()} Bancony.`,
+      copyright: `Bank2ai is an open standard stewarded by Bancony. © ${new Date().getFullYear()} Bancony.`,
     },
     prism: {
       theme: prismThemes.github,

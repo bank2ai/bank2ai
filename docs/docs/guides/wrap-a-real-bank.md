@@ -1,7 +1,7 @@
 ---
 title: Wrap a real bank
 sidebar_position: 3
-description: How to wire the Bank2AI surface to a real bank backend.
+description: How to wire the bank2ai surface to a real bank backend.
 ---
 
 # Wrap a real bank
@@ -29,7 +29,7 @@ uv run --package bank2ai-<your-bank> bank2ai-<your-bank>
 
 ## How authentication works
 
-A typical Bank2AI server supports three credential paths, in order of preference:
+A typical bank2ai server supports three credential paths, in order of preference:
 
 1. **Inbound MCP `access_token`.** If the MCP client forwards a bearer token issued by the bank's identity provider, the server uses it directly. Best for clients that have already authenticated.
 2. **Server-configured email + password.** If credential env vars are set, the server exchanges them for a bearer token at startup and refreshes as needed.
@@ -39,7 +39,7 @@ This three-way fallback is a useful template — most real banks need at least o
 
 ## How handlers map onto a bank API
 
-Each Bank2AI tool is implemented as a thin async handler that calls the bank API and maps the response into the Bank2AI shape. The handler does the work the spec defines; the mapper does the work your backend shape forces.
+Each bank2ai tool is implemented as a thin async handler that calls the bank API and maps the response into the bank2ai shape. The handler does the work the spec defines; the mapper does the work your backend shape forces.
 
 ```python
 async def get_accounts(*, only_withdrawal_accounts, account_type):
@@ -57,7 +57,7 @@ For a working reference implementation, see the example servers in the [`example
 
 1. **Project layout.** `pyproject.toml`, `src/<your_pkg>/server.py`, `src/<your_pkg>/__main__.py`. Mirror an existing reference server.
 2. **Credential handling.** Whichever of the three patterns above fits your backend.
-3. **Mappers.** One per Bank2AI shape — `_to_bank2ai_account`, `_to_bank2ai_transaction`, etc. Unit-test these.
+3. **Mappers.** One per bank2ai shape — `_to_bank2ai_account`, `_to_bank2ai_transaction`, etc. Unit-test these.
 4. **The two-step transfer flow.** Cache the prepared transfer keyed by `(withdrawal_account_id, recipient_account_number, amount)` and reject `execute_transfer` calls without a matching preparation. See [Writing handlers → prepare → execute](/docs/library/writing-handlers#pattern-prepare--execute-for-transfers).
 
 Then run the [drift test](/docs/library/testing#1-spec-drift-test) and you're compliant.
