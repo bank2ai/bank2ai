@@ -90,13 +90,13 @@ def register_tools(
         _get_transactions_handler = get_transactions
 
         @app.tool(
-            name="transactions",
+            name="get-transactions",
             description=(
                 "Get bank transactions. Returns a list of transactions "
                 "with amounts, dates, descriptions, and categories."
             ),
         )
-        async def _transactions(
+        async def _get_transactions(
             count: Optional[int] = Field(
                 default=None,
                 description="Maximum number of transactions to return.",

@@ -51,7 +51,7 @@ async def main():
             # Test 2: Get recent transactions
             print("Test 2: Get Recent Transactions")
             print("-" * 50)
-            result = await session.call_tool("transactions", {"count": 5})
+            result = await session.call_tool("get-transactions", {"count": 5})
             data = json.loads(result.content[0].text)
             print(f"Last {len(data['items'])} transactions:")
             for tx in data["items"]:

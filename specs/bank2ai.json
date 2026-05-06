@@ -841,6 +841,208 @@
       }
     },
     {
+      "description": "Get bank transactions. Returns a list of transactions with amounts, dates, descriptions, and categories.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "account_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Restrict to transactions on these account.id values (from get-accounts)."
+          },
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Restrict to these category names (the `name` field from get-categories, not the id)."
+          },
+          "count": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Maximum number of transactions to return."
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Opaque pagination cursor returned as `nextCursor` from a previous call. Omit to fetch the first page."
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Free-text search across merchant/recipient/reference/description."
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive upper bound, ISO 8601 (YYYY-MM-DD).",
+            "examples": [
+              "2024-03-15"
+            ]
+          },
+          "order": {
+            "default": "NewestFirst",
+            "description": "Sort order.",
+            "enum": [
+              "NewestFirst",
+              "OldestFirst"
+            ],
+            "type": "string"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive lower bound, ISO 8601 (YYYY-MM-DD).",
+            "examples": [
+              "2024-03-15"
+            ]
+          },
+          "type": {
+            "default": "Any",
+            "description": "Filter by direction.",
+            "enum": [
+              "Any",
+              "Income",
+              "Expenses",
+              "Savings"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get-transactions",
+      "outputSchema": {
+        "description": "Envelope for a list of transactions",
+        "properties": {
+          "items": {
+            "description": "Transactions matching the request.",
+            "items": {
+              "description": "Financial transaction with date, amount and metadata",
+              "properties": {
+                "amount": {
+                  "description": "Transaction amount (negative for expenses, positive for income)",
+                  "type": "number"
+                },
+                "category": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Category name"
+                },
+                "description": {
+                  "description": "Transaction description, merchant name or recipient name",
+                  "type": "string"
+                },
+                "id": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Unique transaction identifier"
+                },
+                "transaction_date": {
+                  "description": "Transaction date in ISO 8601 format (YYYY-MM-DD)",
+                  "format": "date",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description",
+                "amount",
+                "transaction_date"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Opaque cursor to pass back as `cursor` to fetch the next page. Absent or null when there are no more results."
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      }
+    },
+    {
       "description": "Lookup recipient of a payment or transfer by name. Returns matching recipients with their account details.",
       "inputSchema": {
         "additionalProperties": false,
@@ -1133,208 +1335,6 @@
           "summary",
           "period",
           "total"
-        ],
-        "type": "object"
-      }
-    },
-    {
-      "description": "Get bank transactions. Returns a list of transactions with amounts, dates, descriptions, and categories.",
-      "inputSchema": {
-        "additionalProperties": false,
-        "properties": {
-          "account_ids": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "description": "Restrict to transactions on these account.id values (from get-accounts)."
-          },
-          "categories": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "description": "Restrict to these category names (the `name` field from get-categories, not the id)."
-          },
-          "count": {
-            "anyOf": [
-              {
-                "minimum": 1,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "description": "Maximum number of transactions to return."
-          },
-          "cursor": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "description": "Opaque pagination cursor returned as `nextCursor` from a previous call. Omit to fetch the first page."
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "description": "Free-text search across merchant/recipient/reference/description."
-          },
-          "end_date": {
-            "anyOf": [
-              {
-                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "description": "Inclusive upper bound, ISO 8601 (YYYY-MM-DD).",
-            "examples": [
-              "2024-03-15"
-            ]
-          },
-          "order": {
-            "default": "NewestFirst",
-            "description": "Sort order.",
-            "enum": [
-              "NewestFirst",
-              "OldestFirst"
-            ],
-            "type": "string"
-          },
-          "start_date": {
-            "anyOf": [
-              {
-                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "description": "Inclusive lower bound, ISO 8601 (YYYY-MM-DD).",
-            "examples": [
-              "2024-03-15"
-            ]
-          },
-          "type": {
-            "default": "Any",
-            "description": "Filter by direction.",
-            "enum": [
-              "Any",
-              "Income",
-              "Expenses",
-              "Savings"
-            ],
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "name": "transactions",
-      "outputSchema": {
-        "description": "Envelope for a list of transactions",
-        "properties": {
-          "items": {
-            "description": "Transactions matching the request.",
-            "items": {
-              "description": "Financial transaction with date, amount and metadata",
-              "properties": {
-                "amount": {
-                  "description": "Transaction amount (negative for expenses, positive for income)",
-                  "type": "number"
-                },
-                "category": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Category name"
-                },
-                "description": {
-                  "description": "Transaction description, merchant name or recipient name",
-                  "type": "string"
-                },
-                "id": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Unique transaction identifier"
-                },
-                "transaction_date": {
-                  "description": "Transaction date in ISO 8601 format (YYYY-MM-DD)",
-                  "format": "date",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "description",
-                "amount",
-                "transaction_date"
-              ],
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "nextCursor": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "description": "Opaque cursor to pass back as `cursor` to fetch the next page. Absent or null when there are no more results."
-          }
-        },
-        "required": [
-          "items"
         ],
         "type": "object"
       }

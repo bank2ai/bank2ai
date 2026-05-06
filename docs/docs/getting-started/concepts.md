@@ -21,7 +21,7 @@ Every compliant server registers these tools, with these names:
 | Tool | What it does |
 | --- | --- |
 | [`get-accounts`](/docs/specification/tools/get-accounts) | List accounts and cards. |
-| [`transactions`](/docs/specification/tools/transactions) | List transactions, with filters. |
+| [`get-transactions`](/docs/specification/tools/get-transactions) | List transactions, with filters. |
 | [`get-categories`](/docs/specification/tools/get-categories) | List the bank's transaction categories. |
 | [`spending-summary`](/docs/specification/tools/spending-summary) | Aggregated spending by category, group, month, or merchant. |
 | [`recipients-by-name`](/docs/specification/tools/recipients-by-name) | Find saved payment recipients by partial name. |

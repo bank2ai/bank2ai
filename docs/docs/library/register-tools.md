@@ -36,7 +36,7 @@ def register_tools(
 | Tool | Handler keyword arguments |
 | --- | --- |
 | [`get-accounts`](/docs/specification/tools/get-accounts) | `only_withdrawal_accounts: bool`, `account_type: Literal["Current","Savings","Credit"] \| None` |
-| [`transactions`](/docs/specification/tools/transactions) | `count: int \| None`, `type: Literal["Any","Income","Expenses","Savings"]`, `order: Literal["NewestFirst","OldestFirst"]`, `start_date: str \| None`, `end_date: str \| None`, `description: str \| None`, `categories: list[str] \| None`, `account_ids: list[str] \| None`, `cursor: str \| None` |
+| [`get-transactions`](/docs/specification/tools/get-transactions) | `count: int \| None`, `type: Literal["Any","Income","Expenses","Savings"]`, `order: Literal["NewestFirst","OldestFirst"]`, `start_date: str \| None`, `end_date: str \| None`, `description: str \| None`, `categories: list[str] \| None`, `account_ids: list[str] \| None`, `cursor: str \| None` |
 | [`get-categories`](/docs/specification/tools/get-categories) | _(none)_ |
 | [`spending-summary`](/docs/specification/tools/spending-summary) | `group_by: Literal["category","group","month","merchant"]`, `start_date: str \| None`, `end_date: str \| None`, `categories: list[str] \| None` |
 | [`recipients-by-name`](/docs/specification/tools/recipients-by-name) | `name: str` |
@@ -77,7 +77,7 @@ The MCP spec requires `structuredContent` to be a JSON object, so list-returning
 | Tool | Response model | Wire shape |
 | --- | --- | --- |
 | `get-accounts` | `AccountList` | `{ "items": Account[] }` |
-| `transactions` | `TransactionList` | `{ "items": Transaction[], "nextCursor": string \| null }` |
+| `get-transactions` | `TransactionList` | `{ "items": Transaction[], "nextCursor": string \| null }` |
 | `get-categories` | `CategoryList` | `{ "items": Category[] }` |
 | `recipients-by-name` | `RecipientList` | `{ "items": Recipient[] }` |
 

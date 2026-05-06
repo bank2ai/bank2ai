@@ -30,7 +30,7 @@ from bank2ai import AccountType, TransactionType, TransactionOrder
 ```
 
 - `AccountType`, `Current`, `Savings`, `Credit`.
-- `TransactionType`, `Any`, `Income`, `Expenses`, `Savings` (filter on `transactions`).
+- `TransactionType`, `Any`, `Income`, `Expenses`, `Savings` (filter on `get-transactions`).
 - `TransactionOrder`, `NewestFirst`, `OldestFirst`.
 
 ## Tool-response shapes

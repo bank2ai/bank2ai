@@ -25,7 +25,7 @@ A bank2ai server MAY register any subset of the following tools. Tools that are 
 | Name                       | Purpose                                                            |
 | -------------------------- | ------------------------------------------------------------------ |
 | `get-accounts`             | List bank accounts and cards, optionally filtered by type or by withdrawal-eligibility. |
-| `transactions`             | List transactions, with filters for account, date range, direction, categories, free-text search, and result count. Supports cursor-based paging via `cursor` / `nextCursor`. |
+| `get-transactions`         | List transactions, with filters for account, date range, direction, categories, free-text search, and result count. Supports cursor-based paging via `cursor` / `nextCursor`. |
 | `get-categories`           | List the bank's transaction categories.                            |
 | `spending-summary`         | Aggregated spending grouped by category, group, month, or merchant. |
 | `recipients-by-name`       | Lookup saved payment recipients by partial name match.             |
@@ -77,7 +77,7 @@ Servers MUST NOT register a bank2ai-defined `authenticate` tool, earlier drafts 
 
 * All money amounts are numeric in their account's currency; currencies are ISO 4217 (`USD`, `ISK`, `EUR`, …).
 * Dates are ISO 8601 (`YYYY-MM-DD`).
-* Category names are localized server-side. Clients MUST treat category names as opaque user-facing strings; programmatic filtering MUST go through the `categories` parameter on `transactions` / `spending-summary` (which references category names returned by `get-categories`).
+* Category names are localized server-side. Clients MUST treat category names as opaque user-facing strings; programmatic filtering MUST go through the `categories` parameter on `get-transactions` / `spending-summary` (which references category names returned by `get-categories`).
 
 ## 7. Backwards compatibility
 

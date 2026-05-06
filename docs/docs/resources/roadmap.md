@@ -17,7 +17,7 @@ The bank2ai roadmap is intentionally narrow: keep the spec small, deepen the con
 ## Library
 
 - **Conformance test suite.** A standalone package (`bank2ai-conformance`) that any server can run against itself.
-- **Async streaming for `transactions`.** For banks with large transaction histories, streaming results would beat collecting them all in memory.
+- **Async streaming for `get-transactions`.** For banks with large transaction histories, streaming results would beat collecting them all in memory.
 
 ## Marketplace
 

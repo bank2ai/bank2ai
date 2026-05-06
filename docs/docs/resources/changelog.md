@@ -15,7 +15,7 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 ### 0.1.0, Draft
 
 - Initial draft, derived from the Python reference implementation.
-- Tools: `get-accounts`, `transactions`, `get-categories`, `spending-summary`, `recipients-by-name`, `create-recipient`, `transfer-money-icelandic`, `execute-transfer`.
+- Tools: `get-accounts`, `get-transactions`, `get-categories`, `spending-summary`, `recipients-by-name`, `create-recipient`, `transfer-money-icelandic`, `execute-transfer`.
 - Four shared models: `Account`, `Transaction`, `Category`, `Recipient`.
 - Authentication declared out of scope.
 - A previously specified bank2ai-defined `authenticate` tool was removed.
@@ -27,8 +27,8 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 - **Breaking:** the MCP tool surface moved from `bank2ai.mcp` to `bank2ai.tools`. Update imports accordingly.
 - Every `register_tools` handler keyword argument is now optional, tools whose handler is omitted are not registered, so a server can expose only the subset of the spec it implements.
 - Tool outputs follow the MCP convention of wrapping list results under an `items` key (`AccountList`, `CategoryList`, `RecipientList`, `TransactionList`).
-- `transactions` gains pagination via `cursor` plus a `next_cursor` on `TransactionList`.
-- `transactions` accepts an `account_ids` list (replacing the earlier single `account_id`) so callers can filter across multiple accounts in one call.
+- `get-transactions` gains pagination via `cursor` plus a `next_cursor` on `TransactionList`.
+- `get-transactions` accepts an `account_ids` list (replacing the earlier single `account_id`) so callers can filter across multiple accounts in one call.
 
 ### 0.1.0
 
