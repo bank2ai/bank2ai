@@ -27,11 +27,13 @@ def make_app(api: AcmeBankClient) -> FastMCP:
             rows = [r for r in rows if r.type == account_type]
         return [_to_bank2ai_account(r) for r in rows]
 
-    # … other handlers …
+    # … other handlers (all optional) …
 
     register_tools(app, get_accounts=get_accounts, ...)
     return app
 ```
+
+Every keyword argument to `register_tools` is optional, so during development you can register only the handlers you've written — unimplemented tools are simply not exposed.
 
 ## Pattern: per-request authentication
 

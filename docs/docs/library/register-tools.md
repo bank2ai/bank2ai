@@ -1,7 +1,7 @@
 ---
 title: register_tools
 sidebar_position: 2
-description: register_tools wires the eight Bank2AI tools onto a FastMCP app.
+description: register_tools wires Bank2AI tools onto a FastMCP app — pass handlers for the subset you implement.
 ---
 
 # `register_tools`
@@ -46,6 +46,8 @@ def register_tools(
 
 ## Example
 
+Handlers are optional — pass only the ones you implement. Here's a minimal server that exposes just `get-accounts`:
+
 ```python
 from fastmcp import FastMCP
 from bank2ai import AccountList, register_tools
@@ -60,17 +62,13 @@ async def get_accounts(*, only_withdrawal_accounts, account_type):
         rows = [r for r in rows if r.type == account_type]
     return AccountList(items=[to_bank2ai_account(r) for r in rows])
 
-# … define the other seven handlers …
-
-register_tools(
-    app,
-    get_accounts=get_accounts,
-    # …
-)
+register_tools(app, get_accounts=get_accounts)
 
 if __name__ == "__main__":
     app.run()
 ```
+
+To expose the full surface, define the other seven handlers and pass them as additional keyword arguments — `register_tools(app, get_accounts=..., get_transactions=..., …)`.
 
 ## Response envelopes
 

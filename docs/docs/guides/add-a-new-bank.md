@@ -53,10 +53,12 @@ api = AcmeBankClient(...)
 async def get_accounts(*, only_withdrawal_accounts, account_type):
     return await _list_accounts_via_acme(api, only_withdrawal_accounts, account_type)
 
-# … other seven handlers …
+# … any other handlers you implement …
 
 register_tools(app, get_accounts=get_accounts, ...)
 ```
+
+Every `register_tools` keyword argument is optional, so you can land tools incrementally — start with `get-accounts` and add the rest as the backend integration matures.
 
 See [Writing handlers](/docs/library/writing-handlers) for patterns and [Wrap a real bank](./wrap-a-real-bank) for a worked example.
 

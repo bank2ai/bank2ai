@@ -12,16 +12,15 @@ const QUICKSTART = `from fastmcp import FastMCP
 from bank2ai import register_tools
 
 app = FastMCP("my-bank")
+
+# Every handler is optional — pass only the tools you've implemented.
 register_tools(
     app,
     get_accounts=...,
-    get_transactions=...,
     get_categories=...,
-    get_spending_summary=...,
-    search_recipients=...,
-    create_recipient=...,
-    prepare_transfer=...,
-    execute_transfer=...,
+    # get_transactions=..., get_spending_summary=...,
+    # search_recipients=..., create_recipient=...,
+    # prepare_transfer=..., execute_transfer=...,
 )
 `;
 

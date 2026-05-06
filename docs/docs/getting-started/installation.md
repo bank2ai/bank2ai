@@ -27,6 +27,6 @@ That's it. To stand up a server, continue with the [Quickstart](./quickstart). T
 | Module | Contents |
 | --- | --- |
 | `bank2ai.models` | Pydantic data models for the shared banking vocabulary — `Account`, `Transaction`, `Recipient`, `Category`, plus the request/response shapes for transfers and spending summaries. |
-| `bank2ai.tools` | Reusable MCP tool surface — `register_tools` wires the eight Bank2AI tools onto a [FastMCP](https://github.com/jlowin/fastmcp) app and dispatches each call to handlers you provide. |
+| `bank2ai.tools` | Reusable MCP tool surface — `register_tools` wires Bank2AI tools onto a [FastMCP](https://github.com/jlowin/fastmcp) app and dispatches each call to the handlers you provide. Tools whose handler is omitted are skipped, so you can expose only the subset you implement. |
 
 Authentication is intentionally **outside** this library. See [Specification → Authentication](/docs/specification/overview#4-authentication) for the rationale and patterns.

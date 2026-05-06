@@ -26,7 +26,7 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 - Initial release.
 - Pydantic models for every Bank2AI shape.
-- `register_tools(app, ...)` wiring all eight tools onto a FastMCP app.
+- `register_tools(app, ...)` wiring all eight tools onto a FastMCP app. Every handler keyword argument is optional — tools whose handler is omitted are not registered, so a server can expose only the subset of the spec it implements.
 
 ## Versioning policy
 
