@@ -102,10 +102,6 @@ def register_tools(
                 description="Maximum number of transactions to return.",
                 ge=1,
             ),
-            type: Literal["Any", "Income", "Expenses", "Savings"] = Field(
-                default="Any",
-                description="Filter by direction.",
-            ),
             order: Literal["NewestFirst", "OldestFirst"] = Field(
                 default="NewestFirst",
                 description="Sort order.",
@@ -162,7 +158,6 @@ def register_tools(
         ) -> TransactionList:
             return await _get_transactions_handler(
                 count=count,
-                type=type,
                 order=order,
                 start_date=start_date,
                 end_date=end_date,

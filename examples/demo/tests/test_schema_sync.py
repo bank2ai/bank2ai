@@ -34,7 +34,7 @@ def _load_generator():
 EXPECTED_TOOL_INPUTS = {
     "get-accounts": {"only_withdrawal_accounts", "account_type"},
     "get-transactions": {
-        "count", "type", "order", "start_date", "end_date",
+        "count", "order", "start_date", "end_date",
         "description", "categories", "account_ids",
         "min_amount", "max_amount", "cursor",
     },

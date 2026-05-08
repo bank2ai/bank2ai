@@ -209,7 +209,6 @@ async def get_categories() -> CategoryList:
 async def get_transactions(
     *,
     count: Optional[int] = None,
-    type: str = "Any",
     order: str = "NewestFirst",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
@@ -221,15 +220,13 @@ async def get_transactions(
     cursor: Optional[str] = None,
 ) -> TransactionList:
     logger.info(
-        "get_transactions: count=%s type=%s order=%s start=%s end=%s desc=%s cats=%s account_ids=%s min=%s max=%s cursor=%s",
-        count, type, order, start_date, end_date, description, categories, account_ids, min_amount, max_amount, cursor,
+        "get_transactions: count=%s order=%s start=%s end=%s desc=%s cats=%s account_ids=%s min=%s max=%s cursor=%s",
+        count, order, start_date, end_date, description, categories, account_ids, min_amount, max_amount, cursor,
     )
     params: dict[str, str] = {
         "fields": "id,amount,categoryId,text,date",
         "includeChildCategoriesForParentWhenUsingSearchText": "true",
     }
-    if type != "Any":
-        params["categoryTypes"] = type
     if count is not None:
         params["take"] = str(count)
     if cursor:
@@ -295,7 +292,7 @@ async def get_spending_summary(
 ) -> SpendingSummary:
     logger.info("get_spending_summary: group_by=%s", group_by)
     transactions = (await get_transactions(
-        type="Expenses",
+        max_amount=0,
         start_date=start_date,
         end_date=end_date,
         categories=categories,

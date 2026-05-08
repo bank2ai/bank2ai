@@ -25,7 +25,7 @@ A bank2ai server MAY register any subset of the following tools. Tools that are 
 | Name                       | Purpose                                                            |
 | -------------------------- | ------------------------------------------------------------------ |
 | `get-accounts`             | List bank accounts and cards, optionally filtered by type or by withdrawal-eligibility. |
-| `get-transactions`         | List transactions, with filters for account, date range, direction, categories, signed amount range, free-text search, and result count. Supports cursor-based paging via `cursor` / `nextCursor`. |
+| `get-transactions`         | List transactions, with filters for account, date range, signed amount range, categories, free-text search, and result count. Supports cursor-based paging via `cursor` / `nextCursor`. |
 | `get-categories`           | List the bank's transaction categories.                            |
 | `spending-summary`         | Aggregated spending grouped by category, group, month, or merchant. |
 | `recipients-by-name`       | Lookup saved payment recipients by partial name match.             |

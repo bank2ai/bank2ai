@@ -168,15 +168,6 @@ class RecipientList(BaseModel):
     items: list[Recipient] = Field(description="Recipients matching the request.")
 
 
-class TransactionType(str, Enum):
-    """Filter type for transactions."""
-
-    Any = "Any"
-    Income = "Income"
-    Expenses = "Expenses"
-    Savings = "Savings"
-
-
 class TransactionOrder(str, Enum):
     """Sort order for transactions."""
 
