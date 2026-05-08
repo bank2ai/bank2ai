@@ -31,7 +31,7 @@ register_tools(
     app,
     get_accounts=...,
     get_categories=...,
-    # get_transactions=..., get_spending_summary=...,
+    # get_transactions=..., get_transactions_summary=...,
     # search_recipients=..., create_recipient=...,
     # prepare_transfer=..., execute_transfer=...,
 )

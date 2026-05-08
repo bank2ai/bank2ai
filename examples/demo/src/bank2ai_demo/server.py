@@ -24,11 +24,11 @@ from bank2ai import (
     ExecuteTransferResponse,
     Recipient,
     RecipientList,
-    SpendingSummary,
-    SpendingSummaryGroup,
-    SpendingSummaryPeriod,
     Transaction,
     TransactionList,
+    TransactionsSummary,
+    TransactionsSummaryGroup,
+    TransactionsSummaryPeriod,
     TransferAction,
     TransferPreparedItem,
     TransferPreparedResponse,
@@ -138,15 +138,36 @@ async def get_categories() -> CategoryList:
     return CategoryList(items=[Category(**c) for c in demo_data.CATEGORIES])
 
 
-async def get_spending_summary(
+async def get_transactions_summary(
     *,
+    direction: str,
     group_by: str = "category",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     categories: Optional[list[str]] = None,
-) -> SpendingSummary:
-    logger.info("get_spending_summary: group_by=%s", group_by)
+    account_ids: Optional[list[str]] = None,
+    min_amount: Optional[float] = None,
+    max_amount: Optional[float] = None,
+) -> TransactionsSummary:
+    logger.info(
+        "get_transactions_summary: direction=%s group_by=%s account_ids=%s",
+        direction, group_by, account_ids,
+    )
     transactions = list(demo_data.TRANSACTIONS)
+
+    if account_ids:
+        wanted = set(account_ids)
+        transactions = [t for t in transactions if t.get("account_id") in wanted]
+
+    if direction == "Expenses":
+        transactions = [t for t in transactions if t["amount"] < 0]
+    else:
+        transactions = [t for t in transactions if t["amount"] > 0]
+
+    if min_amount is not None:
+        transactions = [t for t in transactions if t["amount"] >= min_amount]
+    if max_amount is not None:
+        transactions = [t for t in transactions if t["amount"] <= max_amount]
 
     if start_date:
         transactions = [t for t in transactions if t["transaction_date"] >= start_date]
@@ -158,28 +179,40 @@ async def get_spending_summary(
             t for t in transactions if t.get("category", "").lower() in lower_cats
         ]
 
-    transactions = [t for t in transactions if t["amount"] < 0]
+    def grouping_key(t: dict) -> tuple[Optional[str], Optional[str]]:
+        cat = t.get("category") or "Uncategorized"
+        month = str(t["transaction_date"])[:7]
+        if group_by == "category":
+            return (cat, None)
+        if group_by == "month":
+            return (None, month)
+        if group_by == "both":
+            return (cat, month)
+        return (None, None)
 
-    groups: dict[str, dict[str, float]] = defaultdict(lambda: {"total": 0, "count": 0})
+    groups: dict[tuple[Optional[str], Optional[str]], dict[str, float]] = defaultdict(
+        lambda: {"total": 0, "count": 0}
+    )
     for t in transactions:
-        key = t.get("category", "Uncategorized")
+        key = grouping_key(t)
         groups[key]["total"] += t["amount"]
         groups[key]["count"] += 1
 
     summary = [
-        SpendingSummaryGroup(
-            group=group,
+        TransactionsSummaryGroup(
+            category=cat,
+            month=month,
             total_amount=stats["total"],
             transaction_count=int(stats["count"]),
             average_amount=stats["total"] / stats["count"] if stats["count"] > 0 else 0,
         )
-        for group, stats in groups.items()
+        for (cat, month), stats in groups.items()
     ]
     summary.sort(key=lambda g: g.total_amount)
 
-    return SpendingSummary(
+    return TransactionsSummary(
         summary=summary,
-        period=SpendingSummaryPeriod(
+        period=TransactionsSummaryPeriod(
             start_date=start_date or "all",
             end_date=end_date or "all",
         ),
@@ -293,7 +326,7 @@ register_tools(
     get_accounts=get_accounts,
     get_transactions=get_transactions,
     get_categories=get_categories,
-    get_spending_summary=get_spending_summary,
+    get_transactions_summary=get_transactions_summary,
     search_recipients=search_recipients,
     create_recipient=create_recipient,
     prepare_transfer=prepare_transfer,

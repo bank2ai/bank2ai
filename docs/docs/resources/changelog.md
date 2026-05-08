@@ -12,6 +12,26 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Specification
 
+### 0.6.0, Draft
+
+- **Breaking:** `transactions-summary` reworked its grouping. `group_by` accepts `none`, `category`, `month`, or `both` (replacing `category` / `group` / `month` / `merchant`). `TransactionsSummaryGroup` drops the opaque `group` field in favour of explicit nullable `category` and `month` fields, populated according to the requested `group_by`.
+
+### 0.5.0, Draft
+
+- **Breaking:** `transactions-summary` is always scoped to a single direction. The `direction` input is now required and accepts `Income` or `Expenses`; the `Both` option has been removed. Callers that need both sides should call the tool twice.
+
+### 0.4.0, Draft
+
+- **Breaking:** `spending-summary` renamed to `transactions-summary`. Inputs now include `direction` (`Income` / `Expenses` / `Both`), `account_ids`, `min_amount`, and `max_amount`, mirroring the `get-transactions` filter set. The `SpendingSummary*` models are renamed to `TransactionsSummary*`.
+
+### 0.3.0, Draft
+
+- **Breaking:** dropped the `type` (`Income` / `Expenses` / `Savings`) input from `get-transactions`; income/expenses scoping now goes through the signed `min_amount` / `max_amount` bounds.
+
+### 0.2.0, Draft
+
+- Added optional `min_amount` and `max_amount` inputs to `get-transactions`. Bounds are applied against the signed transaction amount (negative = expense, positive = income).
+
 ### 0.1.0, Draft
 
 - Initial draft, derived from the Python reference implementation.

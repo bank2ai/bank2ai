@@ -26,11 +26,12 @@ These are the types most handlers return. Each is a `BaseModel`:
 ## Enums
 
 ```python
-from bank2ai import AccountType, TransactionOrder
+from bank2ai import AccountType, TransactionOrder, TransactionDirection
 ```
 
 - `AccountType`, `Current`, `Savings`, `Credit`.
 - `TransactionOrder`, `NewestFirst`, `OldestFirst`.
+- `TransactionDirection`, `Income`, `Expenses` (required filter on `transactions-summary`).
 
 ## Tool-response shapes
 
@@ -38,7 +39,7 @@ Some tools return wrapped responses with a `content` field for human-readable st
 
 ```python
 from bank2ai import (
-    SpendingSummary, SpendingSummaryGroup, SpendingSummaryPeriod,
+    TransactionsSummary, TransactionsSummaryGroup, TransactionsSummaryPeriod,
     CreateRecipientResponse,
     TransferPreparedResponse, TransferPreparedItem, TransferAction,
     ExecuteTransferResponse, ExecuteTransferDetail,

@@ -33,7 +33,7 @@ Example `plugin.json`:
   "requires": [
     "bank2ai/0.1",
     "bank2ai:transactions",
-    "bank2ai:spending-summary",
+    "bank2ai:transactions-summary",
     "bank2ai:get-categories"
   ],
   "homepage": "https://github.com/your-org/bank2ai-budgeting-helper"

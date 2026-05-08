@@ -23,7 +23,7 @@ Every compliant server registers these tools, with these names:
 | [`get-accounts`](/docs/specification/tools/get-accounts) | List accounts and cards. |
 | [`get-transactions`](/docs/specification/tools/get-transactions) | List transactions, with filters. |
 | [`get-categories`](/docs/specification/tools/get-categories) | List the bank's transaction categories. |
-| [`spending-summary`](/docs/specification/tools/spending-summary) | Aggregated spending by category, group, month, or merchant. |
+| [`transactions-summary`](/docs/specification/tools/transactions-summary) | Aggregated income or expenses, optionally grouped by category, month, or both. |
 | [`recipients-by-name`](/docs/specification/tools/recipients-by-name) | Find saved payment recipients by partial name. |
 | [`create-recipient`](/docs/specification/tools/create-recipient) | Save a new recipient. |
 | [`transfer-money-icelandic`](/docs/specification/tools/transfer-money-icelandic) | **Prepare** a domestic transfer. Does not execute. |

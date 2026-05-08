@@ -175,11 +175,30 @@ class TransactionOrder(str, Enum):
     OldestFirst = "OldestFirst"
 
 
-class SpendingSummaryGroup(BaseModel):
-    """One row of an aggregated spending summary."""
+class TransactionDirection(str, Enum):
+    """Direction filter for transaction summaries."""
 
-    group: str = Field(
-        description="Aggregation key value (category name, group, month, or merchant).",
+    Income = "Income"
+    Expenses = "Expenses"
+
+
+class TransactionsSummaryGroup(BaseModel):
+    """One row of an aggregated transactions summary."""
+
+    category: Optional[str] = Field(
+        default=None,
+        description=(
+            "Category name when the request grouped by `category` or `both`; "
+            "null otherwise."
+        ),
+    )
+    month: Optional[str] = Field(
+        default=None,
+        description=(
+            "ISO 8601 month (YYYY-MM) when the request grouped by `month` or `both`; "
+            "null otherwise."
+        ),
+        examples=["2024-03"],
     )
     total_amount: float = Field(description="Sum of transaction amounts in this group.")
     transaction_count: int = Field(
@@ -191,8 +210,8 @@ class SpendingSummaryGroup(BaseModel):
     )
 
 
-class SpendingSummaryPeriod(BaseModel):
-    """Inclusive date range covered by a spending summary."""
+class TransactionsSummaryPeriod(BaseModel):
+    """Inclusive date range covered by a transactions summary."""
 
     start_date: str = Field(
         description="Inclusive lower bound, ISO 8601 (YYYY-MM-DD).",
@@ -204,13 +223,13 @@ class SpendingSummaryPeriod(BaseModel):
     )
 
 
-class SpendingSummary(BaseModel):
-    """Aggregated spending summary"""
+class TransactionsSummary(BaseModel):
+    """Aggregated transactions summary"""
 
-    summary: list[SpendingSummaryGroup] = Field(
+    summary: list[TransactionsSummaryGroup] = Field(
         description="One entry per aggregation key value.",
     )
-    period: SpendingSummaryPeriod = Field(
+    period: TransactionsSummaryPeriod = Field(
         description="Date range covered by the aggregation.",
     )
     total: float = Field(description="Sum across all groups in the summary.")

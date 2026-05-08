@@ -66,15 +66,18 @@ async def main():
             print(f"Available categories: {', '.join(c['name'] for c in data['items'])}")
             print()
 
-            # Test 4: Spending summary
-            print("Test 4: Spending Summary by Category")
+            # Test 4: Transactions summary (expenses only)
+            print("Test 4: Transactions Summary by Category (Expenses)")
             print("-" * 50)
-            result = await session.call_tool("spending-summary", {"group_by": "category"})
+            result = await session.call_tool(
+                "transactions-summary",
+                {"group_by": "category", "direction": "Expenses"},
+            )
             data = json.loads(result.content[0].text)
             print(f"Total spending: {data['total']:,.2f}")
             print("\nTop spending categories:")
             for item in data["summary"][:5]:
-                print(f"  {item['group']:20s}: {item['total_amount']:>10,.2f} ({item['transaction_count']} txs)")
+                print(f"  {item['category']:20s}: {item['total_amount']:>10,.2f} ({item['transaction_count']} txs)")
             print()
 
             # Test 5: Search recipients

@@ -34,11 +34,11 @@ from bank2ai import (
     ExecuteTransferResponse,
     Recipient,
     RecipientList,
-    SpendingSummary,
-    SpendingSummaryGroup,
-    SpendingSummaryPeriod,
     Transaction,
     TransactionList,
+    TransactionsSummary,
+    TransactionsSummaryGroup,
+    TransactionsSummaryPeriod,
     TransferAction,
     TransferPreparedItem,
     TransferPreparedResponse,
@@ -283,41 +283,72 @@ async def get_transactions(
     return TransactionList(items=transactions, nextCursor=next_cursor)
 
 
-async def get_spending_summary(
+async def get_transactions_summary(
     *,
+    direction: str,
     group_by: str = "category",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     categories: Optional[list[str]] = None,
-) -> SpendingSummary:
-    logger.info("get_spending_summary: group_by=%s", group_by)
+    account_ids: Optional[list[str]] = None,
+    min_amount: Optional[float] = None,
+    max_amount: Optional[float] = None,
+) -> TransactionsSummary:
+    logger.info(
+        "get_transactions_summary: direction=%s group_by=%s account_ids=%s",
+        direction, group_by, account_ids,
+    )
+
+    eff_min = min_amount
+    eff_max = max_amount
+    if direction == "Expenses":
+        eff_max = 0 if max_amount is None else min(max_amount, 0)
+    else:
+        eff_min = 0 if min_amount is None else max(min_amount, 0)
+
     transactions = (await get_transactions(
-        max_amount=0,
         start_date=start_date,
         end_date=end_date,
         categories=categories,
+        account_ids=account_ids,
+        min_amount=eff_min,
+        max_amount=eff_max,
     )).items
 
-    groups: dict[str, dict[str, float]] = defaultdict(lambda: {"total": 0, "count": 0})
+    def grouping_key(t: Transaction) -> tuple[Optional[str], Optional[str]]:
+        cat = t.category or "Uncategorized"
+        month = t.transaction_date.strftime("%Y-%m")
+        if group_by == "category":
+            return (cat, None)
+        if group_by == "month":
+            return (None, month)
+        if group_by == "both":
+            return (cat, month)
+        return (None, None)
+
+    groups: dict[tuple[Optional[str], Optional[str]], dict[str, float]] = defaultdict(
+        lambda: {"total": 0, "count": 0}
+    )
     for t in transactions:
-        key = t.category or "Uncategorized"
+        key = grouping_key(t)
         groups[key]["total"] += t.amount
         groups[key]["count"] += 1
 
     summary = [
-        SpendingSummaryGroup(
-            group=group,
+        TransactionsSummaryGroup(
+            category=cat,
+            month=month,
             total_amount=stats["total"],
             transaction_count=int(stats["count"]),
             average_amount=stats["total"] / stats["count"] if stats["count"] > 0 else 0,
         )
-        for group, stats in groups.items()
+        for (cat, month), stats in groups.items()
     ]
     summary.sort(key=lambda g: g.total_amount)
 
-    return SpendingSummary(
+    return TransactionsSummary(
         summary=summary,
-        period=SpendingSummaryPeriod(
+        period=TransactionsSummaryPeriod(
             start_date=start_date or "all",
             end_date=end_date or "all",
         ),
@@ -422,7 +453,7 @@ register_tools(
     get_accounts=get_accounts,
     get_transactions=get_transactions,
     get_categories=get_categories,
-    get_spending_summary=get_spending_summary,
+    get_transactions_summary=get_transactions_summary,
     search_recipients=search_recipients,
     create_recipient=create_recipient,
     prepare_transfer=prepare_transfer,

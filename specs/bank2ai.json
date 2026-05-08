@@ -1213,10 +1213,25 @@
       }
     },
     {
-      "description": "Get an aggregated spending summary. Returns totals, counts, and averages grouped by category, category group, month, or merchant.",
+      "description": "Get an aggregated summary of transactions, scoped to either income or expenses. Returns totals, counts, and averages, optionally grouped by category, month, or both. Filters mirror get-transactions: account, date, amount range, categories.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
+          "account_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Restrict to transactions on these account.id values (from get-accounts)."
+          },
           "categories": {
             "anyOf": [
               {
@@ -1231,6 +1246,14 @@
             ],
             "default": null,
             "description": "Restrict to these category names (the `name` field from get-categories, not the id)."
+          },
+          "direction": {
+            "description": "Restrict to income (positive amounts) or expenses (negative amounts). A summary covers exactly one direction; call the tool twice to compare.",
+            "enum": [
+              "Income",
+              "Expenses"
+            ],
+            "type": "string"
           },
           "end_date": {
             "anyOf": [
@@ -1250,14 +1273,38 @@
           },
           "group_by": {
             "default": "category",
-            "description": "Aggregation key.",
+            "description": "Aggregation key. `none` returns a single row spanning all matched transactions; `category` groups by category; `month` groups by calendar month (YYYY-MM); `both` groups by (category, month) pairs. Each summary row reports `category` and/or `month` accordingly.",
             "enum": [
+              "none",
               "category",
-              "group",
               "month",
-              "merchant"
+              "both"
             ],
             "type": "string"
+          },
+          "max_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive upper bound on the transaction amount. Amounts are signed: expenses are negative, income is positive. Combined with `direction`, both filters are applied."
+          },
+          "min_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive lower bound on the transaction amount. Amounts are signed: expenses are negative, income is positive. Combined with `direction`, both filters are applied."
           },
           "start_date": {
             "anyOf": [
@@ -1276,11 +1323,14 @@
             ]
           }
         },
+        "required": [
+          "direction"
+        ],
         "type": "object"
       },
-      "name": "spending-summary",
+      "name": "transactions-summary",
       "outputSchema": {
-        "description": "Aggregated spending summary",
+        "description": "Aggregated transactions summary",
         "properties": {
           "period": {
             "description": "Date range covered by the aggregation.",
@@ -1309,15 +1359,38 @@
           "summary": {
             "description": "One entry per aggregation key value.",
             "items": {
-              "description": "One row of an aggregated spending summary.",
+              "description": "One row of an aggregated transactions summary.",
               "properties": {
                 "average_amount": {
                   "description": "Mean transaction amount within this group.",
                   "type": "number"
                 },
-                "group": {
-                  "description": "Aggregation key value (category name, group, month, or merchant).",
-                  "type": "string"
+                "category": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Category name when the request grouped by `category` or `both`; null otherwise."
+                },
+                "month": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "ISO 8601 month (YYYY-MM) when the request grouped by `month` or `both`; null otherwise.",
+                  "examples": [
+                    "2024-03"
+                  ]
                 },
                 "total_amount": {
                   "description": "Sum of transaction amounts in this group.",
@@ -1330,7 +1403,6 @@
                 }
               },
               "required": [
-                "group",
                 "total_amount",
                 "transaction_count",
                 "average_amount"
@@ -1626,5 +1698,5 @@
       }
     }
   ],
-  "version": "0.3.0"
+  "version": "0.6.0"
 }

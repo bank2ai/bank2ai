@@ -23,8 +23,8 @@ from .models import (
     CreateRecipientResponse,
     ExecuteTransferResponse,
     RecipientList,
-    SpendingSummary,
     TransactionList,
+    TransactionsSummary,
     TransferPreparedResponse,
 )
 
@@ -45,7 +45,7 @@ def register_tools(
     get_accounts: Optional[Handler] = None,
     get_transactions: Optional[Handler] = None,
     get_categories: Optional[Handler] = None,
-    get_spending_summary: Optional[Handler] = None,
+    get_transactions_summary: Optional[Handler] = None,
     search_recipients: Optional[Handler] = None,
     create_recipient: Optional[Handler] = None,
     prepare_transfer: Optional[Handler] = None,
@@ -182,20 +182,33 @@ def register_tools(
         async def _get_categories() -> CategoryList:
             return await _get_categories_handler()
 
-    if get_spending_summary is not None:
-        _get_spending_summary_handler = get_spending_summary
+    if get_transactions_summary is not None:
+        _get_transactions_summary_handler = get_transactions_summary
 
         @app.tool(
-            name="spending-summary",
+            name="transactions-summary",
             description=(
-                "Get an aggregated spending summary. Returns totals, counts, and averages "
-                "grouped by category, category group, month, or merchant."
+                "Get an aggregated summary of transactions, scoped to either income or "
+                "expenses. Returns totals, counts, and averages, optionally grouped by "
+                "category, month, or both. Filters mirror get-transactions: account, "
+                "date, amount range, categories."
             ),
         )
-        async def _spending_summary(
-            group_by: Literal["category", "group", "month", "merchant"] = Field(
+        async def _transactions_summary(
+            direction: Literal["Income", "Expenses"] = Field(
+                description=(
+                    "Restrict to income (positive amounts) or expenses (negative amounts). "
+                    "A summary covers exactly one direction; call the tool twice to compare."
+                ),
+            ),
+            group_by: Literal["none", "category", "month", "both"] = Field(
                 default="category",
-                description="Aggregation key.",
+                description=(
+                    "Aggregation key. `none` returns a single row spanning all matched "
+                    "transactions; `category` groups by category; `month` groups by "
+                    "calendar month (YYYY-MM); `both` groups by (category, month) pairs. "
+                    "Each summary row reports `category` and/or `month` accordingly."
+                ),
             ),
             start_date: Optional[str] = Field(
                 default=None,
@@ -213,12 +226,36 @@ def register_tools(
                 default=None,
                 description="Restrict to these category names (the `name` field from get-categories, not the id).",
             ),
-        ) -> SpendingSummary:
-            return await _get_spending_summary_handler(
+            account_ids: Optional[list[str]] = Field(
+                default=None,
+                description="Restrict to transactions on these account.id values (from get-accounts).",
+            ),
+            min_amount: Optional[float] = Field(
+                default=None,
+                description=(
+                    "Inclusive lower bound on the transaction amount. "
+                    "Amounts are signed: expenses are negative, income is positive. "
+                    "Combined with `direction`, both filters are applied."
+                ),
+            ),
+            max_amount: Optional[float] = Field(
+                default=None,
+                description=(
+                    "Inclusive upper bound on the transaction amount. "
+                    "Amounts are signed: expenses are negative, income is positive. "
+                    "Combined with `direction`, both filters are applied."
+                ),
+            ),
+        ) -> TransactionsSummary:
+            return await _get_transactions_summary_handler(
+                direction=direction,
                 group_by=group_by,
                 start_date=start_date,
                 end_date=end_date,
                 categories=categories,
+                account_ids=account_ids,
+                min_amount=min_amount,
+                max_amount=max_amount,
             )
 
     if search_recipients is not None:

@@ -14,7 +14,7 @@ In the Claude Code plugin format, a skill is a directory of:
 
 - a `SKILL.md` file describing what the skill does and when to invoke it,
 - optional resources (templates, examples),
-- a manifest declaring required bank2ai capabilities (e.g. *"requires `get-transactions` and `spending-summary`"*).
+- a manifest declaring required bank2ai capabilities (e.g. *"requires `get-transactions` and `transactions-summary`"*).
 
 See the [Claude Code plugin marketplace docs](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces) for the full format.
 
@@ -22,7 +22,7 @@ See the [Claude Code plugin marketplace docs](https://docs.claude.com/en/docs/cl
 
 | Skill | What it does | Tools it uses |
 | --- | --- | --- |
-| **Budgeting helper** | Compares spending vs. budget targets and flags overruns | `get-transactions`, `spending-summary`, `get-categories` |
+| **Budgeting helper** | Compares spending vs. budget targets and flags overruns | `get-transactions`, `transactions-summary`, `get-categories` |
 | **Statement explainer** | Walks the user through a recent statement, summarising and answering questions | `get-transactions` |
 | **Transfer assistant** | Helps users prepare and confirm transfers, including recipient lookup and validation | `recipients-by-name`, `create-recipient`, `transfer-money-icelandic`, `execute-transfer` |
 | **Subscription auditor** | Detects recurring charges and surfaces them | `get-transactions` |

@@ -27,7 +27,7 @@ A bank2ai server MAY register any subset of the following tools. Tools that are 
 | `get-accounts`             | List bank accounts and cards, optionally filtered by type or by withdrawal-eligibility. |
 | `get-transactions`         | List transactions, with filters for account, date range, signed amount range, categories, free-text search, and result count. Supports cursor-based paging via `cursor` / `nextCursor`. |
 | `get-categories`           | List the bank's transaction categories.                            |
-| `spending-summary`         | Aggregated spending grouped by category, group, month, or merchant. |
+| `transactions-summary`     | Aggregated transactions, scoped to either income or expenses (required `direction`). Group by `none`, `category`, `month`, or `both`; each row reports the corresponding `category` and/or `month`. Filters mirror `get-transactions`: account, date, amount, categories. |
 | `recipients-by-name`       | Lookup saved payment recipients by partial name match.             |
 | `create-recipient`         | Save a new recipient for future transfers.                         |
 | `transfer-money-icelandic` | **Prepare** a domestic transfer; validates inputs and returns details for confirmation. Does **not** execute. |
@@ -77,7 +77,7 @@ Servers MUST NOT register a bank2ai-defined `authenticate` tool, earlier drafts 
 
 * All money amounts are numeric in their account's currency; currencies are ISO 4217 (`USD`, `ISK`, `EUR`, …).
 * Dates are ISO 8601 (`YYYY-MM-DD`).
-* Category names are localized server-side. Clients MUST treat category names as opaque user-facing strings; programmatic filtering MUST go through the `categories` parameter on `get-transactions` / `spending-summary` (which references category names returned by `get-categories`).
+* Category names are localized server-side. Clients MUST treat category names as opaque user-facing strings; programmatic filtering MUST go through the `categories` parameter on `get-transactions` / `transactions-summary` (which references category names returned by `get-categories`).
 
 ## 7. Backwards compatibility
 
