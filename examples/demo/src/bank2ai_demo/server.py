@@ -220,8 +220,8 @@ async def get_transactions_summary(
     )
 
 
-async def search_recipients(*, name: str) -> RecipientList:
-    logger.info("search_recipients: name=%s", name)
+async def get_recipients(*, name: str) -> RecipientList:
+    logger.info("get_recipients: name=%s", name)
     search = name.lower()
     return RecipientList(
         items=[Recipient(**r) for r in demo_data.RECIPIENTS if search in r["name"].lower()],
@@ -251,7 +251,7 @@ async def create_recipient(
     )
 
 
-async def prepare_transfer(
+async def prepare_transfer_icelandic(
     *,
     amount: float,
     recipient_ssn: str,
@@ -260,7 +260,7 @@ async def prepare_transfer(
     withdrawal_account_number: str = "",
     currency: str = "",
 ) -> TransferPreparedResponse:
-    logger.info("prepare_transfer: amount=%s", amount)
+    logger.info("prepare_transfer_icelandic: amount=%s", amount)
     recipient_data = next(
         (r for r in demo_data.RECIPIENTS if r["socialSecurityNumber"] == recipient_ssn),
         None,
@@ -327,9 +327,9 @@ register_tools(
     get_transactions=get_transactions,
     get_categories=get_categories,
     get_transactions_summary=get_transactions_summary,
-    search_recipients=search_recipients,
+    get_recipients=get_recipients,
     create_recipient=create_recipient,
-    prepare_transfer=prepare_transfer,
+    prepare_transfer_icelandic=prepare_transfer_icelandic,
     execute_transfer=execute_transfer,
 )
 

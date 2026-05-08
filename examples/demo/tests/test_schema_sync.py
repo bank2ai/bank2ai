@@ -39,13 +39,13 @@ EXPECTED_TOOL_INPUTS = {
         "min_amount", "max_amount", "cursor",
     },
     "get-categories": set(),
-    "transactions-summary": {
+    "get-transactions-summary": {
         "direction", "group_by", "start_date", "end_date",
         "categories", "account_ids", "min_amount", "max_amount",
     },
-    "recipients-by-name": {"name"},
+    "get-recipients": {"name"},
     "create-recipient": {"name", "account_number", "kennitala"},
-    "transfer-money-icelandic": {
+    "prepare-transfer-icelandic": {
         "amount", "recipient_ssn", "recipient_account_number",
         "description", "withdrawal_account_number", "currency",
     },

@@ -74,7 +74,7 @@ def _to_bank2ai_account(row: AcmeAccountRow) -> Account:
 
 The two-step transfer flow exists so the user can confirm a structured preview before money moves. A reasonable implementation:
 
-1. `prepare_transfer`, validate everything (amount, recipient, source account), then return a `TransferPreparedResponse` with a populated `item` and a short, idempotent token (e.g. a UUID) embedded somewhere your `execute_transfer` can recognize. Cache the prepared transfer server-side keyed by that token.
+1. `prepare_transfer_icelandic`, validate everything (amount, recipient, source account), then return a `TransferPreparedResponse` with a populated `item` and a short, idempotent token (e.g. a UUID) embedded somewhere your `execute_transfer` can recognize. Cache the prepared transfer server-side keyed by that token.
 2. `execute_transfer`, look up the prepared transfer by `(withdrawal_account_id, recipient_account_number, amount)` (or by the token if your client surfaces it) and call your backend's transfer API. Return an `ExecuteTransferResponse` with the bank-issued receipt.
 
 Reject `execute_transfer` calls with no matching preparation. This is the single most important safety property of the surface, don't shortcut it.

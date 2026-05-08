@@ -19,8 +19,8 @@ register_tools(
     get_accounts=...,
     get_categories=...,
     # get_transactions=..., get_transactions_summary=...,
-    # search_recipients=..., create_recipient=...,
-    # prepare_transfer=..., execute_transfer=...,
+    # get_recipients=..., create_recipient=...,
+    # prepare_transfer_icelandic=..., execute_transfer=...,
 )
 `;
 

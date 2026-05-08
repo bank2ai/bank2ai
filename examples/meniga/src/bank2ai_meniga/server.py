@@ -356,10 +356,10 @@ async def get_transactions_summary(
     )
 
 
-async def search_recipients(*, name: str) -> RecipientList:
-    logger.info("search_recipients: name=%s", name)
+async def get_recipients(*, name: str) -> RecipientList:
+    logger.info("get_recipients: name=%s", name)
     matches = [r for r in _recipients_store if name.lower() in r.name.lower()]
-    logger.info("search_recipients: found %d matches", len(matches))
+    logger.info("get_recipients: found %d matches", len(matches))
     return RecipientList(items=matches)
 
 
@@ -383,7 +383,7 @@ async def create_recipient(
     )
 
 
-async def prepare_transfer(
+async def prepare_transfer_icelandic(
     *,
     amount: float,
     recipient_ssn: str,
@@ -392,7 +392,7 @@ async def prepare_transfer(
     withdrawal_account_number: str = "",
     currency: str = "",
 ) -> TransferPreparedResponse:
-    logger.info("prepare_transfer: amount=%s recipient_ssn=%s", amount, recipient_ssn)
+    logger.info("prepare_transfer_icelandic: amount=%s recipient_ssn=%s", amount, recipient_ssn)
     accounts = (await get_accounts()).items
     if withdrawal_account_number:
         account = next(
@@ -403,14 +403,14 @@ async def prepare_transfer(
         account = next((a for a in accounts if a.isDefaultAccount), None)
 
     if not account:
-        logger.warning("prepare_transfer: no valid account found")
+        logger.warning("prepare_transfer_icelandic: no valid account found")
         return TransferPreparedResponse(content="Invalid or no default account found.")
 
     if account.availableBalance is not None and account.availableBalance < amount:
-        logger.warning("prepare_transfer: insufficient funds")
+        logger.warning("prepare_transfer_icelandic: insufficient funds")
         return TransferPreparedResponse(content="Insufficient funds.")
 
-    recipients = (await search_recipients(name=recipient_ssn)).items
+    recipients = (await get_recipients(name=recipient_ssn)).items
     recipient = next(
         (r for r in recipients if r.socialSecurityNumber == recipient_ssn), None
     )
@@ -454,9 +454,9 @@ register_tools(
     get_transactions=get_transactions,
     get_categories=get_categories,
     get_transactions_summary=get_transactions_summary,
-    search_recipients=search_recipients,
+    get_recipients=get_recipients,
     create_recipient=create_recipient,
-    prepare_transfer=prepare_transfer,
+    prepare_transfer_icelandic=prepare_transfer_icelandic,
     execute_transfer=execute_transfer,
 )
 

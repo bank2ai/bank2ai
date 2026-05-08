@@ -31,7 +31,7 @@ from bank2ai import AccountType, TransactionOrder, TransactionDirection
 
 - `AccountType`, `Current`, `Savings`, `Credit`.
 - `TransactionOrder`, `NewestFirst`, `OldestFirst`.
-- `TransactionDirection`, `Income`, `Expenses` (required filter on `transactions-summary`).
+- `TransactionDirection`, `Income`, `Expenses` (required filter on `get-transactions-summary`).
 
 ## Tool-response shapes
 

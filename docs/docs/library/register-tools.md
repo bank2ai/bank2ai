@@ -10,7 +10,7 @@ description: register_tools wires bank2ai tools onto a FastMCP app, pass handler
 from bank2ai import register_tools
 ```
 
-`register_tools(app, *, get_accounts=None, get_transactions=None, get_categories=None, get_transactions_summary=None, search_recipients=None, create_recipient=None, prepare_transfer=None, execute_transfer=None)` registers bank2ai MCP tools on a [FastMCP](https://github.com/jlowin/fastmcp) `app`, dispatching each call to the handler you provide. Tools whose handler is omitted are not registered, so a server can expose only the subset of the spec it implements.
+`register_tools(app, *, get_accounts=None, get_transactions=None, get_categories=None, get_transactions_summary=None, get_recipients=None, create_recipient=None, prepare_transfer_icelandic=None, execute_transfer=None)` registers bank2ai MCP tools on a [FastMCP](https://github.com/jlowin/fastmcp) `app`, dispatching each call to the handler you provide. Tools whose handler is omitted are not registered, so a server can expose only the subset of the spec it implements.
 
 ## Signature
 
@@ -18,14 +18,14 @@ from bank2ai import register_tools
 def register_tools(
     app: FastMCP,
     *,
-    get_accounts:             Handler | None = None,  # → AccountList
-    get_transactions:         Handler | None = None,  # → TransactionList
-    get_categories:           Handler | None = None,  # → CategoryList
-    get_transactions_summary: Handler | None = None,  # → TransactionsSummary
-    search_recipients:        Handler | None = None,  # → RecipientList
-    create_recipient:         Handler | None = None,  # → CreateRecipientResponse
-    prepare_transfer:         Handler | None = None,  # → TransferPreparedResponse
-    execute_transfer:         Handler | None = None,  # → ExecuteTransferResponse
+    get_accounts:               Handler | None = None,  # → AccountList
+    get_transactions:           Handler | None = None,  # → TransactionList
+    get_categories:             Handler | None = None,  # → CategoryList
+    get_transactions_summary:   Handler | None = None,  # → TransactionsSummary
+    get_recipients:             Handler | None = None,  # → RecipientList
+    create_recipient:           Handler | None = None,  # → CreateRecipientResponse
+    prepare_transfer_icelandic: Handler | None = None,  # → TransferPreparedResponse
+    execute_transfer:           Handler | None = None,  # → ExecuteTransferResponse
 ) -> None
 ```
 
@@ -38,10 +38,10 @@ def register_tools(
 | [`get-accounts`](/docs/specification/tools/get-accounts) | `only_withdrawal_accounts: bool`, `account_type: Literal["Current","Savings","Credit"] \| None` |
 | [`get-transactions`](/docs/specification/tools/get-transactions) | `count: int \| None`, `order: Literal["NewestFirst","OldestFirst"]`, `start_date: str \| None`, `end_date: str \| None`, `description: str \| None`, `categories: list[str] \| None`, `account_ids: list[str] \| None`, `min_amount: float \| None`, `max_amount: float \| None`, `cursor: str \| None` |
 | [`get-categories`](/docs/specification/tools/get-categories) | _(none)_ |
-| [`transactions-summary`](/docs/specification/tools/transactions-summary) | `direction: Literal["Income","Expenses"]`, `group_by: Literal["none","category","month","both"]`, `start_date: str \| None`, `end_date: str \| None`, `categories: list[str] \| None`, `account_ids: list[str] \| None`, `min_amount: float \| None`, `max_amount: float \| None` |
-| [`recipients-by-name`](/docs/specification/tools/recipients-by-name) | `name: str` |
+| [`get-transactions-summary`](/docs/specification/tools/get-transactions-summary) | `direction: Literal["Income","Expenses"]`, `group_by: Literal["none","category","month","both"]`, `start_date: str \| None`, `end_date: str \| None`, `categories: list[str] \| None`, `account_ids: list[str] \| None`, `min_amount: float \| None`, `max_amount: float \| None` |
+| [`get-recipients`](/docs/specification/tools/get-recipients) | `name: str` |
 | [`create-recipient`](/docs/specification/tools/create-recipient) | `name: str`, `account_number: str`, `kennitala: str` |
-| [`transfer-money-icelandic`](/docs/specification/tools/transfer-money-icelandic) | `amount: float`, `recipient_ssn: str`, `recipient_account_number: str`, `description: str`, `withdrawal_account_number: str`, `currency: str` |
+| [`prepare-transfer-icelandic`](/docs/specification/tools/prepare-transfer-icelandic) | `amount: float`, `recipient_ssn: str`, `recipient_account_number: str`, `description: str`, `withdrawal_account_number: str`, `currency: str` |
 | [`execute-transfer`](/docs/specification/tools/execute-transfer) | `withdrawal_account_id: str`, `recipient_account_number: str`, `amount: float`, `description: str` |
 
 ## Example
@@ -79,9 +79,9 @@ The MCP spec requires `structuredContent` to be a JSON object, so list-returning
 | `get-accounts` | `AccountList` | `{ "items": Account[] }` |
 | `get-transactions` | `TransactionList` | `{ "items": Transaction[], "nextCursor": string \| null }` |
 | `get-categories` | `CategoryList` | `{ "items": Category[] }` |
-| `recipients-by-name` | `RecipientList` | `{ "items": Recipient[] }` |
+| `get-recipients` | `RecipientList` | `{ "items": Recipient[] }` |
 
-Single-object tools (`transactions-summary`, `create-recipient`, `transfer-money-icelandic`, `execute-transfer`) return their natural response model.
+Single-object tools (`get-transactions-summary`, `create-recipient`, `prepare-transfer-icelandic`, `execute-transfer`) return their natural response model.
 
 ## What `register_tools` does *not* do
 

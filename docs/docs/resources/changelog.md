@@ -12,6 +12,10 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Specification
 
+### 0.7.0, Draft
+
+- **Breaking:** tool names overhauled for consistency. `transactions-summary` → `get-transactions-summary`, `recipients-by-name` → `get-recipients`, `transfer-money-icelandic` → `prepare-transfer-icelandic`. Reads now use `get-<plural>`; writes stay verb-noun. Handler kwargs match: `search_recipients` → `get_recipients`, `prepare_transfer` → `prepare_transfer_icelandic`.
+
 ### 0.6.0, Draft
 
 - **Breaking:** `transactions-summary` reworked its grouping. `group_by` accepts `none`, `category`, `month`, or `both` (replacing `category` / `group` / `month` / `merchant`). `TransactionsSummaryGroup` drops the opaque `group` field in favour of explicit nullable `category` and `month` fields, populated according to the requested `group_by`.

@@ -70,7 +70,7 @@ async def main():
             print("Test 4: Transactions Summary by Category (Expenses)")
             print("-" * 50)
             result = await session.call_tool(
-                "transactions-summary",
+                "get-transactions-summary",
                 {"group_by": "category", "direction": "Expenses"},
             )
             data = json.loads(result.content[0].text)
@@ -83,7 +83,7 @@ async def main():
             # Test 5: Search recipients
             print("Test 5: Search Recipients")
             print("-" * 50)
-            result = await session.call_tool("recipients-by-name", {"name": "Smith"})
+            result = await session.call_tool("get-recipients", {"name": "Smith"})
             data = json.loads(result.content[0].text)
             print(f"Found {len(data['items'])} recipients matching 'Smith':")
             for recipient in data["items"]:
@@ -93,7 +93,7 @@ async def main():
             # Test 6: Prepare transfer (not executing!)
             print("Test 6: Prepare Transfer (Validation Only)")
             print("-" * 50)
-            result = await session.call_tool("transfer-money-icelandic", {
+            result = await session.call_tool("prepare-transfer-icelandic", {
                 "amount": 100.00,
                 "recipient_ssn": "123-45-6789",
                 "recipient_account_number": "5678-90-123456",

@@ -14,7 +14,7 @@ In the Claude Code plugin format, a skill is a directory of:
 
 - a `SKILL.md` file describing what the skill does and when to invoke it,
 - optional resources (templates, examples),
-- a manifest declaring required bank2ai capabilities (e.g. *"requires `get-transactions` and `transactions-summary`"*).
+- a manifest declaring required bank2ai capabilities (e.g. *"requires `get-transactions` and `get-transactions-summary`"*).
 
 See the [Claude Code plugin marketplace docs](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces) for the full format.
 
@@ -22,16 +22,16 @@ See the [Claude Code plugin marketplace docs](https://docs.claude.com/en/docs/cl
 
 | Skill | What it does | Tools it uses |
 | --- | --- | --- |
-| **Budgeting helper** | Compares spending vs. budget targets and flags overruns | `get-transactions`, `transactions-summary`, `get-categories` |
+| **Budgeting helper** | Compares spending vs. budget targets and flags overruns | `get-transactions`, `get-transactions-summary`, `get-categories` |
 | **Statement explainer** | Walks the user through a recent statement, summarising and answering questions | `get-transactions` |
-| **Transfer assistant** | Helps users prepare and confirm transfers, including recipient lookup and validation | `recipients-by-name`, `create-recipient`, `transfer-money-icelandic`, `execute-transfer` |
+| **Transfer assistant** | Helps users prepare and confirm transfers, including recipient lookup and validation | `get-recipients`, `create-recipient`, `prepare-transfer-icelandic`, `execute-transfer` |
 | **Subscription auditor** | Detects recurring charges and surfaces them | `get-transactions` |
 | **Cash-flow forecaster** | Projects forward from past patterns | `get-transactions`, `get-accounts` |
 
 ## Design guidelines
 
 - **Depend on tool names, not server identity.** A skill that works for one bank2ai server should work for any of them. Don't hardcode bank-specific behaviour.
-- **Honour the prepare → execute split.** Never call `execute-transfer` without first calling `transfer-money-icelandic` and surfacing the prepared item to the user for confirmation.
+- **Honour the prepare → execute split.** Never call `execute-transfer` without first calling `prepare-transfer-icelandic` and surfacing the prepared item to the user for confirmation.
 - **Tolerate unknown fields.** Servers MAY return extras on `Account`, `Transaction`, etc. Don't break when you see them.
 - **Be explicit about required tools.** Declare which bank2ai tools your skill depends on, so installers can warn the user if their server doesn't register them.
 

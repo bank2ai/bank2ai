@@ -27,10 +27,10 @@ A bank2ai server MAY register any subset of the following tools. Tools that are 
 | `get-accounts`             | List bank accounts and cards, optionally filtered by type or by withdrawal-eligibility. |
 | `get-transactions`         | List transactions, with filters for account, date range, signed amount range, categories, free-text search, and result count. Supports cursor-based paging via `cursor` / `nextCursor`. |
 | `get-categories`           | List the bank's transaction categories.                            |
-| `transactions-summary`     | Aggregated transactions, scoped to either income or expenses (required `direction`). Group by `none`, `category`, `month`, or `both`; each row reports the corresponding `category` and/or `month`. Filters mirror `get-transactions`: account, date, amount, categories. |
-| `recipients-by-name`       | Lookup saved payment recipients by partial name match.             |
+| `get-transactions-summary` | Aggregated transactions, scoped to either income or expenses (required `direction`). Group by `none`, `category`, `month`, or `both`; each row reports the corresponding `category` and/or `month`. Filters mirror `get-transactions`: account, date, amount, categories. |
+| `get-recipients`           | Look up saved payment recipients by partial name match.            |
 | `create-recipient`         | Save a new recipient for future transfers.                         |
-| `transfer-money-icelandic` | **Prepare** a domestic transfer; validates inputs and returns details for confirmation. Does **not** execute. |
+| `prepare-transfer-icelandic` | **Prepare** a domestic Icelandic transfer; validates inputs and returns details for confirmation. Does **not** execute. |
 | `execute-transfer`         | Execute a transfer that the user has already confirmed.            |
 
 Servers MAY also register additional, vendor-specific tools, but they MUST NOT alter the names, inputs, or outputs of the tools above.
@@ -43,7 +43,7 @@ A typical bank2ai session looks like this:
 
 1. The MCP client connects and calls `tools/list`. The server returns the bank2ai tools it has registered (any subset of those listed in §1).
 2. The client calls bank2ai tools as the user requests them. The server resolves credentials internally (see §4) and rejects calls it cannot authenticate.
-3. On a transfer, the client calls `transfer-money-icelandic` first to validate, surfaces the prepared details to the user, and only invokes `execute-transfer` after explicit confirmation.
+3. On a transfer, the client calls `prepare-transfer-icelandic` first to validate, surfaces the prepared details to the user, and only invokes `execute-transfer` after explicit confirmation.
 
 ## 3. Shared data models
 
@@ -71,13 +71,13 @@ Servers MUST NOT register a bank2ai-defined `authenticate` tool, earlier drafts 
 ## 5. Error model
 
 * Servers SHOULD return MCP `ToolError` (or equivalent protocol-level error) for unrecoverable failures, including authentication failures.
-* For recoverable user-facing conditions (e.g. "Insufficient funds", "Invalid recipient"), servers SHOULD return a successful tool call whose response model includes a human-readable `content` field describing the problem. `transfer-money-icelandic` and `create-recipient` model this explicitly.
+* For recoverable user-facing conditions (e.g. "Insufficient funds", "Invalid recipient"), servers SHOULD return a successful tool call whose response model includes a human-readable `content` field describing the problem. `prepare-transfer-icelandic` and `create-recipient` model this explicitly.
 
 ## 6. Localization
 
 * All money amounts are numeric in their account's currency; currencies are ISO 4217 (`USD`, `ISK`, `EUR`, …).
 * Dates are ISO 8601 (`YYYY-MM-DD`).
-* Category names are localized server-side. Clients MUST treat category names as opaque user-facing strings; programmatic filtering MUST go through the `categories` parameter on `get-transactions` / `transactions-summary` (which references category names returned by `get-categories`).
+* Category names are localized server-side. Clients MUST treat category names as opaque user-facing strings; programmatic filtering MUST go through the `categories` parameter on `get-transactions` / `get-transactions-summary` (which references category names returned by `get-categories`).
 
 ## 7. Backwards compatibility
 

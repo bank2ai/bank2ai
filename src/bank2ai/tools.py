@@ -46,9 +46,9 @@ def register_tools(
     get_transactions: Optional[Handler] = None,
     get_categories: Optional[Handler] = None,
     get_transactions_summary: Optional[Handler] = None,
-    search_recipients: Optional[Handler] = None,
+    get_recipients: Optional[Handler] = None,
     create_recipient: Optional[Handler] = None,
-    prepare_transfer: Optional[Handler] = None,
+    prepare_transfer_icelandic: Optional[Handler] = None,
     execute_transfer: Optional[Handler] = None,
 ) -> None:
     """Register bank2ai MCP tools on `app`, dispatching to the handlers
@@ -186,7 +186,7 @@ def register_tools(
         _get_transactions_summary_handler = get_transactions_summary
 
         @app.tool(
-            name="transactions-summary",
+            name="get-transactions-summary",
             description=(
                 "Get an aggregated summary of transactions, scoped to either income or "
                 "expenses. Returns totals, counts, and averages, optionally grouped by "
@@ -258,22 +258,22 @@ def register_tools(
                 max_amount=max_amount,
             )
 
-    if search_recipients is not None:
-        _search_recipients_handler = search_recipients
+    if get_recipients is not None:
+        _get_recipients_handler = get_recipients
 
         @app.tool(
-            name="recipients-by-name",
+            name="get-recipients",
             description=(
-                "Lookup recipient of a payment or transfer by name. "
+                "Get saved payment recipients filtered by name. "
                 "Returns matching recipients with their account details."
             ),
         )
-        async def _recipients_by_name(
+        async def _get_recipients(
             name: str = Field(
                 description="Free-text search; matches partial names of saved recipients.",
             ),
         ) -> RecipientList:
-            return await _search_recipients_handler(name=name)
+            return await _get_recipients_handler(name=name)
 
     if create_recipient is not None:
         _create_recipient_handler = create_recipient
@@ -303,17 +303,17 @@ def register_tools(
                 kennitala=kennitala,
             )
 
-    if prepare_transfer is not None:
-        _prepare_transfer_handler = prepare_transfer
+    if prepare_transfer_icelandic is not None:
+        _prepare_transfer_icelandic_handler = prepare_transfer_icelandic
 
         @app.tool(
-            name="transfer-money-icelandic",
+            name="prepare-transfer-icelandic",
             description=(
-                "Prepare a domestic money transfer. "
+                "Prepare a domestic Icelandic money transfer. "
                 "Validates recipient and prepares transfer details for confirmation."
             ),
         )
-        async def _transfer_money_icelandic(
+        async def _prepare_transfer_icelandic(
             amount: float = Field(
                 description="Transfer amount in the source account's currency.",
                 gt=0,
@@ -341,7 +341,7 @@ def register_tools(
                 examples=["ISK", "EUR", "USD"],
             ),
         ) -> TransferPreparedResponse:
-            return await _prepare_transfer_handler(
+            return await _prepare_transfer_icelandic_handler(
                 amount=amount,
                 recipient_ssn=recipient_ssn,
                 recipient_account_number=recipient_account_number,
@@ -357,7 +357,7 @@ def register_tools(
             name="execute-transfer",
             description=(
                 "Execute a money transfer after the user has confirmed the details. "
-                "Use transfer-money-icelandic first to prepare and validate."
+                "Use prepare-transfer-icelandic first to prepare and validate."
             ),
         )
         async def _execute_transfer(

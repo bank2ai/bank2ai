@@ -544,7 +544,7 @@
       }
     },
     {
-      "description": "Execute a money transfer after the user has confirmed the details. Use transfer-money-icelandic first to prepare and validate.",
+      "description": "Execute a money transfer after the user has confirmed the details. Use prepare-transfer-icelandic first to prepare and validate.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
@@ -841,6 +841,163 @@
       }
     },
     {
+      "description": "Get saved payment recipients filtered by name. Returns matching recipients with their account details.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Free-text search; matches partial names of saved recipients.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "name": "get-recipients",
+      "outputSchema": {
+        "description": "Envelope for a list of recipients",
+        "properties": {
+          "items": {
+            "description": "Recipients matching the request.",
+            "items": {
+              "description": "Payment recipient with account details",
+              "properties": {
+                "accountNumber": {
+                  "description": "Recipient's bank account number",
+                  "examples": [
+                    "5678-90-123456",
+                    "GB29NWBK60161331926819"
+                  ],
+                  "type": "string"
+                },
+                "accountNumberType": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Type of account number",
+                  "examples": [
+                    "Domestic",
+                    "IBAN",
+                    "SWIFT"
+                  ]
+                },
+                "address": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Recipient's address (if available)"
+                },
+                "bankInfo": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Bank name or identifier",
+                  "examples": [
+                    "Example Bank",
+                    "Bank of America"
+                  ]
+                },
+                "description": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "User-provided description or note",
+                  "examples": [
+                    "Friend",
+                    "Landlord",
+                    "Contractor"
+                  ]
+                },
+                "id": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Unique recipient identifier"
+                },
+                "isFavorite": {
+                  "default": false,
+                  "description": "Whether this recipient is marked as favorite",
+                  "type": "boolean"
+                },
+                "name": {
+                  "description": "Recipient's full name or business name",
+                  "type": "string"
+                },
+                "paymentType": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Type of payment supported",
+                  "examples": [
+                    "Domestic",
+                    "International",
+                    "SEPA"
+                  ]
+                },
+                "socialSecurityNumber": {
+                  "description": "National ID / SSN (format varies by country)",
+                  "examples": [
+                    "010190-1234",
+                    "123-45-6789"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "socialSecurityNumber",
+                "accountNumber"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      }
+    },
+    {
       "description": "Get bank transactions. Returns a list of transactions with amounts, dates, descriptions, and categories.",
       "inputSchema": {
         "additionalProperties": false,
@@ -1056,163 +1213,6 @@
       }
     },
     {
-      "description": "Lookup recipient of a payment or transfer by name. Returns matching recipients with their account details.",
-      "inputSchema": {
-        "additionalProperties": false,
-        "properties": {
-          "name": {
-            "description": "Free-text search; matches partial names of saved recipients.",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "type": "object"
-      },
-      "name": "recipients-by-name",
-      "outputSchema": {
-        "description": "Envelope for a list of recipients",
-        "properties": {
-          "items": {
-            "description": "Recipients matching the request.",
-            "items": {
-              "description": "Payment recipient with account details",
-              "properties": {
-                "accountNumber": {
-                  "description": "Recipient's bank account number",
-                  "examples": [
-                    "5678-90-123456",
-                    "GB29NWBK60161331926819"
-                  ],
-                  "type": "string"
-                },
-                "accountNumberType": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Type of account number",
-                  "examples": [
-                    "Domestic",
-                    "IBAN",
-                    "SWIFT"
-                  ]
-                },
-                "address": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Recipient's address (if available)"
-                },
-                "bankInfo": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Bank name or identifier",
-                  "examples": [
-                    "Example Bank",
-                    "Bank of America"
-                  ]
-                },
-                "description": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "User-provided description or note",
-                  "examples": [
-                    "Friend",
-                    "Landlord",
-                    "Contractor"
-                  ]
-                },
-                "id": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Unique recipient identifier"
-                },
-                "isFavorite": {
-                  "default": false,
-                  "description": "Whether this recipient is marked as favorite",
-                  "type": "boolean"
-                },
-                "name": {
-                  "description": "Recipient's full name or business name",
-                  "type": "string"
-                },
-                "paymentType": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Type of payment supported",
-                  "examples": [
-                    "Domestic",
-                    "International",
-                    "SEPA"
-                  ]
-                },
-                "socialSecurityNumber": {
-                  "description": "National ID / SSN (format varies by country)",
-                  "examples": [
-                    "010190-1234",
-                    "123-45-6789"
-                  ],
-                  "type": "string"
-                }
-              },
-              "required": [
-                "name",
-                "socialSecurityNumber",
-                "accountNumber"
-              ],
-              "type": "object"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "items"
-        ],
-        "type": "object"
-      }
-    },
-    {
       "description": "Get an aggregated summary of transactions, scoped to either income or expenses. Returns totals, counts, and averages, optionally grouped by category, month, or both. Filters mirror get-transactions: account, date, amount range, categories.",
       "inputSchema": {
         "additionalProperties": false,
@@ -1328,7 +1328,7 @@
         ],
         "type": "object"
       },
-      "name": "transactions-summary",
+      "name": "get-transactions-summary",
       "outputSchema": {
         "description": "Aggregated transactions summary",
         "properties": {
@@ -1425,7 +1425,7 @@
       }
     },
     {
-      "description": "Prepare a domestic money transfer. Validates recipient and prepares transfer details for confirmation.",
+      "description": "Prepare a domestic Icelandic money transfer. Validates recipient and prepares transfer details for confirmation.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
@@ -1477,7 +1477,7 @@
         ],
         "type": "object"
       },
-      "name": "transfer-money-icelandic",
+      "name": "prepare-transfer-icelandic",
       "outputSchema": {
         "description": "Prepared transfer details awaiting confirmation",
         "properties": {
@@ -1698,5 +1698,5 @@
       }
     }
   ],
-  "version": "0.6.0"
+  "version": "0.7.0"
 }

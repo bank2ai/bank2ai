@@ -23,10 +23,10 @@ Every compliant server registers these tools, with these names:
 | [`get-accounts`](/docs/specification/tools/get-accounts) | List accounts and cards. |
 | [`get-transactions`](/docs/specification/tools/get-transactions) | List transactions, with filters. |
 | [`get-categories`](/docs/specification/tools/get-categories) | List the bank's transaction categories. |
-| [`transactions-summary`](/docs/specification/tools/transactions-summary) | Aggregated income or expenses, optionally grouped by category, month, or both. |
-| [`recipients-by-name`](/docs/specification/tools/recipients-by-name) | Find saved payment recipients by partial name. |
+| [`get-transactions-summary`](/docs/specification/tools/get-transactions-summary) | Aggregated income or expenses, optionally grouped by category, month, or both. |
+| [`get-recipients`](/docs/specification/tools/get-recipients) | Find saved payment recipients by partial name. |
 | [`create-recipient`](/docs/specification/tools/create-recipient) | Save a new recipient. |
-| [`transfer-money-icelandic`](/docs/specification/tools/transfer-money-icelandic) | **Prepare** a domestic transfer. Does not execute. |
+| [`prepare-transfer-icelandic`](/docs/specification/tools/prepare-transfer-icelandic) | **Prepare** a domestic Icelandic transfer. Does not execute. |
 | [`execute-transfer`](/docs/specification/tools/execute-transfer) | Execute a transfer the user has confirmed. |
 
 Servers MAY add vendor-specific tools but MUST NOT alter the names, inputs, or outputs of the tools above.
@@ -35,7 +35,7 @@ Servers MAY add vendor-specific tools but MUST NOT alter the names, inputs, or o
 
 Money movement is split into two tools on purpose:
 
-1. The agent calls `transfer-money-icelandic` to **validate** inputs and surface a structured preview to the user (amount, recipient, source account).
+1. The agent calls `prepare-transfer-icelandic` to **validate** inputs and surface a structured preview to the user (amount, recipient, source account).
 2. Only after the user confirms in their UI does the client call `execute-transfer`.
 
 This keeps the AI agent on a safe rail, it can never spend money without explicit human confirmation. Servers SHOULD reject `execute-transfer` calls that don't correspond to a recently prepared transfer.
