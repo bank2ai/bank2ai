@@ -27,7 +27,7 @@ A bank2ai server MAY register any subset of the following tools. Tools that are 
 | `get-accounts`             | List bank accounts and cards, optionally filtered by type or by withdrawal-eligibility. |
 | `get-transactions`         | List transactions, with filters for account, date range, signed amount range, categories, free-text search, and result count. Supports cursor-based paging via `cursor` / `nextCursor`. |
 | `get-categories`           | List the bank's transaction categories.                            |
-| `get-transactions-summary` | Aggregated transactions, scoped to either income or expenses (required `direction`). Group by `none`, `category`, `month`, or `both`; each row reports the corresponding `category` and/or `month`. Filters mirror `get-transactions`: account, date, amount, categories. |
+| `get-transactions-summary` | Aggregated transactions, scoped to either income or expenses (required `direction`). Group by `none`, `category`, `month`, or `both`; each row reports the corresponding `category_id` and/or `month`. Filters mirror `get-transactions`: account, date, amount, category ids. |
 | `get-recipients`           | Look up saved payment recipients by partial name match.            |
 | `create-recipient`         | Save a new recipient for future transfers.                         |
 | `prepare-transfer-icelandic` | **Prepare** a domestic Icelandic transfer; validates inputs and returns details for confirmation. Does **not** execute. |
@@ -50,7 +50,7 @@ A typical bank2ai session looks like this:
 The schemas in `bank2ai.json` under `models{}` define the canonical shapes for:
 
 * **`Account`**, id, accountNumber, currency, balance, optional availableBalance, overdraftLimit, isWithdrawalAccount, isDefaultAccount, accountType (`Current` | `Savings` | `Credit`).
-* **`Transaction`**, id, description, amount (in the user's default currency, negative = expense), transaction_date (ISO 8601), category, optional currency and amount_in_currency for transactions originally made in a different currency.
+* **`Transaction`**, id, description, amount (in the user's default currency, negative = expense), transaction_date (ISO 8601), category_id (resolves via `get-categories`), optional currency and amount_in_currency for transactions originally made in a different currency.
 * **`Category`**, id, name (localized).
 * **`Recipient`**, id, name, accountNumber, accountNumberType (`Domestic` | `IBAN` | `SWIFT`), socialSecurityNumber, optional bankInfo, paymentType, address, isFavorite, description.
 
@@ -77,7 +77,7 @@ Servers MUST NOT register a bank2ai-defined `authenticate` tool, earlier drafts 
 
 * Currencies are ISO 4217 (`USD`, `ISK`, `EUR`, …). `Account.balance` and `Account.availableBalance` are in the account's `currency`. `Transaction.amount` is normalized to the user's default currency so clients can render transaction lists without per-row currency conversion; when the transaction was originally made in a different currency, `Transaction.currency` and `Transaction.amount_in_currency` preserve the original. Clients SHOULD omit the currency symbol on transaction amounts unless the user explicitly asks which currency a transaction is in.
 * Dates are ISO 8601 (`YYYY-MM-DD`).
-* Category names are localized server-side. Clients MUST treat category names as opaque user-facing strings; programmatic filtering MUST go through the `categories` parameter on `get-transactions` / `get-transactions-summary` (which references category names returned by `get-categories`).
+* Category names are localized server-side. Clients MUST treat category names as opaque user-facing strings and use `Category.id` for programmatic identity; filtering MUST go through the `category_ids` parameter on `get-transactions` / `get-transactions-summary`, and `Transaction.category_id` resolves to the matching `Category` from `get-categories`.
 
 ## 7. Backwards compatibility
 

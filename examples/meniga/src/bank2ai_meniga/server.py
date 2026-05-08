@@ -213,7 +213,7 @@ async def get_transactions(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     description: Optional[str] = None,
-    categories: Optional[list[str]] = None,
+    category_ids: Optional[list[str]] = None,
     account_ids: Optional[list[str]] = None,
     min_amount: Optional[float] = None,
     max_amount: Optional[float] = None,
@@ -221,7 +221,7 @@ async def get_transactions(
 ) -> TransactionList:
     logger.info(
         "get_transactions: count=%s order=%s start=%s end=%s desc=%s cats=%s account_ids=%s min=%s max=%s cursor=%s",
-        count, order, start_date, end_date, description, categories, account_ids, min_amount, max_amount, cursor,
+        count, order, start_date, end_date, description, category_ids, account_ids, min_amount, max_amount, cursor,
     )
     params: dict[str, str] = {
         "fields": "id,amount,amountInCurrency,currency,categoryId,text,date",
@@ -247,28 +247,16 @@ async def get_transactions(
     if max_amount is not None:
         params["amountTo"] = str(max_amount)
 
-    all_categories = (await get_categories()).items
-
-    if categories:
-        category_ids = {c.id for c in all_categories if c.name in categories}
-        if category_ids:
-            params["categoryIds"] = ",".join(category_ids)
+    if category_ids:
+        params["categoryIds"] = ",".join(category_ids)
 
     async with await _client() as client:
         response = await client.get(f"{_BASE_URL}/v1/transactions", params=params)
     response.raise_for_status()
 
-    cat_by_id = {c.id: c.name for c in all_categories}
-
     transactions: list[Transaction] = []
     response_json = response.json()
     for t in response_json["data"]:
-        cat_name = cat_by_id.get(str(t["categoryId"]))
-        if categories:
-            lower_cats = {c.lower() for c in categories}
-            if (cat_name or "").lower() not in lower_cats:
-                continue
-
         transactions.append(Transaction(
             id=str(t["id"]),
             description=t["text"],
@@ -276,7 +264,7 @@ async def get_transactions(
             transaction_date=t["date"],
             amount_in_currency=t.get("amountInCurrency"),
             currency=t.get("currency"),
-            category=cat_name,
+            category_id=str(t["categoryId"]) if t.get("categoryId") is not None else None,
         ))
 
     next_cursor: Optional[str] = response_json["meta"]["pageToken"]
@@ -291,7 +279,7 @@ async def get_transactions_summary(
     group_by: str = "category",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    categories: Optional[list[str]] = None,
+    category_ids: Optional[list[str]] = None,
     account_ids: Optional[list[str]] = None,
     min_amount: Optional[float] = None,
     max_amount: Optional[float] = None,
@@ -311,14 +299,14 @@ async def get_transactions_summary(
     transactions = (await get_transactions(
         start_date=start_date,
         end_date=end_date,
-        categories=categories,
+        category_ids=category_ids,
         account_ids=account_ids,
         min_amount=eff_min,
         max_amount=eff_max,
     )).items
 
     def grouping_key(t: Transaction) -> tuple[Optional[str], Optional[str]]:
-        cat = t.category or "Uncategorized"
+        cat = t.category_id
         month = t.transaction_date.strftime("%Y-%m")
         if group_by == "category":
             return (cat, None)
@@ -338,7 +326,7 @@ async def get_transactions_summary(
 
     summary = [
         TransactionsSummaryGroup(
-            category=cat,
+            category_id=cat,
             month=month,
             total_amount=stats["total"],
             transaction_count=int(stats["count"]),

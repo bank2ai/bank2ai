@@ -122,9 +122,9 @@ def register_tools(
                 default=None,
                 description="Free-text search across merchant/recipient/reference/description.",
             ),
-            categories: Optional[list[str]] = Field(
+            category_ids: Optional[list[str]] = Field(
                 default=None,
-                description="Restrict to these category names (the `name` field from get-categories, not the id).",
+                description="Restrict to these category ids (the `id` field from get-categories).",
             ),
             account_ids: Optional[list[str]] = Field(
                 default=None,
@@ -162,7 +162,7 @@ def register_tools(
                 start_date=start_date,
                 end_date=end_date,
                 description=description,
-                categories=categories,
+                category_ids=category_ids,
                 account_ids=account_ids,
                 min_amount=min_amount,
                 max_amount=max_amount,
@@ -191,7 +191,7 @@ def register_tools(
                 "Get an aggregated summary of transactions, scoped to either income or "
                 "expenses. Returns totals, counts, and averages, optionally grouped by "
                 "category, month, or both. Filters mirror get-transactions: account, "
-                "date, amount range, categories."
+                "date, amount range, category ids."
             ),
         )
         async def _transactions_summary(
@@ -205,9 +205,9 @@ def register_tools(
                 default="category",
                 description=(
                     "Aggregation key. `none` returns a single row spanning all matched "
-                    "transactions; `category` groups by category; `month` groups by "
-                    "calendar month (YYYY-MM); `both` groups by (category, month) pairs. "
-                    "Each summary row reports `category` and/or `month` accordingly."
+                    "transactions; `category` groups by category id; `month` groups by "
+                    "calendar month (YYYY-MM); `both` groups by (category id, month) pairs. "
+                    "Each summary row reports `category_id` and/or `month` accordingly."
                 ),
             ),
             start_date: Optional[str] = Field(
@@ -222,9 +222,9 @@ def register_tools(
                 pattern=r"^\d{4}-\d{2}-\d{2}$",
                 examples=["2024-03-15"],
             ),
-            categories: Optional[list[str]] = Field(
+            category_ids: Optional[list[str]] = Field(
                 default=None,
-                description="Restrict to these category names (the `name` field from get-categories, not the id).",
+                description="Restrict to these category ids (the `id` field from get-categories).",
             ),
             account_ids: Optional[list[str]] = Field(
                 default=None,
@@ -252,7 +252,7 @@ def register_tools(
                 group_by=group_by,
                 start_date=start_date,
                 end_date=end_date,
-                categories=categories,
+                category_ids=category_ids,
                 account_ids=account_ids,
                 min_amount=min_amount,
                 max_amount=max_amount,

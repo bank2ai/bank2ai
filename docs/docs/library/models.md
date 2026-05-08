@@ -19,7 +19,7 @@ from bank2ai import Account, Transaction, Category, Recipient
 These are the types most handlers return. Each is a `BaseModel`:
 
 - `Account`, id, accountNumber, currency, balance, optional availableBalance/overdraftLimit/isWithdrawalAccount/isDefaultAccount/accountType.
-- `Transaction`, id, description, amount (negative = expense), transaction_date, optional category.
+- `Transaction`, id, description, amount (negative = expense), transaction_date, optional category_id (resolves via `get-categories`).
 - `Category`, id, name (localized).
 - `Recipient`, id, name, accountNumber, accountNumberType, socialSecurityNumber, optional bankInfo/paymentType/address/isFavorite/description.
 

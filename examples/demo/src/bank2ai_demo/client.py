@@ -77,7 +77,7 @@ async def main():
             print(f"Total spending: {data['total']:,.2f}")
             print("\nTop spending categories:")
             for item in data["summary"][:5]:
-                print(f"  {item['category']:20s}: {item['total_amount']:>10,.2f} ({item['transaction_count']} txs)")
+                print(f"  {item.get('category_id', '-'):20s}: {item['total_amount']:>10,.2f} ({item['transaction_count']} txs)")
             print()
 
             # Test 5: Search recipients

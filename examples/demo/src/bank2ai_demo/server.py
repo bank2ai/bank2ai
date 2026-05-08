@@ -73,7 +73,7 @@ async def get_transactions(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     description: Optional[str] = None,
-    categories: Optional[list[str]] = None,
+    category_ids: Optional[list[str]] = None,
     account_ids: Optional[list[str]] = None,
     min_amount: Optional[float] = None,
     max_amount: Optional[float] = None,
@@ -99,10 +99,10 @@ async def get_transactions(
     if max_amount is not None:
         transactions = [t for t in transactions if t["amount"] <= max_amount]
 
-    if categories:
-        lower_cats = {c.lower() for c in categories}
+    if category_ids:
+        wanted_cats = set(category_ids)
         transactions = [
-            t for t in transactions if t.get("category", "").lower() in lower_cats
+            t for t in transactions if t.get("category_id") in wanted_cats
         ]
 
     if description:
@@ -144,7 +144,7 @@ async def get_transactions_summary(
     group_by: str = "category",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    categories: Optional[list[str]] = None,
+    category_ids: Optional[list[str]] = None,
     account_ids: Optional[list[str]] = None,
     min_amount: Optional[float] = None,
     max_amount: Optional[float] = None,
@@ -173,14 +173,14 @@ async def get_transactions_summary(
         transactions = [t for t in transactions if t["transaction_date"] >= start_date]
     if end_date:
         transactions = [t for t in transactions if t["transaction_date"] <= end_date]
-    if categories:
-        lower_cats = {c.lower() for c in categories}
+    if category_ids:
+        wanted_cats = set(category_ids)
         transactions = [
-            t for t in transactions if t.get("category", "").lower() in lower_cats
+            t for t in transactions if t.get("category_id") in wanted_cats
         ]
 
     def grouping_key(t: dict) -> tuple[Optional[str], Optional[str]]:
-        cat = t.get("category") or "Uncategorized"
+        cat = t.get("category_id")
         month = str(t["transaction_date"])[:7]
         if group_by == "category":
             return (cat, None)
@@ -200,7 +200,7 @@ async def get_transactions_summary(
 
     summary = [
         TransactionsSummaryGroup(
-            category=cat,
+            category_id=cat,
             month=month,
             total_amount=stats["total"],
             transaction_count=int(stats["count"]),

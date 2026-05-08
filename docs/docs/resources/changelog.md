@@ -12,6 +12,10 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Specification
 
+### 0.9.0, Draft
+
+- **Breaking:** categories are referenced by id, not name. `Transaction.category` (string name) becomes `Transaction.category_id`; `TransactionsSummaryGroup.category` becomes `category_id`. The `categories` input on `get-transactions` and `get-transactions-summary` is renamed to `category_ids` and now takes `Category.id` values from `get-categories`. `Category.name` is unchanged and remains the only place a category's localized name lives.
+
 ### 0.7.0, Draft
 
 - **Breaking:** tool names overhauled for consistency. `transactions-summary` → `get-transactions-summary`, `recipients-by-name` → `get-recipients`, `transfer-money-icelandic` → `prepare-transfer-icelandic`. Reads now use `get-<plural>`; writes stay verb-noun. Handler kwargs match: `search_recipients` → `get_recipients`, `prepare_transfer` → `prepare_transfer_icelandic`.

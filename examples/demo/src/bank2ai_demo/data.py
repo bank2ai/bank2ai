@@ -59,7 +59,7 @@ def generate_transactions():
         "description": "Monthly Salary",
         "amount": 4500.00,
         "transaction_date": (today - timedelta(days=5)).isoformat(),
-        "category": "Income",
+        "category_id": "cat_income",
     })
 
     transactions.append({
@@ -68,7 +68,7 @@ def generate_transactions():
         "description": "Rent Payment",
         "amount": -1200.00,
         "transaction_date": (today - timedelta(days=3)).isoformat(),
-        "category": "Housing",
+        "category_id": "cat_housing",
     })
 
     # Groceries
@@ -80,7 +80,7 @@ def generate_transactions():
             "description": grocery_stores[i % len(grocery_stores)],
             "amount": -85.50 - (i * 5),
             "transaction_date": (today - timedelta(days=days_ago)).isoformat(),
-            "category": "Groceries",
+            "category_id": "cat_groceries",
         })
 
     # Transportation
@@ -91,7 +91,7 @@ def generate_transactions():
             "description": "Shell Gas Station",
             "amount": -45.00,
             "transaction_date": (today - timedelta(days=4)).isoformat(),
-            "category": "Transportation",
+            "category_id": "cat_transportation",
         },
         {
             "id": "tx_transit_001",
@@ -99,7 +99,7 @@ def generate_transactions():
             "description": "Monthly Metro Pass",
             "amount": -120.00,
             "transaction_date": (today - timedelta(days=1)).isoformat(),
-            "category": "Transportation",
+            "category_id": "cat_transportation",
         },
     ])
 
@@ -111,7 +111,7 @@ def generate_transactions():
             "description": "Netflix Subscription",
             "amount": -15.99,
             "transaction_date": (today - timedelta(days=10)).isoformat(),
-            "category": "Entertainment",
+            "category_id": "cat_entertainment",
         },
         {
             "id": "tx_movie_001",
@@ -119,7 +119,7 @@ def generate_transactions():
             "description": "Cinema Tickets",
             "amount": -32.00,
             "transaction_date": (today - timedelta(days=12)).isoformat(),
-            "category": "Entertainment",
+            "category_id": "cat_entertainment",
         },
         {
             "id": "tx_spotify_001",
@@ -127,7 +127,7 @@ def generate_transactions():
             "description": "Spotify Premium",
             "amount": -9.99,
             "transaction_date": (today - timedelta(days=8)).isoformat(),
-            "category": "Entertainment",
+            "category_id": "cat_entertainment",
         },
     ])
 
@@ -139,7 +139,7 @@ def generate_transactions():
             "description": "Electric Company",
             "amount": -85.00,
             "transaction_date": (today - timedelta(days=15)).isoformat(),
-            "category": "Utilities",
+            "category_id": "cat_utilities",
         },
         {
             "id": "tx_internet_001",
@@ -147,7 +147,7 @@ def generate_transactions():
             "description": "Internet Service Provider",
             "amount": -60.00,
             "transaction_date": (today - timedelta(days=18)).isoformat(),
-            "category": "Utilities",
+            "category_id": "cat_utilities",
         },
     ])
 
@@ -160,7 +160,7 @@ def generate_transactions():
             "description": restaurants[i % len(restaurants)],
             "amount": -25.00 - (i * 3),
             "transaction_date": (today - timedelta(days=days_ago)).isoformat(),
-            "category": "Dining",
+            "category_id": "cat_dining",
         })
 
     # Healthcare
@@ -170,7 +170,7 @@ def generate_transactions():
         "description": "Pharmacy Co-pay",
         "amount": -20.00,
         "transaction_date": (today - timedelta(days=22)).isoformat(),
-        "category": "Healthcare",
+        "category_id": "cat_healthcare",
     })
 
     # Shopping (charged to credit card)
@@ -181,7 +181,7 @@ def generate_transactions():
             "description": "Amazon.com",
             "amount": -78.50,
             "transaction_date": (today - timedelta(days=11)).isoformat(),
-            "category": "Shopping",
+            "category_id": "cat_shopping",
         },
         {
             "id": "tx_clothing_001",
@@ -189,7 +189,7 @@ def generate_transactions():
             "description": "Clothing Store",
             "amount": -125.00,
             "transaction_date": (today - timedelta(days=16)).isoformat(),
-            "category": "Shopping",
+            "category_id": "cat_shopping",
         },
     ])
 
@@ -204,7 +204,7 @@ def generate_transactions():
             "currency": "EUR",
             "amount_in_currency": -49.80,
             "transaction_date": (today - timedelta(days=17)).isoformat(),
-            "category": "Dining",
+            "category_id": "cat_dining",
         },
         {
             "id": "tx_london_shopping_001",
@@ -214,7 +214,7 @@ def generate_transactions():
             "currency": "GBP",
             "amount_in_currency": -165.00,
             "transaction_date": (today - timedelta(days=24)).isoformat(),
-            "category": "Shopping",
+            "category_id": "cat_shopping",
         },
     ])
 

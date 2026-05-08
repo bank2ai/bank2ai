@@ -35,13 +35,13 @@ EXPECTED_TOOL_INPUTS = {
     "get-accounts": {"only_withdrawal_accounts", "account_type"},
     "get-transactions": {
         "count", "order", "start_date", "end_date",
-        "description", "categories", "account_ids",
+        "description", "category_ids", "account_ids",
         "min_amount", "max_amount", "cursor",
     },
     "get-categories": set(),
     "get-transactions-summary": {
         "direction", "group_by", "start_date", "end_date",
-        "categories", "account_ids", "min_amount", "max_amount",
+        "category_ids", "account_ids", "min_amount", "max_amount",
     },
     "get-recipients": {"name"},
     "create-recipient": {"name", "account_number", "kennitala"},

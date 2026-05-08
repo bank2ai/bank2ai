@@ -141,8 +141,10 @@ class Transaction(_Bank2aiModel):
     transaction_date: date = Field(
         description="Transaction date in ISO 8601 format (YYYY-MM-DD)"
     )
-    category: Optional[str] = Field(default=None,
-        description="Category name")
+    category_id: Optional[str] = Field(
+        default=None,
+        description="Category id (the `id` field from get-categories which also has category name).",
+    )
     currency: Optional[str] = Field(
         default=None,
         description=(
@@ -220,11 +222,11 @@ class TransactionDirection(str, Enum):
 class TransactionsSummaryGroup(BaseModel):
     """One row of an aggregated transactions summary."""
 
-    category: Optional[str] = Field(
+    category_id: Optional[str] = Field(
         default=None,
         description=(
-            "Category name when the request grouped by `category` or `both`; "
-            "null otherwise."
+            "Category id when the request grouped by `category` or `both`; "
+            "null otherwise. Resolve to a name via get-categories."
         ),
     )
     month: Optional[str] = Field(

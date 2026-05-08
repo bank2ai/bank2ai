@@ -326,7 +326,7 @@
           "description": "Original transaction amount in `currency` (negative for expenses, positive for income). Present only when `currency` is set.",
           "title": "Amount In Currency"
         },
-        "category": {
+        "category_id": {
           "anyOf": [
             {
               "type": "string"
@@ -336,8 +336,8 @@
             }
           ],
           "default": null,
-          "description": "Category name",
-          "title": "Category"
+          "description": "Category id (the `id` field from get-categories which also has category name).",
+          "title": "Category Id"
         },
         "currency": {
           "anyOf": [
@@ -1049,7 +1049,7 @@
             "default": null,
             "description": "Restrict to transactions on these account.id values (from get-accounts)."
           },
-          "categories": {
+          "category_ids": {
             "anyOf": [
               {
                 "items": {
@@ -1062,7 +1062,7 @@
               }
             ],
             "default": null,
-            "description": "Restrict to these category names (the `name` field from get-categories, not the id)."
+            "description": "Restrict to these category ids (the `id` field from get-categories)."
           },
           "count": {
             "anyOf": [
@@ -1194,7 +1194,7 @@
                   "default": null,
                   "description": "Original transaction amount in `currency` (negative for expenses, positive for income). Present only when `currency` is set."
                 },
-                "category": {
+                "category_id": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -1204,7 +1204,7 @@
                     }
                   ],
                   "default": null,
-                  "description": "Category name"
+                  "description": "Category id (the `id` field from get-categories which also has category name)."
                 },
                 "currency": {
                   "anyOf": [
@@ -1275,7 +1275,7 @@
       }
     },
     {
-      "description": "Get an aggregated summary of transactions, scoped to either income or expenses. Returns totals, counts, and averages, optionally grouped by category, month, or both. Filters mirror get-transactions: account, date, amount range, categories.",
+      "description": "Get an aggregated summary of transactions, scoped to either income or expenses. Returns totals, counts, and averages, optionally grouped by category, month, or both. Filters mirror get-transactions: account, date, amount range, category ids.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
@@ -1294,7 +1294,7 @@
             "default": null,
             "description": "Restrict to transactions on these account.id values (from get-accounts)."
           },
-          "categories": {
+          "category_ids": {
             "anyOf": [
               {
                 "items": {
@@ -1307,7 +1307,7 @@
               }
             ],
             "default": null,
-            "description": "Restrict to these category names (the `name` field from get-categories, not the id)."
+            "description": "Restrict to these category ids (the `id` field from get-categories)."
           },
           "direction": {
             "description": "Restrict to income (positive amounts) or expenses (negative amounts). A summary covers exactly one direction; call the tool twice to compare.",
@@ -1335,7 +1335,7 @@
           },
           "group_by": {
             "default": "category",
-            "description": "Aggregation key. `none` returns a single row spanning all matched transactions; `category` groups by category; `month` groups by calendar month (YYYY-MM); `both` groups by (category, month) pairs. Each summary row reports `category` and/or `month` accordingly.",
+            "description": "Aggregation key. `none` returns a single row spanning all matched transactions; `category` groups by category id; `month` groups by calendar month (YYYY-MM); `both` groups by (category id, month) pairs. Each summary row reports `category_id` and/or `month` accordingly.",
             "enum": [
               "none",
               "category",
@@ -1427,7 +1427,7 @@
                   "description": "Mean transaction amount within this group.",
                   "type": "number"
                 },
-                "category": {
+                "category_id": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -1437,7 +1437,7 @@
                     }
                   ],
                   "default": null,
-                  "description": "Category name when the request grouped by `category` or `both`; null otherwise."
+                  "description": "Category id when the request grouped by `category` or `both`; null otherwise. Resolve to a name via get-categories."
                 },
                 "month": {
                   "anyOf": [
@@ -1760,5 +1760,5 @@
       }
     }
   ],
-  "version": "0.8.0"
+  "version": "0.9.0"
 }
