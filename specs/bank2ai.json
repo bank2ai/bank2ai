@@ -309,9 +309,22 @@
       "description": "Financial transaction with date, amount and metadata",
       "properties": {
         "amount": {
-          "description": "Transaction amount (negative for expenses, positive for income)",
+          "description": "Transaction amount in the user's default currency (negative for expenses, positive for income). Clients SHOULD render this without a currency symbol unless the user has explicitly asked which currency a transaction is in.",
           "title": "Amount",
           "type": "number"
+        },
+        "amount_in_currency": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Original transaction amount in `currency` (negative for expenses, positive for income). Present only when `currency` is set.",
+          "title": "Amount In Currency"
         },
         "category": {
           "anyOf": [
@@ -325,6 +338,25 @@
           "default": null,
           "description": "Category name",
           "title": "Category"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 4217 currency code of the original transaction, present only when the transaction was made in a currency other than the user's default. Pair with `amount_in_currency` to recover the original amount.",
+          "examples": [
+            "EUR",
+            "GBP",
+            "JPY"
+          ],
+          "title": "Currency"
         },
         "description": {
           "description": "Transaction description, merchant name or recipient name",
@@ -1147,8 +1179,20 @@
               "description": "Financial transaction with date, amount and metadata",
               "properties": {
                 "amount": {
-                  "description": "Transaction amount (negative for expenses, positive for income)",
+                  "description": "Transaction amount in the user's default currency (negative for expenses, positive for income). Clients SHOULD render this without a currency symbol unless the user has explicitly asked which currency a transaction is in.",
                   "type": "number"
+                },
+                "amount_in_currency": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Original transaction amount in `currency` (negative for expenses, positive for income). Present only when `currency` is set."
                 },
                 "category": {
                   "anyOf": [
@@ -1161,6 +1205,24 @@
                   ],
                   "default": null,
                   "description": "Category name"
+                },
+                "currency": {
+                  "anyOf": [
+                    {
+                      "pattern": "^[A-Z]{3}$",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "ISO 4217 currency code of the original transaction, present only when the transaction was made in a currency other than the user's default. Pair with `amount_in_currency` to recover the original amount.",
+                  "examples": [
+                    "EUR",
+                    "GBP",
+                    "JPY"
+                  ]
                 },
                 "description": {
                   "description": "Transaction description, merchant name or recipient name",
@@ -1698,5 +1760,5 @@
       }
     }
   ],
-  "version": "0.7.0"
+  "version": "0.8.0"
 }

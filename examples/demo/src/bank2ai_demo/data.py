@@ -193,6 +193,31 @@ def generate_transactions():
         },
     ])
 
+    # Foreign-currency transactions: amount is in the user's default currency
+    # (USD here); currency / amount_in_currency carry the original.
+    transactions.extend([
+        {
+            "id": "tx_paris_dining_001",
+            "account_id": "acc_credit_001",
+            "description": "Le Petit Bistro, Paris",
+            "amount": -54.20,
+            "currency": "EUR",
+            "amount_in_currency": -49.80,
+            "transaction_date": (today - timedelta(days=17)).isoformat(),
+            "category": "Dining",
+        },
+        {
+            "id": "tx_london_shopping_001",
+            "account_id": "acc_credit_001",
+            "description": "Selfridges, London",
+            "amount": -210.45,
+            "currency": "GBP",
+            "amount_in_currency": -165.00,
+            "transaction_date": (today - timedelta(days=24)).isoformat(),
+            "category": "Shopping",
+        },
+    ])
+
     # Sort by date (newest first)
     transactions.sort(key=lambda x: x["transaction_date"], reverse=True)
 

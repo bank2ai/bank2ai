@@ -118,13 +118,35 @@ class Transaction(BaseModel):
         description="Transaction description, merchant name or recipient name",
     )
     amount: float = Field(
-        description="Transaction amount (negative for expenses, positive for income)",
+        description=(
+            "Transaction amount in the user's default currency "
+            "(negative for expenses, positive for income). "
+            "Clients SHOULD render this without a currency symbol unless "
+            "the user has explicitly asked which currency a transaction is in."
+        ),
     )
     transaction_date: date = Field(
         description="Transaction date in ISO 8601 format (YYYY-MM-DD)"
     )
     category: Optional[str] = Field(default=None,
         description="Category name")
+    currency: Optional[str] = Field(
+        default=None,
+        description=(
+            "ISO 4217 currency code of the original transaction, present only "
+            "when the transaction was made in a currency other than the user's "
+            "default. Pair with `amount_in_currency` to recover the original amount."
+        ),
+        pattern="^[A-Z]{3}$",
+        examples=["EUR", "GBP", "JPY"],
+    )
+    amount_in_currency: Optional[float] = Field(
+        default=None,
+        description=(
+            "Original transaction amount in `currency` (negative for expenses, "
+            "positive for income). Present only when `currency` is set."
+        ),
+    )
 
 
 class Category(BaseModel):

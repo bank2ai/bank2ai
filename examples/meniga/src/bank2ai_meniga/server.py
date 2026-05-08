@@ -224,7 +224,7 @@ async def get_transactions(
         count, order, start_date, end_date, description, categories, account_ids, min_amount, max_amount, cursor,
     )
     params: dict[str, str] = {
-        "fields": "id,amount,categoryId,text,date",
+        "fields": "id,amount,amountInCurrency,currency,categoryId,text,date",
         "includeChildCategoriesForParentWhenUsingSearchText": "true",
     }
     if count is not None:
@@ -274,6 +274,8 @@ async def get_transactions(
             description=t["text"],
             amount=t["amount"],
             transaction_date=t["date"],
+            amount_in_currency=t.get("amountInCurrency"),
+            currency=t.get("currency"),
             category=cat_name,
         ))
 

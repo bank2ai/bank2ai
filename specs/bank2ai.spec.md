@@ -50,7 +50,7 @@ A typical bank2ai session looks like this:
 The schemas in `bank2ai.json` under `models{}` define the canonical shapes for:
 
 * **`Account`**, id, accountNumber, currency, balance, optional availableBalance, overdraftLimit, isWithdrawalAccount, isDefaultAccount, accountType (`Current` | `Savings` | `Credit`).
-* **`Transaction`**, id, description, amount (negative = expense), transaction_date (ISO 8601), category.
+* **`Transaction`**, id, description, amount (in the user's default currency, negative = expense), transaction_date (ISO 8601), category, optional currency and amount_in_currency for transactions originally made in a different currency.
 * **`Category`**, id, name (localized).
 * **`Recipient`**, id, name, accountNumber, accountNumberType (`Domestic` | `IBAN` | `SWIFT`), socialSecurityNumber, optional bankInfo, paymentType, address, isFavorite, description.
 
@@ -75,7 +75,7 @@ Servers MUST NOT register a bank2ai-defined `authenticate` tool, earlier drafts 
 
 ## 6. Localization
 
-* All money amounts are numeric in their account's currency; currencies are ISO 4217 (`USD`, `ISK`, `EUR`, …).
+* Currencies are ISO 4217 (`USD`, `ISK`, `EUR`, …). `Account.balance` and `Account.availableBalance` are in the account's `currency`. `Transaction.amount` is normalized to the user's default currency so clients can render transaction lists without per-row currency conversion; when the transaction was originally made in a different currency, `Transaction.currency` and `Transaction.amount_in_currency` preserve the original. Clients SHOULD omit the currency symbol on transaction amounts unless the user explicitly asks which currency a transaction is in.
 * Dates are ISO 8601 (`YYYY-MM-DD`).
 * Category names are localized server-side. Clients MUST treat category names as opaque user-facing strings; programmatic filtering MUST go through the `categories` parameter on `get-transactions` / `get-transactions-summary` (which references category names returned by `get-categories`).
 
