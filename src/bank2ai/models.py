@@ -4,10 +4,23 @@ from datetime import date
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_serializer
 
 
-class RecipientInfo(BaseModel):
+class _Bank2aiModel(BaseModel):
+    """Base for documented bank2ai models. Drops None-valued keys on
+    serialization so optional fields that are absent on a row don't bloat
+    every tool response. The JSON Schema marks these fields optional with
+    `default: null`, so omission is conformant; clients must already tolerate
+    either form."""
+
+    @model_serializer(mode="wrap")
+    def _omit_none(self, handler):
+        data = handler(self)
+        return {k: v for k, v in data.items() if v is not None}
+
+
+class RecipientInfo(_Bank2aiModel):
     """Basic recipient information for transfers."""
 
     name: str = Field(description="Recipient's full name or business name")
@@ -68,7 +81,7 @@ class AccountType(str, Enum):
     Savings = "Savings"
 
 
-class Account(BaseModel):
+class Account(_Bank2aiModel):
     """Bank account with balance and metadata"""
 
     id: str = Field(description="Unique account identifier")
@@ -110,7 +123,7 @@ class Account(BaseModel):
     )
 
 
-class Transaction(BaseModel):
+class Transaction(_Bank2aiModel):
     """Financial transaction with date, amount and metadata"""
     id: Optional[str] = Field(default=None,
         description="Unique transaction identifier")
@@ -149,7 +162,7 @@ class Transaction(BaseModel):
     )
 
 
-class Category(BaseModel):
+class Category(_Bank2aiModel):
     """Transaction category for spending classification"""
 
     id: str = Field(description="Unique category identifier")
