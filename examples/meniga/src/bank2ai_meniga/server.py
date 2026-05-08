@@ -216,11 +216,13 @@ async def get_transactions(
     description: Optional[str] = None,
     categories: Optional[list[str]] = None,
     account_ids: Optional[list[str]] = None,
+    min_amount: Optional[float] = None,
+    max_amount: Optional[float] = None,
     cursor: Optional[str] = None,
 ) -> TransactionList:
     logger.info(
-        "get_transactions: count=%s type=%s order=%s start=%s end=%s desc=%s cats=%s account_ids=%s cursor=%s",
-        count, type, order, start_date, end_date, description, categories, account_ids, cursor,
+        "get_transactions: count=%s type=%s order=%s start=%s end=%s desc=%s cats=%s account_ids=%s min=%s max=%s cursor=%s",
+        count, type, order, start_date, end_date, description, categories, account_ids, min_amount, max_amount, cursor,
     )
     params: dict[str, str] = {
         "fields": "id,amount,categoryId,text,date",
@@ -243,6 +245,10 @@ async def get_transactions(
         params["ascendingOrder"] = "true"
     if account_ids:
         params["accountIds"] = ",".join(account_ids)
+    if min_amount is not None:
+        params["amountFrom"] = str(min_amount)
+    if max_amount is not None:
+        params["amountTo"] = str(max_amount)
 
     all_categories = (await get_categories()).items
 

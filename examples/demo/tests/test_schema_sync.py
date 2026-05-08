@@ -35,7 +35,8 @@ EXPECTED_TOOL_INPUTS = {
     "get-accounts": {"only_withdrawal_accounts", "account_type"},
     "get-transactions": {
         "count", "type", "order", "start_date", "end_date",
-        "description", "categories", "account_ids", "cursor",
+        "description", "categories", "account_ids",
+        "min_amount", "max_amount", "cursor",
     },
     "get-categories": set(),
     "spending-summary": {"group_by", "start_date", "end_date", "categories"},

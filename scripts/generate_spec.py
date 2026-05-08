@@ -33,7 +33,7 @@ from bank2ai.models import (
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SPEC_PATH = REPO_ROOT / "specs" / "bank2ai.json"
-SPEC_VERSION = "0.1.0"
+SPEC_VERSION = "0.2.0"
 
 DOCUMENTED_MODELS = {
     "Account": Account,

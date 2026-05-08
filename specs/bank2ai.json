@@ -928,6 +928,30 @@
               "2024-03-15"
             ]
           },
+          "max_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive upper bound on the transaction amount. Amounts are signed: expenses are negative, income is positive. Examples: `max_amount=0` keeps only expenses; `max_amount=-50` keeps only expenses of 50 or more (in absolute value)."
+          },
+          "min_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive lower bound on the transaction amount. Amounts are signed: expenses are negative, income is positive. Examples: `min_amount=0` keeps only income; `min_amount=-100` drops expenses larger than 100."
+          },
           "order": {
             "default": "NewestFirst",
             "description": "Sort order.",
@@ -1613,5 +1637,5 @@
       }
     }
   ],
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

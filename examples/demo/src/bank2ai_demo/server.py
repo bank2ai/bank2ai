@@ -76,6 +76,8 @@ async def get_transactions(
     description: Optional[str] = None,
     categories: Optional[list[str]] = None,
     account_ids: Optional[list[str]] = None,
+    min_amount: Optional[float] = None,
+    max_amount: Optional[float] = None,
     cursor: Optional[str] = None,
 ) -> TransactionList:
     logger.info(
@@ -97,6 +99,11 @@ async def get_transactions(
         transactions = [t for t in transactions if t["transaction_date"] >= start_date]
     if end_date:
         transactions = [t for t in transactions if t["transaction_date"] <= end_date]
+
+    if min_amount is not None:
+        transactions = [t for t in transactions if t["amount"] >= min_amount]
+    if max_amount is not None:
+        transactions = [t for t in transactions if t["amount"] <= max_amount]
 
     if categories:
         lower_cats = {c.lower() for c in categories}

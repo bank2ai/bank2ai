@@ -134,6 +134,24 @@ def register_tools(
                 default=None,
                 description="Restrict to transactions on these account.id values (from get-accounts).",
             ),
+            min_amount: Optional[float] = Field(
+                default=None,
+                description=(
+                    "Inclusive lower bound on the transaction amount. "
+                    "Amounts are signed: expenses are negative, income is positive. "
+                    "Examples: `min_amount=0` keeps only income; "
+                    "`min_amount=-100` drops expenses larger than 100."
+                ),
+            ),
+            max_amount: Optional[float] = Field(
+                default=None,
+                description=(
+                    "Inclusive upper bound on the transaction amount. "
+                    "Amounts are signed: expenses are negative, income is positive. "
+                    "Examples: `max_amount=0` keeps only expenses; "
+                    "`max_amount=-50` keeps only expenses of 50 or more (in absolute value)."
+                ),
+            ),
             cursor: Optional[str] = Field(
                 default=None,
                 description=(
@@ -151,6 +169,8 @@ def register_tools(
                 description=description,
                 categories=categories,
                 account_ids=account_ids,
+                min_amount=min_amount,
+                max_amount=max_amount,
                 cursor=cursor,
             )
 
