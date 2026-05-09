@@ -27,6 +27,7 @@ from fastmcp.server.dependencies import get_access_token, get_context
 from bank2ai import (
     Account,
     AccountList,
+    AccountStatus,
     AccountType,
     Category,
     CategoryList,
@@ -136,19 +137,31 @@ async def get_accounts(
     *,
     only_withdrawal_accounts: bool = False,
     account_type: Optional[str] = None,
+    status: Optional[str] = None,
+    usage: Optional[str] = None,
 ) -> AccountList:
     logger.info(
-        "get_accounts: only_withdrawal=%s account_type=%s",
-        only_withdrawal_accounts, account_type,
+        "get_accounts: only_withdrawal=%s account_type=%s status=%s usage=%s",
+        only_withdrawal_accounts, account_type, status, usage,
     )
+
+    params: dict[str, str] = {}
+
+    if status != AccountStatus.Enabled:
+        params["includeDisabled"] = True
+        params["includeHidden"] = True
+
     async with await _client() as client:
-        response = await client.get(f"{_BASE_URL}/v1/accounts")
+        response = await client.get(f"{_BASE_URL}/v1/accounts", params=params)
     response.raise_for_status()
 
     accounts: list[Account] = []
     for acc in response.json()["data"]:
         category = acc.get("accountCategory")
         if category == "Credit":
+            # Statement-cycle fields (statementBalance, minimumPaymentDue,
+            # paymentDueDate, statementClosingDate) aren't on /v1/accounts;
+            # they need a separate Meniga endpoint and stay omitted for now.
             at, is_withdrawal = AccountType.Credit, False
         elif category == "Savings":
             at, is_withdrawal = AccountType.Savings, True
@@ -156,6 +169,13 @@ async def get_accounts(
             at, is_withdrawal = AccountType.Current, True
         else:
             continue
+
+        if acc.get("isHidden"):
+            st = AccountStatus.Deleted
+        elif acc.get("isDisabled"):
+            st = AccountStatus.Blocked
+        else:
+            st = AccountStatus.Enabled
 
         accounts.append(Account(
             id=str(acc["id"]),
@@ -166,7 +186,7 @@ async def get_accounts(
             overdraftLimit=acc["limit"],
             currency=acc["currencyCode"],
             accountType=at,
-            isWithdrawalAccount=is_withdrawal,
+            status=st,
         ))
 
     first_current = next(
@@ -180,6 +200,12 @@ async def get_accounts(
 
     if account_type:
         accounts = [a for a in accounts if a.accountType == account_type]
+
+    if status is not None and status != AccountStatus.Enabled:
+        accounts = [a for a in accounts if a.status == status]
+
+    if usage:
+        accounts = [a for a in accounts if a.usage == usage]
 
     logger.info("get_accounts: returning %d accounts", len(accounts))
     return AccountList(items=accounts)

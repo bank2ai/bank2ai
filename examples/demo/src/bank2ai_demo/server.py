@@ -53,16 +53,22 @@ async def get_accounts(
     *,
     only_withdrawal_accounts: bool = False,
     account_type: Optional[str] = None,
+    status: Optional[str] = None,
+    usage: Optional[str] = None,
 ) -> AccountList:
     logger.info(
-        "get_accounts: only_withdrawal=%s account_type=%s",
-        only_withdrawal_accounts, account_type,
+        "get_accounts: only_withdrawal=%s account_type=%s status=%s usage=%s",
+        only_withdrawal_accounts, account_type, status, usage,
     )
     accounts = list(demo_data.ACCOUNTS)
     if only_withdrawal_accounts:
-        accounts = [a for a in accounts if a["isWithdrawalAccount"]]
+        accounts = [a for a in accounts if a.get("isWithdrawalAccount")]
     if account_type:
-        accounts = [a for a in accounts if a["accountType"] == account_type]
+        accounts = [a for a in accounts if a.get("accountType") == account_type]
+    if status:
+        accounts = [a for a in accounts if a.get("status") == status]
+    if usage:
+        accounts = [a for a in accounts if a.get("usage") == usage]
     return AccountList(items=[Account(**a) for a in accounts])
 
 

@@ -15,7 +15,9 @@ from .tools import (
 from .models import (
     Account,
     AccountList,
+    AccountStatus,
     AccountType,
+    AccountUsage,
     Category,
     CategoryList,
     CreateRecipientResponse,
@@ -39,7 +41,9 @@ from .models import (
 __all__ = [
     "Account",
     "AccountList",
+    "AccountStatus",
     "AccountType",
+    "AccountUsage",
     "Category",
     "CategoryList",
     "CreateRecipientResponse",

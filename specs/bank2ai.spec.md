@@ -24,7 +24,7 @@ A bank2ai server MAY register any subset of the following tools. Tools that are 
 
 | Name                       | Purpose                                                            |
 | -------------------------- | ------------------------------------------------------------------ |
-| `get-accounts`             | List bank accounts and cards, optionally filtered by type or by withdrawal-eligibility. |
+| `get-accounts`             | List bank accounts and cards with balances and identifiers (account number plus IBAN/BBAN/BIC or masked PAN where available), optionally filtered by type, lifecycle status, usage, or withdrawal-eligibility. |
 | `get-transactions`         | List transactions, with filters for account, date range, signed amount range, categories, free-text search, and result count. Supports cursor-based paging via `cursor` / `nextCursor`. |
 | `get-categories`           | List the bank's transaction categories.                            |
 | `get-transactions-summary` | Aggregated transactions, scoped to either income or expenses (required `direction`). Group by `none`, `category`, `month`, or `both`; each row reports the corresponding `category_id` and/or `month`. Filters mirror `get-transactions`: account, date, amount, category ids. |
@@ -49,7 +49,7 @@ A typical bank2ai session looks like this:
 
 The schemas in `bank2ai.json` under `models{}` define the canonical shapes for:
 
-* **`Account`**, id, accountNumber, currency, balance, optional availableBalance, overdraftLimit, isWithdrawalAccount, isDefaultAccount, accountType (`Current` | `Savings` | `Credit`).
+* **`Account`**, id, accountNumber, currency, balance; optional typed identifiers iban / bban / bic / maskedPan; optional availableBalance, overdraftLimit, ownerName, product, openedDate, balanceUpdatedAt; optional accountType (`Current` | `Savings` | `Credit` | `Loan` | `Other`), status (`Enabled` | `Blocked` | `Deleted`), usage (`Private` | `Business`), isWithdrawalAccount, isDefaultAccount; credit-only optional statementBalance, minimumPaymentDue, paymentDueDate, statementClosingDate. Field names follow Berlin Group PSD2 `accountDetails` where they overlap; statement-cycle fields go beyond PSD2 so an agent can answer "what do I owe and when?" without a second call. Debit and prepaid cards live under `Current`; their attached card is signalled by `maskedPan`. Servers MUST omit the statement-cycle fields on non-credit accounts.
 * **`Transaction`**, id, description, amount (in the user's default currency, negative = expense), transaction_date (ISO 8601), category_id (resolves via `get-categories`), optional currency and amount_in_currency for transactions originally made in a different currency.
 * **`Category`**, id, name (localized).
 * **`Recipient`**, id, name, accountNumber, accountNumberType (`Domestic` | `IBAN` | `SWIFT`), socialSecurityNumber, optional bankInfo, paymentType, address, isFavorite, description.
