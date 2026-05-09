@@ -42,12 +42,16 @@ This three-way fallback is a useful template, most real banks need at least opti
 Each bank2ai tool is implemented as a thin async handler that calls the bank API and maps the response into the bank2ai shape. The handler does the work the spec defines; the mapper does the work your backend shape forces.
 
 ```python
-async def get_accounts(*, only_withdrawal_accounts, account_type):
+async def get_accounts(*, only_withdrawal_accounts, account_type, status, usage):
     rows = await bank_client.list_accounts()
     if only_withdrawal_accounts:
         rows = [r for r in rows if r["IsActive"] and r["IsAvailable"]]
     if account_type:
         rows = [r for r in rows if r["AccountTypeName"] == account_type]
+    if status:
+        rows = [r for r in rows if r["Status"] == status]
+    if usage:
+        rows = [r for r in rows if r["Usage"] == usage]
     return [_to_bank2ai_account(r) for r in rows]
 ```
 

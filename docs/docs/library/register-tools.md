@@ -35,7 +35,7 @@ def register_tools(
 
 | Tool | Handler keyword arguments |
 | --- | --- |
-| [`get-accounts`](/docs/specification/tools/get-accounts) | `only_withdrawal_accounts: bool`, `account_type: Literal["Current","Savings","Credit"] \| None` |
+| [`get-accounts`](/docs/specification/tools/get-accounts) | `only_withdrawal_accounts: bool`, `account_type: Literal["Current","Savings","Credit","Loan","Other"] \| None`, `status: Literal["Enabled","Blocked","Deleted"] \| None`, `usage: Literal["Private","Business"] \| None` |
 | [`get-transactions`](/docs/specification/tools/get-transactions) | `count: int \| None`, `order: Literal["NewestFirst","OldestFirst"]`, `start_date: str \| None`, `end_date: str \| None`, `description: str \| None`, `category_ids: list[str] \| None`, `account_ids: list[str] \| None`, `min_amount: float \| None`, `max_amount: float \| None`, `cursor: str \| None` |
 | [`get-categories`](/docs/specification/tools/get-categories) | _(none)_ |
 | [`get-transactions-summary`](/docs/specification/tools/get-transactions-summary) | `direction: Literal["Income","Expenses"]`, `group_by: Literal["none","category","month","both"]`, `start_date: str \| None`, `end_date: str \| None`, `category_ids: list[str] \| None`, `account_ids: list[str] \| None`, `min_amount: float \| None`, `max_amount: float \| None` |
@@ -54,12 +54,16 @@ from bank2ai import AccountList, register_tools
 
 app = FastMCP("acme-bank")
 
-async def get_accounts(*, only_withdrawal_accounts, account_type):
+async def get_accounts(*, only_withdrawal_accounts, account_type, status, usage):
     rows = await acme_api.list_accounts()
     if only_withdrawal_accounts:
         rows = [r for r in rows if r.is_withdrawal]
     if account_type:
         rows = [r for r in rows if r.type == account_type]
+    if status:
+        rows = [r for r in rows if r.status == status]
+    if usage:
+        rows = [r for r in rows if r.usage == usage]
     return AccountList(items=[to_bank2ai_account(r) for r in rows])
 
 register_tools(app, get_accounts=get_accounts)

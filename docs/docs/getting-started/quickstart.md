@@ -47,7 +47,7 @@ CATEGORIES = [
     Category(id="cat-transport", name="Transportation"),
 ]
 
-async def get_accounts(*, only_withdrawal_accounts: bool, account_type):
+async def get_accounts(*, only_withdrawal_accounts: bool, account_type, status, usage):
     return AccountList(items=ACCOUNTS)
 
 async def get_categories():

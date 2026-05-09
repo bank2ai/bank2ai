@@ -12,6 +12,12 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Specification
 
+### 0.10.0, Draft
+
+- `Account` overhauled with the standard banking properties most issuers expose, with field names following [Berlin Group PSD2 `accountDetails`](https://www.berlin-group.org/openfinance-downloads) where they overlap. New optional fields: typed identifiers `iban` / `bban` / `bic` / `maskedPan`, plus `ownerName`, `product`, `status`, `usage`, `openedDate`, `balanceUpdatedAt`. Credit accounts may also carry `statementBalance`, `minimumPaymentDue`, `paymentDueDate`, and `statementClosingDate` so an agent can answer "what do I owe and when?" without a second call.
+- `AccountType` extended with `Loan` and `Other`. Debit and prepaid cards live under `Current`; their attached card is signalled by `Account.maskedPan`.
+- `get-accounts` gains optional `status` and `usage` filters; `account_type` accepts the new enum values.
+
 ### 0.9.0, Draft
 
 - **Breaking:** categories are referenced by id, not name. `Transaction.category` (string name) becomes `Transaction.category_id`; `TransactionsSummaryGroup.category` becomes `category_id`. The `categories` input on `get-transactions` and `get-transactions-summary` is renamed to `category_ids` and now takes `Category.id` values from `get-categories`. `Category.name` is unchanged and remains the only place a category's localized name lives.
