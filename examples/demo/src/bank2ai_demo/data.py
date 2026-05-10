@@ -83,20 +83,20 @@ def generate_transactions():
     # Recurring monthly transactions
     transactions.append({
         "id": "tx_001",
-        "account_id": "acc_checking_001",
+        "accountId": "acc_checking_001",
         "description": "Monthly Salary",
         "amount": 4500.00,
-        "transaction_date": (today - timedelta(days=5)).isoformat(),
-        "category_id": "cat_income",
+        "bookingDate": (today - timedelta(days=5)).isoformat(),
+        "categoryId": "cat_income",
     })
 
     transactions.append({
         "id": "tx_002",
-        "account_id": "acc_checking_001",
+        "accountId": "acc_checking_001",
         "description": "Rent Payment",
         "amount": -1200.00,
-        "transaction_date": (today - timedelta(days=3)).isoformat(),
-        "category_id": "cat_housing",
+        "bookingDate": (today - timedelta(days=3)).isoformat(),
+        "categoryId": "cat_housing",
     })
 
     # Groceries
@@ -104,30 +104,30 @@ def generate_transactions():
     for i, days_ago in enumerate([2, 7, 14, 21, 28, 35]):
         transactions.append({
             "id": f"tx_grocery_{i:03d}",
-            "account_id": "acc_checking_001",
+            "accountId": "acc_checking_001",
             "description": grocery_stores[i % len(grocery_stores)],
             "amount": -85.50 - (i * 5),
-            "transaction_date": (today - timedelta(days=days_ago)).isoformat(),
-            "category_id": "cat_groceries",
+            "bookingDate": (today - timedelta(days=days_ago)).isoformat(),
+            "categoryId": "cat_groceries",
         })
 
     # Transportation
     transactions.extend([
         {
             "id": "tx_gas_001",
-            "account_id": "acc_checking_001",
+            "accountId": "acc_checking_001",
             "description": "Shell Gas Station",
             "amount": -45.00,
-            "transaction_date": (today - timedelta(days=4)).isoformat(),
-            "category_id": "cat_transportation",
+            "bookingDate": (today - timedelta(days=4)).isoformat(),
+            "categoryId": "cat_transportation",
         },
         {
             "id": "tx_transit_001",
-            "account_id": "acc_checking_001",
+            "accountId": "acc_checking_001",
             "description": "Monthly Metro Pass",
             "amount": -120.00,
-            "transaction_date": (today - timedelta(days=1)).isoformat(),
-            "category_id": "cat_transportation",
+            "bookingDate": (today - timedelta(days=1)).isoformat(),
+            "categoryId": "cat_transportation",
         },
     ])
 
@@ -135,27 +135,27 @@ def generate_transactions():
     transactions.extend([
         {
             "id": "tx_netflix_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Netflix Subscription",
             "amount": -15.99,
-            "transaction_date": (today - timedelta(days=10)).isoformat(),
-            "category_id": "cat_entertainment",
+            "bookingDate": (today - timedelta(days=10)).isoformat(),
+            "categoryId": "cat_entertainment",
         },
         {
             "id": "tx_movie_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Cinema Tickets",
             "amount": -32.00,
-            "transaction_date": (today - timedelta(days=12)).isoformat(),
-            "category_id": "cat_entertainment",
+            "bookingDate": (today - timedelta(days=12)).isoformat(),
+            "categoryId": "cat_entertainment",
         },
         {
             "id": "tx_spotify_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Spotify Premium",
             "amount": -9.99,
-            "transaction_date": (today - timedelta(days=8)).isoformat(),
-            "category_id": "cat_entertainment",
+            "bookingDate": (today - timedelta(days=8)).isoformat(),
+            "categoryId": "cat_entertainment",
         },
     ])
 
@@ -163,19 +163,19 @@ def generate_transactions():
     transactions.extend([
         {
             "id": "tx_electric_001",
-            "account_id": "acc_checking_001",
+            "accountId": "acc_checking_001",
             "description": "Electric Company",
             "amount": -85.00,
-            "transaction_date": (today - timedelta(days=15)).isoformat(),
-            "category_id": "cat_utilities",
+            "bookingDate": (today - timedelta(days=15)).isoformat(),
+            "categoryId": "cat_utilities",
         },
         {
             "id": "tx_internet_001",
-            "account_id": "acc_checking_001",
+            "accountId": "acc_checking_001",
             "description": "Internet Service Provider",
             "amount": -60.00,
-            "transaction_date": (today - timedelta(days=18)).isoformat(),
-            "category_id": "cat_utilities",
+            "bookingDate": (today - timedelta(days=18)).isoformat(),
+            "categoryId": "cat_utilities",
         },
     ])
 
@@ -184,70 +184,70 @@ def generate_transactions():
     for i, days_ago in enumerate([1, 6, 9, 13, 20, 25, 30]):
         transactions.append({
             "id": f"tx_dining_{i:03d}",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": restaurants[i % len(restaurants)],
             "amount": -25.00 - (i * 3),
-            "transaction_date": (today - timedelta(days=days_ago)).isoformat(),
-            "category_id": "cat_dining",
+            "bookingDate": (today - timedelta(days=days_ago)).isoformat(),
+            "categoryId": "cat_dining",
         })
 
     # Healthcare
     transactions.append({
         "id": "tx_pharmacy_001",
-        "account_id": "acc_checking_001",
+        "accountId": "acc_checking_001",
         "description": "Pharmacy Co-pay",
         "amount": -20.00,
-        "transaction_date": (today - timedelta(days=22)).isoformat(),
-        "category_id": "cat_healthcare",
+        "bookingDate": (today - timedelta(days=22)).isoformat(),
+        "categoryId": "cat_healthcare",
     })
 
     # Shopping (charged to credit card)
     transactions.extend([
         {
             "id": "tx_amazon_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Amazon.com",
             "amount": -78.50,
-            "transaction_date": (today - timedelta(days=11)).isoformat(),
-            "category_id": "cat_shopping",
+            "bookingDate": (today - timedelta(days=11)).isoformat(),
+            "categoryId": "cat_shopping",
         },
         {
             "id": "tx_clothing_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Clothing Store",
             "amount": -125.00,
-            "transaction_date": (today - timedelta(days=16)).isoformat(),
-            "category_id": "cat_shopping",
+            "bookingDate": (today - timedelta(days=16)).isoformat(),
+            "categoryId": "cat_shopping",
         },
     ])
 
     # Foreign-currency transactions: amount is in the user's default currency
-    # (USD here); currency / amount_in_currency carry the original.
+    # (USD here); originalCurrency / originalAmount carry the original.
     transactions.extend([
         {
             "id": "tx_paris_dining_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Le Petit Bistro, Paris",
             "amount": -54.20,
-            "currency": "EUR",
-            "amount_in_currency": -49.80,
-            "transaction_date": (today - timedelta(days=17)).isoformat(),
-            "category_id": "cat_dining",
+            "originalCurrency": "EUR",
+            "originalAmount": -49.80,
+            "bookingDate": (today - timedelta(days=17)).isoformat(),
+            "categoryId": "cat_dining",
         },
         {
             "id": "tx_london_shopping_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Selfridges, London",
             "amount": -210.45,
-            "currency": "GBP",
-            "amount_in_currency": -165.00,
-            "transaction_date": (today - timedelta(days=24)).isoformat(),
-            "category_id": "cat_shopping",
+            "originalCurrency": "GBP",
+            "originalAmount": -165.00,
+            "bookingDate": (today - timedelta(days=24)).isoformat(),
+            "categoryId": "cat_shopping",
         },
     ])
 
     # Sort by date (newest first)
-    transactions.sort(key=lambda x: x["transaction_date"], reverse=True)
+    transactions.sort(key=lambda x: x["bookingDate"], reverse=True)
 
     return transactions
 

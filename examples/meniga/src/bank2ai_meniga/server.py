@@ -250,7 +250,7 @@ async def get_transactions(
         count, order, start_date, end_date, description, category_ids, account_ids, min_amount, max_amount, cursor,
     )
     params: dict[str, str] = {
-        "fields": "id,amount,amountInCurrency,currency,categoryId,text,date",
+        "fields": "id,accountId,amount,amountInCurrency,currency,categoryId,text,date",
         "includeChildCategoriesForParentWhenUsingSearchText": "true",
     }
     if count is not None:
@@ -285,12 +285,13 @@ async def get_transactions(
     for t in response_json["data"]:
         transactions.append(Transaction(
             id=str(t["id"]),
+            accountId=str(t["accountId"]),
             description=t["text"],
             amount=t["amount"],
-            transaction_date=t["date"],
-            amount_in_currency=t.get("amountInCurrency"),
-            currency=t.get("currency"),
-            category_id=str(t["categoryId"]) if t.get("categoryId") is not None else None,
+            bookingDate=t["date"],
+            originalAmount=t.get("amountInCurrency"),
+            originalCurrency=t.get("currency"),
+            categoryId=str(t["categoryId"]) if t.get("categoryId") is not None else None,
         ))
 
     next_cursor: Optional[str] = response_json["meta"]["pageToken"]
@@ -332,8 +333,8 @@ async def get_transactions_summary(
     )).items
 
     def grouping_key(t: Transaction) -> tuple[Optional[str], Optional[str]]:
-        cat = t.category_id
-        month = t.transaction_date.strftime("%Y-%m")
+        cat = t.categoryId
+        month = t.bookingDate.strftime("%Y-%m")
         if group_by == "category":
             return (cat, None)
         if group_by == "month":
@@ -352,23 +353,23 @@ async def get_transactions_summary(
 
     summary = [
         TransactionsSummaryGroup(
-            category_id=cat,
+            categoryId=cat,
             month=month,
-            total_amount=stats["total"],
-            transaction_count=int(stats["count"]),
-            average_amount=stats["total"] / stats["count"] if stats["count"] > 0 else 0,
+            totalAmount=stats["total"],
+            transactionCount=int(stats["count"]),
+            averageAmount=stats["total"] / stats["count"] if stats["count"] > 0 else 0,
         )
         for (cat, month), stats in groups.items()
     ]
-    summary.sort(key=lambda g: g.total_amount)
+    summary.sort(key=lambda g: g.totalAmount)
 
     return TransactionsSummary(
         summary=summary,
         period=TransactionsSummaryPeriod(
-            start_date=start_date or "all",
-            end_date=end_date or "all",
+            startDate=start_date or "all",
+            endDate=end_date or "all",
         ),
-        total=sum(g.total_amount for g in summary),
+        total=sum(g.totalAmount for g in summary),
     )
 
 

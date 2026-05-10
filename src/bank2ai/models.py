@@ -294,10 +294,29 @@ class Account(_Bank2aiModel):
     )
 
 
+class TransactionStatus(str, Enum):
+    """Booking status of a transaction, per Berlin Group PSD2 `bookingStatus`.
+
+    `Booked` is the default a client should assume when servers omit
+    `Transaction.status`.
+    """
+
+    Booked = "Booked"
+    Pending = "Pending"
+    Information = "Information"
+
+
 class Transaction(_Bank2aiModel):
-    """Financial transaction with date, amount and metadata"""
-    id: Optional[str] = Field(default=None,
-        description="Unique transaction identifier")
+    """Financial transaction with date, amount and metadata.
+
+    Profile of: ISO 20022 `EntryDetails2` and Berlin Group PSD2
+    `transactions` array element.
+    """
+
+    id: str = Field(description="Unique transaction identifier (server-scoped).")
+    accountId: str = Field(
+        description="References the `id` of the `Account` this transaction belongs to.",
+    )
     description: str = Field(
         description="Transaction description, merchant name or recipient name",
     )
@@ -309,28 +328,42 @@ class Transaction(_Bank2aiModel):
             "the user has explicitly asked which currency a transaction is in."
         ),
     )
-    transaction_date: date = Field(
-        description="Transaction date in ISO 8601 format (YYYY-MM-DD)"
+    bookingDate: date = Field(
+        description="Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD).",
     )
-    category_id: Optional[str] = Field(
+    status: Optional[TransactionStatus] = Field(
+        default=None,
+        description=(
+            "Booking status. If omitted, clients SHOULD treat the transaction "
+            "as `Booked`."
+        ),
+    )
+    counterpartyName: Optional[str] = Field(
+        default=None,
+        description=(
+            "Best-effort merchant or counterparty display name. Distinct from "
+            "`description`, which is the bank's narrative as presented to the user."
+        ),
+    )
+    categoryId: Optional[str] = Field(
         default=None,
         description="Category id (the `id` field from get-categories which also has category name).",
     )
-    currency: Optional[str] = Field(
+    originalCurrency: Optional[str] = Field(
         default=None,
         description=(
             "ISO 4217 currency code of the original transaction, present only "
             "when the transaction was made in a currency other than the user's "
-            "default. Pair with `amount_in_currency` to recover the original amount."
+            "default. Pair with `originalAmount` to recover the original amount."
         ),
         pattern="^[A-Z]{3}$",
         examples=["EUR", "GBP", "JPY"],
     )
-    amount_in_currency: Optional[float] = Field(
+    originalAmount: Optional[float] = Field(
         default=None,
         description=(
-            "Original transaction amount in `currency` (negative for expenses, "
-            "positive for income). Present only when `currency` is set."
+            "Transaction amount in `originalCurrency` (negative for expenses, "
+            "positive for income). Present only when `originalCurrency` is set."
         ),
     )
 
@@ -393,7 +426,7 @@ class TransactionDirection(str, Enum):
 class TransactionsSummaryGroup(BaseModel):
     """One row of an aggregated transactions summary."""
 
-    category_id: Optional[str] = Field(
+    categoryId: Optional[str] = Field(
         default=None,
         description=(
             "Category id when the request grouped by `category` or `both`; "
@@ -408,12 +441,12 @@ class TransactionsSummaryGroup(BaseModel):
         ),
         examples=["2024-03"],
     )
-    total_amount: float = Field(description="Sum of transaction amounts in this group.")
-    transaction_count: int = Field(
+    totalAmount: float = Field(description="Sum of transaction amounts in this group.")
+    transactionCount: int = Field(
         description="Number of transactions contributing to this group.",
         ge=0,
     )
-    average_amount: float = Field(
+    averageAmount: float = Field(
         description="Mean transaction amount within this group.",
     )
 
@@ -421,11 +454,11 @@ class TransactionsSummaryGroup(BaseModel):
 class TransactionsSummaryPeriod(BaseModel):
     """Inclusive date range covered by a transactions summary."""
 
-    start_date: str = Field(
+    startDate: str = Field(
         description="Inclusive lower bound, ISO 8601 (YYYY-MM-DD).",
         examples=["2024-03-01"],
     )
-    end_date: str = Field(
+    endDate: str = Field(
         description="Inclusive upper bound, ISO 8601 (YYYY-MM-DD).",
         examples=["2024-03-31"],
     )

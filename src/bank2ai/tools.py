@@ -238,7 +238,7 @@ def register_tools(
                     "Aggregation key. `none` returns a single row spanning all matched "
                     "transactions; `category` groups by category id; `month` groups by "
                     "calendar month (YYYY-MM); `both` groups by (category id, month) pairs. "
-                    "Each summary row reports `category_id` and/or `month` accordingly."
+                    "Each summary row reports `categoryId` and/or `month` accordingly."
                 ),
             ),
             start_date: Optional[str] = Field(

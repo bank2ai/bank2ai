@@ -541,27 +541,37 @@
       "type": "object"
     },
     "Transaction": {
-      "description": "Financial transaction with date, amount and metadata",
+      "$defs": {
+        "TransactionStatus": {
+          "description": "Booking status of a transaction, per Berlin Group PSD2 `bookingStatus`.\n\n`Booked` is the default a client should assume when servers omit\n`Transaction.status`.",
+          "enum": [
+            "Booked",
+            "Pending",
+            "Information"
+          ],
+          "title": "TransactionStatus",
+          "type": "string"
+        }
+      },
+      "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2` and Berlin Group PSD2\n`transactions` array element.",
       "properties": {
+        "accountId": {
+          "description": "References the `id` of the `Account` this transaction belongs to.",
+          "title": "Accountid",
+          "type": "string"
+        },
         "amount": {
           "description": "Transaction amount in the user's default currency (negative for expenses, positive for income). Clients SHOULD render this without a currency symbol unless the user has explicitly asked which currency a transaction is in.",
           "title": "Amount",
           "type": "number"
         },
-        "amount_in_currency": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Original transaction amount in `currency` (negative for expenses, positive for income). Present only when `currency` is set.",
-          "title": "Amount In Currency"
+        "bookingDate": {
+          "description": "Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD).",
+          "format": "date",
+          "title": "Bookingdate",
+          "type": "string"
         },
-        "category_id": {
+        "categoryId": {
           "anyOf": [
             {
               "type": "string"
@@ -572,9 +582,45 @@
           ],
           "default": null,
           "description": "Category id (the `id` field from get-categories which also has category name).",
-          "title": "Category Id"
+          "title": "Categoryid"
         },
-        "currency": {
+        "counterpartyName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Best-effort merchant or counterparty display name. Distinct from `description`, which is the bank's narrative as presented to the user.",
+          "title": "Counterpartyname"
+        },
+        "description": {
+          "description": "Transaction description, merchant name or recipient name",
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique transaction identifier (server-scoped).",
+          "title": "Id",
+          "type": "string"
+        },
+        "originalAmount": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Transaction amount in `originalCurrency` (negative for expenses, positive for income). Present only when `originalCurrency` is set.",
+          "title": "Originalamount"
+        },
+        "originalCurrency": {
           "anyOf": [
             {
               "pattern": "^[A-Z]{3}$",
@@ -585,43 +631,33 @@
             }
           ],
           "default": null,
-          "description": "ISO 4217 currency code of the original transaction, present only when the transaction was made in a currency other than the user's default. Pair with `amount_in_currency` to recover the original amount.",
+          "description": "ISO 4217 currency code of the original transaction, present only when the transaction was made in a currency other than the user's default. Pair with `originalAmount` to recover the original amount.",
           "examples": [
             "EUR",
             "GBP",
             "JPY"
           ],
-          "title": "Currency"
+          "title": "Originalcurrency"
         },
-        "description": {
-          "description": "Transaction description, merchant name or recipient name",
-          "title": "Description",
-          "type": "string"
-        },
-        "id": {
+        "status": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/TransactionStatus"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "Unique transaction identifier",
-          "title": "Id"
-        },
-        "transaction_date": {
-          "description": "Transaction date in ISO 8601 format (YYYY-MM-DD)",
-          "format": "date",
-          "title": "Transaction Date",
-          "type": "string"
+          "description": "Booking status. If omitted, clients SHOULD treat the transaction as `Booked`."
         }
       },
       "required": [
+        "id",
+        "accountId",
         "description",
         "amount",
-        "transaction_date"
+        "bookingDate"
       ],
       "title": "Transaction",
       "type": "object"
@@ -1661,25 +1697,22 @@
           "items": {
             "description": "Transactions matching the request.",
             "items": {
-              "description": "Financial transaction with date, amount and metadata",
+              "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2` and Berlin Group PSD2\n`transactions` array element.",
               "properties": {
+                "accountId": {
+                  "description": "References the `id` of the `Account` this transaction belongs to.",
+                  "type": "string"
+                },
                 "amount": {
                   "description": "Transaction amount in the user's default currency (negative for expenses, positive for income). Clients SHOULD render this without a currency symbol unless the user has explicitly asked which currency a transaction is in.",
                   "type": "number"
                 },
-                "amount_in_currency": {
-                  "anyOf": [
-                    {
-                      "type": "number"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Original transaction amount in `currency` (negative for expenses, positive for income). Present only when `currency` is set."
+                "bookingDate": {
+                  "description": "Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD).",
+                  "format": "date",
+                  "type": "string"
                 },
-                "category_id": {
+                "categoryId": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -1691,7 +1724,39 @@
                   "default": null,
                   "description": "Category id (the `id` field from get-categories which also has category name)."
                 },
-                "currency": {
+                "counterpartyName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Best-effort merchant or counterparty display name. Distinct from `description`, which is the bank's narrative as presented to the user."
+                },
+                "description": {
+                  "description": "Transaction description, merchant name or recipient name",
+                  "type": "string"
+                },
+                "id": {
+                  "description": "Unique transaction identifier (server-scoped).",
+                  "type": "string"
+                },
+                "originalAmount": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Transaction amount in `originalCurrency` (negative for expenses, positive for income). Present only when `originalCurrency` is set."
+                },
+                "originalCurrency": {
                   "anyOf": [
                     {
                       "pattern": "^[A-Z]{3}$",
@@ -1702,20 +1767,22 @@
                     }
                   ],
                   "default": null,
-                  "description": "ISO 4217 currency code of the original transaction, present only when the transaction was made in a currency other than the user's default. Pair with `amount_in_currency` to recover the original amount.",
+                  "description": "ISO 4217 currency code of the original transaction, present only when the transaction was made in a currency other than the user's default. Pair with `originalAmount` to recover the original amount.",
                   "examples": [
                     "EUR",
                     "GBP",
                     "JPY"
                   ]
                 },
-                "description": {
-                  "description": "Transaction description, merchant name or recipient name",
-                  "type": "string"
-                },
-                "id": {
+                "status": {
                   "anyOf": [
                     {
+                      "description": "Booking status of a transaction, per Berlin Group PSD2 `bookingStatus`.\n\n`Booked` is the default a client should assume when servers omit\n`Transaction.status`.",
+                      "enum": [
+                        "Booked",
+                        "Pending",
+                        "Information"
+                      ],
                       "type": "string"
                     },
                     {
@@ -1723,18 +1790,15 @@
                     }
                   ],
                   "default": null,
-                  "description": "Unique transaction identifier"
-                },
-                "transaction_date": {
-                  "description": "Transaction date in ISO 8601 format (YYYY-MM-DD)",
-                  "format": "date",
-                  "type": "string"
+                  "description": "Booking status. If omitted, clients SHOULD treat the transaction as `Booked`."
                 }
               },
               "required": [
+                "id",
+                "accountId",
                 "description",
                 "amount",
-                "transaction_date"
+                "bookingDate"
               ],
               "type": "object"
             },
@@ -1820,7 +1884,7 @@
           },
           "group_by": {
             "default": "category",
-            "description": "Aggregation key. `none` returns a single row spanning all matched transactions; `category` groups by category id; `month` groups by calendar month (YYYY-MM); `both` groups by (category id, month) pairs. Each summary row reports `category_id` and/or `month` accordingly.",
+            "description": "Aggregation key. `none` returns a single row spanning all matched transactions; `category` groups by category id; `month` groups by calendar month (YYYY-MM); `both` groups by (category id, month) pairs. Each summary row reports `categoryId` and/or `month` accordingly.",
             "enum": [
               "none",
               "category",
@@ -1882,14 +1946,14 @@
           "period": {
             "description": "Date range covered by the aggregation.",
             "properties": {
-              "end_date": {
+              "endDate": {
                 "description": "Inclusive upper bound, ISO 8601 (YYYY-MM-DD).",
                 "examples": [
                   "2024-03-31"
                 ],
                 "type": "string"
               },
-              "start_date": {
+              "startDate": {
                 "description": "Inclusive lower bound, ISO 8601 (YYYY-MM-DD).",
                 "examples": [
                   "2024-03-01"
@@ -1898,8 +1962,8 @@
               }
             },
             "required": [
-              "start_date",
-              "end_date"
+              "startDate",
+              "endDate"
             ],
             "type": "object"
           },
@@ -1908,11 +1972,11 @@
             "items": {
               "description": "One row of an aggregated transactions summary.",
               "properties": {
-                "average_amount": {
+                "averageAmount": {
                   "description": "Mean transaction amount within this group.",
                   "type": "number"
                 },
-                "category_id": {
+                "categoryId": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -1939,20 +2003,20 @@
                     "2024-03"
                   ]
                 },
-                "total_amount": {
+                "totalAmount": {
                   "description": "Sum of transaction amounts in this group.",
                   "type": "number"
                 },
-                "transaction_count": {
+                "transactionCount": {
                   "description": "Number of transactions contributing to this group.",
                   "minimum": 0,
                   "type": "integer"
                 }
               },
               "required": [
-                "total_amount",
-                "transaction_count",
-                "average_amount"
+                "totalAmount",
+                "transactionCount",
+                "averageAmount"
               ],
               "type": "object"
             },
