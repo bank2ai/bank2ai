@@ -80,14 +80,34 @@ def generate_transactions():
     transactions = []
     today = date.today()
 
-    # Recurring monthly transactions
+    # Recurring monthly transactions. The salary entry is richly populated
+    # to exercise the optional ISO 20022 fields (counterparty, transactionCode,
+    # remittanceInformation, endToEndId).
     transactions.append({
         "id": "tx_001",
         "accountId": "acc_checking_001",
         "description": "Monthly Salary",
+        "counterpartyName": "Acme Corp",
         "amount": 4500.00,
         "bookingDate": (today - timedelta(days=5)).isoformat(),
         "categoryId": "cat_income",
+        "counterparty": {
+            "name": "Acme Corp",
+            "accountIdentifier": {
+                "type": "accountNumber",
+                "accountNumber": "9999-99-999999",
+                "country": "US",
+            },
+        },
+        "transactionCode": {
+            "domain": "PMNT",
+            "family": "RCDT",
+            "subFamily": "SALA",
+        },
+        "remittanceInformation": {
+            "unstructured": "Payroll, March 2024",
+        },
+        "endToEndId": "ACME-PAY-2024-03-15",
     })
 
     transactions.append({

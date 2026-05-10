@@ -2,7 +2,7 @@
 
 from datetime import date, datetime
 from enum import Enum
-from typing import Optional
+from typing import Annotated, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, model_serializer
 
@@ -18,6 +18,158 @@ class _Bank2aiModel(BaseModel):
     def _omit_none(self, handler):
         data = handler(self)
         return {k: v for k, v in data.items() if v is not None}
+
+
+# ---- Shared identity primitives ----
+#
+# `AccountIdentifier` and `Party` are used by transaction counterparties,
+# transfer creditor details, and (in a later release) `Recipient`.
+
+
+class AliasType(str, Enum):
+    """Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.)."""
+
+    Email = "email"
+    Phone = "phone"
+    VPA = "vpa"
+    Pix = "pix"
+    Other = "other"
+
+
+class NationalIdType(str, Enum):
+    """Opaque label for the kind of national identifier carried in `NationalId.value`.
+
+    bank2ai does not validate national-ID formats; this is a hint so
+    clients can render or route appropriately. Servers SHOULD set the
+    closest-matching value or use `other`.
+    """
+
+    SSN = "ssn"
+    Kennitala = "kennitala"
+    CPR = "cpr"
+    Personnummer = "personnummer"
+    CPF = "cpf"
+    Other = "other"
+
+
+class IbanIdentifier(_Bank2aiModel):
+    """IBAN-routed account, ISO 13616."""
+
+    type: Literal["iban"] = Field(default="iban", description="Discriminator: `iban`.")
+    iban: str = Field(
+        description="IBAN, ISO 13616.",
+        pattern=r"^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$",
+        examples=["GB29NWBK60161331926819", "DE89370400440532013000"],
+    )
+
+
+class BbanIdentifier(_Bank2aiModel):
+    """Domestic Basic Bank Account Number, used in markets without an IBAN."""
+
+    type: Literal["bban"] = Field(default="bban", description="Discriminator: `bban`.")
+    bban: str = Field(
+        description="Domestic account identifier in the country's native format.",
+        examples=["0133-26-007890"],
+    )
+    country: str = Field(
+        description="ISO 3166-1 alpha-2 country code.",
+        pattern=r"^[A-Z]{2}$",
+        examples=["IS", "GB"],
+    )
+
+
+class AccountNumberIdentifier(_Bank2aiModel):
+    """Country-specific composite for non-IBAN markets (US, UK pre-IBAN, etc.)."""
+
+    type: Literal["accountNumber"] = Field(
+        default="accountNumber",
+        description="Discriminator: `accountNumber`.",
+    )
+    accountNumber: str = Field(
+        description="Account number in the country's native format.",
+    )
+    country: str = Field(
+        description="ISO 3166-1 alpha-2 country code.",
+        pattern=r"^[A-Z]{2}$",
+        examples=["US", "GB"],
+    )
+    routing: Optional[str] = Field(
+        default=None,
+        description="US ABA routing number, when applicable.",
+    )
+    sortCode: Optional[str] = Field(
+        default=None,
+        description="UK sort code, when applicable.",
+    )
+
+
+class AliasIdentifier(_Bank2aiModel):
+    """Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.)."""
+
+    type: Literal["alias"] = Field(default="alias", description="Discriminator: `alias`.")
+    alias: str = Field(
+        description="The alias value as the user knows it.",
+        examples=["alex@upi", "+44-7700-900000"],
+    )
+    aliasType: AliasType = Field(description="Kind of alias.")
+
+
+AccountIdentifier = Annotated[
+    Union[
+        IbanIdentifier,
+        BbanIdentifier,
+        AccountNumberIdentifier,
+        AliasIdentifier,
+    ],
+    Field(
+        discriminator="type",
+        description=(
+            "Discriminated union of typed account identifiers. Profile of: "
+            "ISO 20022 `AccountIdentification4Choice`."
+        ),
+    ),
+]
+
+
+class NationalId(_Bank2aiModel):
+    """Person or business national identifier."""
+
+    value: str = Field(
+        description="National identifier value, in the country's native format.",
+        examples=["010190-1234", "123-45-6789"],
+    )
+    country: str = Field(
+        description="ISO 3166-1 alpha-2 country code.",
+        pattern=r"^[A-Z]{2}$",
+        examples=["IS", "US"],
+    )
+    type: Optional[NationalIdType] = Field(
+        default=None,
+        description="Hint for the kind of identifier. bank2ai does not validate the value.",
+    )
+
+
+class Party(_Bank2aiModel):
+    """Counterparty in a transaction or transfer.
+
+    Profile of: ISO 20022 `PartyIdentification135` (subset).
+    """
+
+    name: str = Field(description="Party's full name or business name.")
+    accountIdentifier: Optional[AccountIdentifier] = Field(
+        default=None,
+        description="Party's account identifier when known.",
+    )
+    bic: Optional[str] = Field(
+        default=None,
+        description="BIC / SWIFT code of the party's bank, ISO 9362.",
+        pattern=r"^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$",
+        examples=["NWBKGB2L"],
+    )
+    nationalId: Optional[NationalId] = Field(
+        default=None,
+        description="Party's national identifier when known.",
+    )
 
 
 class RecipientInfo(_Bank2aiModel):
@@ -306,6 +458,53 @@ class TransactionStatus(str, Enum):
     Information = "Information"
 
 
+class TransactionCode(_Bank2aiModel):
+    """ISO 20022 BankTransactionCode taxonomy.
+
+    Three-level hierarchy (`domain` / `family` / `subFamily`). Servers
+    MAY emit only `domain` if that is all the bank exposes; the deeper
+    levels are populated when known.
+    """
+
+    domain: str = Field(
+        description="Top-level transaction domain (e.g., `PMNT` for payments).",
+        examples=["PMNT", "CASH", "ACMT"],
+    )
+    family: Optional[str] = Field(
+        default=None,
+        description="Mid-level family (e.g., `RCDT` for received credit transfers).",
+        examples=["RCDT", "ICDT"],
+    )
+    subFamily: Optional[str] = Field(
+        default=None,
+        description="Sub-family (e.g., `SALA` for salary, `SUBS` for subscription).",
+        examples=["SALA", "SUBS", "UPMT"],
+    )
+
+
+class RemittanceInformation(_Bank2aiModel):
+    """Free-text and/or structured remittance information for a transaction.
+
+    Profile of: ISO 20022 `RemittanceInformation`. Servers SHOULD populate
+    this only when remittance info is genuinely present and not just a
+    duplicate of `Transaction.description`.
+    """
+
+    unstructured: Optional[str] = Field(
+        default=None,
+        description="Free-text remittance line (e.g., the SEPA `RemittanceInformation/Unstructured` field).",
+    )
+    creditorReference: Optional[str] = Field(
+        default=None,
+        description=(
+            "Structured creditor reference, typically an ISO 11649 RF-prefixed "
+            "reference. The reference is opaque to bank2ai; servers pass it "
+            "through as the bank exposes it."
+        ),
+        examples=["RF18539007547034"],
+    )
+
+
 class Transaction(_Bank2aiModel):
     """Financial transaction with date, amount and metadata.
 
@@ -365,6 +564,53 @@ class Transaction(_Bank2aiModel):
             "Transaction amount in `originalCurrency` (negative for expenses, "
             "positive for income). Present only when `originalCurrency` is set."
         ),
+    )
+    valueDate: Optional[date] = Field(
+        default=None,
+        description=(
+            "Date the funds become available, ISO 8601. Servers SHOULD omit "
+            "when equal to `bookingDate`. Profile of: ISO 20022 `ValueDate`."
+        ),
+    )
+    categoryRaw: Optional[str] = Field(
+        default=None,
+        description=(
+            "Bank-native category label as the upstream system exposes it. "
+            "Useful when `categoryId` is mapped from something more specific."
+        ),
+    )
+    counterparty: Optional[Party] = Field(
+        default=None,
+        description=(
+            "Typed counterparty record. Servers SHOULD populate when more "
+            "than just `counterpartyName` is known (account identifier, BIC, "
+            "national id)."
+        ),
+    )
+    transactionCode: Optional[TransactionCode] = Field(
+        default=None,
+        description="ISO 20022 BankTransactionCode classification of the entry.",
+    )
+    remittanceInformation: Optional[RemittanceInformation] = Field(
+        default=None,
+        description=(
+            "Free-text and/or structured remittance info attached to the "
+            "transaction. Servers SHOULD omit when it would duplicate "
+            "`description`."
+        ),
+    )
+    endToEndId: Optional[str] = Field(
+        default=None,
+        description=(
+            "ISO 20022 cross-rail end-to-end identifier preserved across "
+            "the payment chain."
+        ),
+    )
+    merchantCategoryCode: Optional[str] = Field(
+        default=None,
+        description="ISO 18245 Merchant Category Code (4 digits).",
+        pattern=r"^\d{4}$",
+        examples=["5411", "5812"],
     )
 
 
