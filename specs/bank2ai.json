@@ -2046,7 +2046,7 @@
       }
     },
     {
-      "description": "Get bank transactions. Returns a list of transactions with amounts, dates, descriptions, and categories.",
+      "description": "Get bank transactions. Returns a list of transactions with amounts, dates, descriptions, and categories. The `verbosity` parameter caps how many optional fields the server populates: use `minimal` for compact lists, `standard` (default) for general use, `full` for an audit / reconciliation view including ISO 20022 metadata when the server can populate it.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
@@ -2181,6 +2181,16 @@
             "examples": [
               "2024-03-15"
             ]
+          },
+          "verbosity": {
+            "default": "standard",
+            "description": "Upper bound on optional fields each Transaction may carry. `minimal` keeps only the required fields plus `counterpartyName`; `standard` adds `status`, `categoryId`, `originalCurrency`, `originalAmount`; `full` additionally allows every ISO 20022 optional field (`valueDate`, `categoryRaw`, `counterparty`, `transactionCode`, `remittanceInformation`, `endToEndId`, `merchantCategoryCode`). Servers MAY omit any optional field even at `full` if they don't have it.",
+            "enum": [
+              "minimal",
+              "standard",
+              "full"
+            ],
+            "type": "string"
           }
         },
         "type": "object"

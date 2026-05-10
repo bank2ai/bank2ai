@@ -72,10 +72,44 @@ async def get_accounts(
     return AccountList(items=[Account(**a) for a in accounts])
 
 
+_FULL_ONLY_TRANSACTION_FIELDS = (
+    "valueDate",
+    "categoryRaw",
+    "counterparty",
+    "transactionCode",
+    "remittanceInformation",
+    "endToEndId",
+    "merchantCategoryCode",
+)
+_STANDARD_AND_ABOVE_FIELDS = (
+    "status",
+    "categoryId",
+    "originalCurrency",
+    "originalAmount",
+)
+
+
+def _apply_verbosity(t: Transaction, verbosity: str) -> Transaction:
+    """Clear optional fields above the requested verbosity cap. The
+    Pydantic base class drops None-valued keys on serialization, so
+    suppressed fields are simply absent in the wire payload.
+    """
+
+    if verbosity == "full":
+        return t
+    for field in _FULL_ONLY_TRANSACTION_FIELDS:
+        setattr(t, field, None)
+    if verbosity == "minimal":
+        for field in _STANDARD_AND_ABOVE_FIELDS:
+            setattr(t, field, None)
+    return t
+
+
 async def get_transactions(
     *,
     count: Optional[int] = None,
     order: str = "NewestFirst",
+    verbosity: str = "standard",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     description: Optional[str] = None,
@@ -86,8 +120,8 @@ async def get_transactions(
     cursor: Optional[str] = None,
 ) -> TransactionList:
     logger.info(
-        "get_transactions: count=%s order=%s account_ids=%s cursor=%s",
-        count, order, account_ids, cursor,
+        "get_transactions: count=%s order=%s verbosity=%s account_ids=%s cursor=%s",
+        count, order, verbosity, account_ids, cursor,
     )
     transactions = list(demo_data.TRANSACTIONS)
 
@@ -134,7 +168,7 @@ async def get_transactions(
         transactions = transactions[:count]
 
     return TransactionList(
-        items=[Transaction(**t) for t in transactions],
+        items=[_apply_verbosity(Transaction(**t), verbosity) for t in transactions],
         nextCursor=next_cursor,
     )
 

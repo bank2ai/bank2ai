@@ -236,6 +236,7 @@ async def get_transactions(
     *,
     count: Optional[int] = None,
     order: str = "NewestFirst",
+    verbosity: str = "standard",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     description: Optional[str] = None,
@@ -245,9 +246,13 @@ async def get_transactions(
     max_amount: Optional[float] = None,
     cursor: Optional[str] = None,
 ) -> TransactionList:
+    # The Meniga adapter does not populate any of the optional ISO 20022
+    # fields, so verbosity caps to fields the upstream API exposes today
+    # regardless of the requested level. Accept the parameter so callers
+    # can pass it; honouring the cap is a no-op until the field set grows.
     logger.info(
-        "get_transactions: count=%s order=%s start=%s end=%s desc=%s cats=%s account_ids=%s min=%s max=%s cursor=%s",
-        count, order, start_date, end_date, description, category_ids, account_ids, min_amount, max_amount, cursor,
+        "get_transactions: count=%s order=%s verbosity=%s start=%s end=%s desc=%s cats=%s account_ids=%s min=%s max=%s cursor=%s",
+        count, order, verbosity, start_date, end_date, description, category_ids, account_ids, min_amount, max_amount, cursor,
     )
     params: dict[str, str] = {
         "fields": "id,accountId,amount,amountInCurrency,currency,categoryId,text,date",

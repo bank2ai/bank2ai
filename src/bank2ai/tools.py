@@ -124,7 +124,12 @@ def register_tools(
             name="get-transactions",
             description=(
                 "Get bank transactions. Returns a list of transactions "
-                "with amounts, dates, descriptions, and categories."
+                "with amounts, dates, descriptions, and categories. The "
+                "`verbosity` parameter caps how many optional fields the "
+                "server populates: use `minimal` for compact lists, "
+                "`standard` (default) for general use, `full` for an "
+                "audit / reconciliation view including ISO 20022 "
+                "metadata when the server can populate it."
             ),
         )
         async def _get_transactions(
@@ -136,6 +141,21 @@ def register_tools(
             order: Literal["NewestFirst", "OldestFirst"] = Field(
                 default="NewestFirst",
                 description="Sort order.",
+            ),
+            verbosity: Literal["minimal", "standard", "full"] = Field(
+                default="standard",
+                description=(
+                    "Upper bound on optional fields each Transaction may "
+                    "carry. `minimal` keeps only the required fields plus "
+                    "`counterpartyName`; `standard` adds `status`, "
+                    "`categoryId`, `originalCurrency`, `originalAmount`; "
+                    "`full` additionally allows every ISO 20022 optional "
+                    "field (`valueDate`, `categoryRaw`, `counterparty`, "
+                    "`transactionCode`, `remittanceInformation`, "
+                    "`endToEndId`, `merchantCategoryCode`). Servers MAY "
+                    "omit any optional field even at `full` if they don't "
+                    "have it."
+                ),
             ),
             start_date: Optional[str] = Field(
                 default=None,
@@ -190,6 +210,7 @@ def register_tools(
             return await _get_transactions_handler(
                 count=count,
                 order=order,
+                verbosity=verbosity,
                 start_date=start_date,
                 end_date=end_date,
                 description=description,
