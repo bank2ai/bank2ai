@@ -90,7 +90,7 @@ def generate_transactions():
         "counterpartyName": "Acme Corp",
         "amount": 4500.00,
         "bookingDate": (today - timedelta(days=5)).isoformat(),
-        "categoryId": "cat_income",
+        "categoryId": "Income",
         "counterparty": {
             "name": "Acme Corp",
             "accountIdentifier": {
@@ -116,7 +116,7 @@ def generate_transactions():
         "description": "Rent Payment",
         "amount": -1200.00,
         "bookingDate": (today - timedelta(days=3)).isoformat(),
-        "categoryId": "cat_housing",
+        "categoryId": "Housing",
     })
 
     # Groceries
@@ -128,7 +128,7 @@ def generate_transactions():
             "description": grocery_stores[i % len(grocery_stores)],
             "amount": -85.50 - (i * 5),
             "bookingDate": (today - timedelta(days=days_ago)).isoformat(),
-            "categoryId": "cat_groceries",
+            "categoryId": "Groceries",
         })
 
     # Transportation
@@ -139,7 +139,7 @@ def generate_transactions():
             "description": "Shell Gas Station",
             "amount": -45.00,
             "bookingDate": (today - timedelta(days=4)).isoformat(),
-            "categoryId": "cat_transportation",
+            "categoryId": "Transport",
         },
         {
             "id": "tx_transit_001",
@@ -147,7 +147,7 @@ def generate_transactions():
             "description": "Monthly Metro Pass",
             "amount": -120.00,
             "bookingDate": (today - timedelta(days=1)).isoformat(),
-            "categoryId": "cat_transportation",
+            "categoryId": "Transport",
         },
     ])
 
@@ -159,7 +159,7 @@ def generate_transactions():
             "description": "Netflix Subscription",
             "amount": -15.99,
             "bookingDate": (today - timedelta(days=10)).isoformat(),
-            "categoryId": "cat_entertainment",
+            "categoryId": "DiningAndEntertainment",
         },
         {
             "id": "tx_movie_001",
@@ -167,7 +167,7 @@ def generate_transactions():
             "description": "Cinema Tickets",
             "amount": -32.00,
             "bookingDate": (today - timedelta(days=12)).isoformat(),
-            "categoryId": "cat_entertainment",
+            "categoryId": "DiningAndEntertainment",
         },
         {
             "id": "tx_spotify_001",
@@ -175,7 +175,7 @@ def generate_transactions():
             "description": "Spotify Premium",
             "amount": -9.99,
             "bookingDate": (today - timedelta(days=8)).isoformat(),
-            "categoryId": "cat_entertainment",
+            "categoryId": "DiningAndEntertainment",
         },
     ])
 
@@ -187,7 +187,7 @@ def generate_transactions():
             "description": "Electric Company",
             "amount": -85.00,
             "bookingDate": (today - timedelta(days=15)).isoformat(),
-            "categoryId": "cat_utilities",
+            "categoryId": "Utilities",
         },
         {
             "id": "tx_internet_001",
@@ -195,7 +195,7 @@ def generate_transactions():
             "description": "Internet Service Provider",
             "amount": -60.00,
             "bookingDate": (today - timedelta(days=18)).isoformat(),
-            "categoryId": "cat_utilities",
+            "categoryId": "Utilities",
         },
     ])
 
@@ -208,7 +208,7 @@ def generate_transactions():
             "description": restaurants[i % len(restaurants)],
             "amount": -25.00 - (i * 3),
             "bookingDate": (today - timedelta(days=days_ago)).isoformat(),
-            "categoryId": "cat_dining",
+            "categoryId": "DiningAndEntertainment",
         })
 
     # Healthcare
@@ -218,7 +218,7 @@ def generate_transactions():
         "description": "Pharmacy Co-pay",
         "amount": -20.00,
         "bookingDate": (today - timedelta(days=22)).isoformat(),
-        "categoryId": "cat_healthcare",
+        "categoryId": "Health",
     })
 
     # Shopping (charged to credit card)
@@ -229,7 +229,7 @@ def generate_transactions():
             "description": "Amazon.com",
             "amount": -78.50,
             "bookingDate": (today - timedelta(days=11)).isoformat(),
-            "categoryId": "cat_shopping",
+            "categoryId": "Shopping",
         },
         {
             "id": "tx_clothing_001",
@@ -237,7 +237,7 @@ def generate_transactions():
             "description": "Clothing Store",
             "amount": -125.00,
             "bookingDate": (today - timedelta(days=16)).isoformat(),
-            "categoryId": "cat_shopping",
+            "categoryId": "Shopping",
         },
     ])
 
@@ -252,7 +252,7 @@ def generate_transactions():
             "originalCurrency": "EUR",
             "originalAmount": -49.80,
             "bookingDate": (today - timedelta(days=17)).isoformat(),
-            "categoryId": "cat_dining",
+            "categoryId": "DiningAndEntertainment",
         },
         {
             "id": "tx_london_shopping_001",
@@ -262,7 +262,7 @@ def generate_transactions():
             "originalCurrency": "GBP",
             "originalAmount": -165.00,
             "bookingDate": (today - timedelta(days=24)).isoformat(),
-            "categoryId": "cat_shopping",
+            "categoryId": "Shopping",
         },
     ])
 
@@ -273,17 +273,18 @@ def generate_transactions():
 
 TRANSACTIONS = generate_transactions()
 
-# Categories
+# Categories. Demo uses canonical bank2ai category ids
+# (`bank2ai.CANONICAL_CATEGORY_IDS`) so client-side taxonomies built
+# against the demo work unchanged against any conformant server.
 CATEGORIES = [
-    {"id": "cat_income", "name": "Income"},
-    {"id": "cat_housing", "name": "Housing"},
-    {"id": "cat_groceries", "name": "Groceries"},
-    {"id": "cat_transportation", "name": "Transportation"},
-    {"id": "cat_entertainment", "name": "Entertainment"},
-    {"id": "cat_utilities", "name": "Utilities"},
-    {"id": "cat_dining", "name": "Dining"},
-    {"id": "cat_healthcare", "name": "Healthcare"},
-    {"id": "cat_shopping", "name": "Shopping"},
+    {"id": "Income", "name": "Income"},
+    {"id": "Housing", "name": "Housing"},
+    {"id": "Groceries", "name": "Groceries"},
+    {"id": "Transport", "name": "Transport"},
+    {"id": "DiningAndEntertainment", "name": "Dining & Entertainment"},
+    {"id": "Utilities", "name": "Utilities"},
+    {"id": "Health", "name": "Health"},
+    {"id": "Shopping", "name": "Shopping"},
 ]
 
 # Recipients

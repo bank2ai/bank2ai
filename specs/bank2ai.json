@@ -376,10 +376,15 @@
       "type": "object"
     },
     "Category": {
-      "description": "Transaction category for spending classification",
+      "description": "Transaction category for spending classification.\n\nbank2ai-defined categorization model; not profiled from a single\nupstream standard. Localized names live on this object so clients\ncan render category labels per the user's locale; programmatic\nidentity goes through `id`. See `CANONICAL_CATEGORY_IDS` for the\nrecommended id values shared across servers.",
       "properties": {
         "id": {
-          "description": "Unique category identifier",
+          "description": "Unique category identifier. SHOULD be one of the canonical ids in `CANONICAL_CATEGORY_IDS` when a server's category maps cleanly; otherwise free-form server-specific.",
+          "examples": [
+            "Groceries",
+            "DiningAndEntertainment",
+            "Other"
+          ],
           "title": "Id",
           "type": "string"
         },
@@ -1846,10 +1851,15 @@
           "items": {
             "description": "Available transaction categories.",
             "items": {
-              "description": "Transaction category for spending classification",
+              "description": "Transaction category for spending classification.\n\nbank2ai-defined categorization model; not profiled from a single\nupstream standard. Localized names live on this object so clients\ncan render category labels per the user's locale; programmatic\nidentity goes through `id`. See `CANONICAL_CATEGORY_IDS` for the\nrecommended id values shared across servers.",
               "properties": {
                 "id": {
-                  "description": "Unique category identifier",
+                  "description": "Unique category identifier. SHOULD be one of the canonical ids in `CANONICAL_CATEGORY_IDS` when a server's category maps cleanly; otherwise free-form server-specific.",
+                  "examples": [
+                    "Groceries",
+                    "DiningAndEntertainment",
+                    "Other"
+                  ],
                   "type": "string"
                 },
                 "name": {
