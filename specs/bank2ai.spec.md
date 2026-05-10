@@ -18,6 +18,8 @@ Authentication is intentionally outside the spec: servers obtain credentials how
 
 > **About RFC 2119 keywords.** *MUST*, *SHOULD*, *MAY* are used per [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119).
 
+> **About field omission and tolerance.** Schemas describe many optional fields, but default tool responses are lean. Servers SHOULD omit optional fields whose values are `null`, empty, or equal to a documented default; the Python reference implementation does this automatically via the `_Bank2aiModel` base class. Clients MUST tolerate missing optional fields, and MUST also tolerate unknown fields (see [§7](#7-backwards-compatibility)). Example payloads in this document and in [`bank2ai.json`](./bank2ai.json) follow the same rule, so an example reflects a typical response rather than enumerating every possible field. Required fields are unaffected: servers MUST NOT omit fields marked `required` in the schemas.
+
 ## 1. Tool surface
 
 A bank2ai server MAY register any subset of the following tools. Tools that are registered MUST use these exact names and the input/output shapes defined in [`bank2ai.json`](./bank2ai.json) under `tools[].inputSchema` and `tools[].outputSchema`.
@@ -47,14 +49,16 @@ A typical bank2ai session looks like this:
 
 ## 3. Shared data models
 
-The schemas in `bank2ai.json` under `models{}` define the canonical shapes for:
+The schemas in `bank2ai.json` under `models{}` define the canonical shapes listed below.
 
-* **`Account`**, id, accountNumber, currency, balance; optional typed identifiers iban / bban / bic / maskedPan; optional availableBalance, overdraftLimit, ownerName, product, openedDate, balanceUpdatedAt; optional accountType (`Current` | `Savings` | `Credit` | `Loan` | `Other`), status (`Enabled` | `Blocked` | `Deleted`), usage (`Private` | `Business`), isWithdrawalAccount, isDefaultAccount; credit-only optional statementBalance, minimumPaymentDue, paymentDueDate, statementClosingDate. Field names follow Berlin Group PSD2 `accountDetails` where they overlap; statement-cycle fields go beyond PSD2 so an agent can answer "what do I owe and when?" without a second call. Debit and prepaid cards live under `Current`; their attached card is signalled by `maskedPan`. Servers MUST omit the statement-cycle fields on non-credit accounts.
-* **`Transaction`**, id, description, amount (in the user's default currency, negative = expense), transaction_date (ISO 8601), category_id (resolves via `get-categories`), optional currency and amount_in_currency for transactions originally made in a different currency.
-* **`Category`**, id, name (localized).
-* **`Recipient`**, id, name, accountNumber, accountNumberType (`Domestic` | `IBAN` | `SWIFT`), socialSecurityNumber, optional bankInfo, paymentType, address, isFavorite, description.
+Each model is a *profile* of one or more upstream standards: it adopts a strict, named subset of fields with semantics preserved. Profiling buys interoperability without forcing servers to implement the full upstream surface. Where a model maps to a specific upstream element, this is called out with a "Profile of:" line at the top of the model's description; models that are bank2ai-defined and don't profile a single upstream are noted as such.
 
-Servers MAY return additional fields on these objects; clients MUST tolerate unknown fields. Servers MUST NOT omit fields marked `required` in the schemas.
+* **`Account`**. *Profile of:* Berlin Group PSD2 `accountDetails`. id, accountNumber, currency, balance; optional typed identifiers iban / bban / bic / maskedPan; optional availableBalance, overdraftLimit, ownerName, product, openedDate, balanceUpdatedAt; optional accountType (`Current` | `Savings` | `Credit` | `Loan` | `Other`), status (`Enabled` | `Blocked` | `Deleted`), usage (`Private` | `Business`), isWithdrawalAccount, isDefaultAccount; credit-only optional statementBalance, minimumPaymentDue, paymentDueDate, statementClosingDate. Statement-cycle fields go beyond PSD2 so an agent can answer "what do I owe and when?" without a second call. Debit and prepaid cards live under `Current`; their attached card is signalled by `maskedPan`. Servers MUST omit the statement-cycle fields on non-credit accounts.
+* **`Transaction`**. *Profile of:* ISO 20022 `EntryDetails2` and Berlin Group PSD2 `transactions` array element. id, description, amount (in the user's default currency, negative = expense), transaction_date (ISO 8601), category_id (resolves via `get-categories`), optional currency and amount_in_currency for transactions originally made in a different currency.
+* **`Category`**. bank2ai-defined categorization model; not profiled from a single upstream standard. id, name (localized). Localized names live here so clients can render category labels per the user's locale; programmatic identity goes through `id` (see [§6](#6-localization)).
+* **`Recipient`**. *Profile of:* ISO 20022 `Creditor` and `CreditorAccount` (subset). id, name, accountNumber, accountNumberType (`Domestic` | `IBAN` | `SWIFT`), socialSecurityNumber, optional bankInfo, paymentType, address, isFavorite, description.
+
+Per the field omission and tolerance rule in the preamble, servers MAY omit any optional field they don't have, and clients MUST tolerate both missing optional fields and unknown additional fields. Servers MUST NOT omit fields marked `required` in the schemas.
 
 ## 4. Authentication
 
