@@ -25,10 +25,13 @@ from .models import (
     ExecuteTransferResponse,
     GetTransactionResponse,
     NationalId,
+    Party,
+    PrepareTransferResponse,
+    Rail,
     RecipientList,
+    RemittanceInformation,
     TransactionList,
     TransactionsSummary,
-    TransferPreparedResponse,
 )
 
 
@@ -52,6 +55,7 @@ def register_tools(
     get_transactions_summary: Optional[Handler] = None,
     get_recipients: Optional[Handler] = None,
     create_recipient: Optional[Handler] = None,
+    prepare_transfer: Optional[Handler] = None,
     prepare_transfer_icelandic: Optional[Handler] = None,
     execute_transfer: Optional[Handler] = None,
 ) -> None:
@@ -420,14 +424,109 @@ def register_tools(
                 default_description=default_description,
             )
 
+    if prepare_transfer is not None:
+        _prepare_transfer_handler = prepare_transfer
+
+        @app.tool(
+            name="prepare-transfer",
+            description=(
+                "Prepare a money transfer on any supported rail (SEPA, "
+                "SEPA Instant, SWIFT, domestic-IS, etc.). Validates the "
+                "creditor, computes fees / FX / payee verification when "
+                "applicable, and returns a transferIntentId plus a "
+                "summary the user confirms. Does NOT execute; pass the "
+                "intent id to `execute-transfer`."
+            ),
+        )
+        async def _prepare_transfer(
+            debtor_account_id: str = Field(
+                description="Source `Account.id` from `get-accounts`.",
+            ),
+            creditor: Party = Field(
+                description=(
+                    "Creditor record. `accountIdentifier` is required "
+                    "for routing; `name` is required for display and "
+                    "Confirmation-of-Payee on rails that support it."
+                ),
+            ),
+            amount: float = Field(
+                description="Instructed amount in `currency`.",
+                gt=0,
+            ),
+            currency: str = Field(
+                description="ISO 4217 currency code of the instructed amount.",
+                pattern=r"^[A-Z]{3}$",
+                examples=["ISK", "EUR", "USD"],
+            ),
+            rail: Rail = Field(
+                description=(
+                    "Settlement rail. Drives validation, fees, and the "
+                    "set of meaningful `local_instrument` values."
+                ),
+            ),
+            local_instrument: Optional[str] = Field(
+                default=None,
+                description=(
+                    "Rail-specific instrument code; `INST` for SEPA "
+                    "Instant, `RTGS` for SWIFT, etc. Free-form per rail."
+                ),
+            ),
+            requested_execution_date: Optional[str] = Field(
+                default=None,
+                description=(
+                    "ISO 8601 (YYYY-MM-DD) requested execution date. "
+                    "Omit for as-soon-as-possible per the rail."
+                ),
+                pattern=r"^\d{4}-\d{2}-\d{2}$",
+            ),
+            remittance_information: Optional[RemittanceInformation] = Field(
+                default=None,
+                description=(
+                    "Structured / unstructured remittance information "
+                    "to attach to the transfer."
+                ),
+            ),
+            end_to_end_id: Optional[str] = Field(
+                default=None,
+                description=(
+                    "Optional client-supplied ISO 20022 cross-rail "
+                    "identifier. Servers MUST generate one when the "
+                    "client omits it; the resolved value is echoed in "
+                    "the response summary."
+                ),
+            ),
+            description: Optional[str] = Field(
+                default=None,
+                description=(
+                    "Free-text shown on the counterparty's statement. "
+                    "Falls back to `remittance_information.unstructured` "
+                    "when both are set."
+                ),
+            ),
+        ) -> PrepareTransferResponse:
+            return await _prepare_transfer_handler(
+                debtor_account_id=debtor_account_id,
+                creditor=creditor,
+                amount=amount,
+                currency=currency,
+                rail=rail,
+                local_instrument=local_instrument,
+                requested_execution_date=requested_execution_date,
+                remittance_information=remittance_information,
+                end_to_end_id=end_to_end_id,
+                description=description,
+            )
+
     if prepare_transfer_icelandic is not None:
         _prepare_transfer_icelandic_handler = prepare_transfer_icelandic
 
         @app.tool(
             name="prepare-transfer-icelandic",
             description=(
-                "Prepare a domestic Icelandic money transfer. "
-                "Validates recipient and prepares transfer details for confirmation."
+                "DEPRECATED: use `prepare-transfer` with `rail=domestic-IS`. "
+                "Maintained as a thin alias for legacy clients; servers "
+                "implement it by delegating internally to "
+                "`prepare-transfer`."
             ),
         )
         async def _prepare_transfer_icelandic(
@@ -457,7 +556,7 @@ def register_tools(
                 pattern=r"^[A-Z]{3}$|^$",
                 examples=["ISK", "EUR", "USD"],
             ),
-        ) -> TransferPreparedResponse:
+        ) -> PrepareTransferResponse:
             return await _prepare_transfer_icelandic_handler(
                 amount=amount,
                 recipient_ssn=recipient_ssn,
@@ -473,31 +572,32 @@ def register_tools(
         @app.tool(
             name="execute-transfer",
             description=(
-                "Execute a money transfer after the user has confirmed the details. "
-                "Use prepare-transfer-icelandic first to prepare and validate."
+                "Execute a transfer the user has confirmed. Takes only "
+                "the `transfer_intent_id` returned by `prepare-transfer` "
+                "(or the deprecated `prepare-transfer-icelandic` alias). "
+                "The intent's amount, creditor, debtor, and rail are "
+                "immutable: any change requires a new prepare call. "
+                "Servers reject expired intents with a structured error."
             ),
         )
         async def _execute_transfer(
-            withdrawal_account_id: str = Field(
-                description="Source account.id (from get-accounts).",
+            transfer_intent_id: str = Field(
+                description=(
+                    "Intent token from a recent `prepare-transfer` call."
+                ),
             ),
-            recipient_account_number: str = Field(
-                description="Destination bank account number.",
-            ),
-            amount: float = Field(
-                description="Transfer amount.",
-                gt=0,
-            ),
-            description: str = Field(
-                default="Transfer",
-                description="Free-text note shown on the recipient's statement.",
+            idempotency_key: Optional[str] = Field(
+                default=None,
+                description=(
+                    "Optional idempotency key. Servers SHOULD return the "
+                    "original response for repeat calls with the same key."
+                ),
+                max_length=128,
             ),
         ) -> ExecuteTransferResponse:
             return await _execute_transfer_handler(
-                withdrawal_account_id=withdrawal_account_id,
-                recipient_account_number=recipient_account_number,
-                amount=amount,
-                description=description,
+                transfer_intent_id=transfer_intent_id,
+                idempotency_key=idempotency_key,
             )
 
 

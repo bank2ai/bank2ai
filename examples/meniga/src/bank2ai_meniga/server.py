@@ -15,6 +15,7 @@ import logging
 import os
 import time
 from collections import defaultdict
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import uuid4
 
@@ -33,17 +34,23 @@ from bank2ai import (
     CategoryList,
     CreateRecipientResponse,
     ExecuteTransferResponse,
+    ExecutedTransfer,
     GetTransactionResponse,
+    Party,
+    PrepareTransferResponse,
+    PreparedTransfer,
+    Rail,
     Recipient,
     RecipientList,
+    RemittanceInformation,
     Transaction,
     TransactionList,
     TransactionsSummary,
     TransactionsSummaryGroup,
     TransactionsSummaryPeriod,
     TransferAction,
-    TransferPreparedItem,
-    TransferPreparedResponse,
+    TransferExecutionStatus,
+    TransferSummary,
     register_tools,
 )
 
@@ -445,6 +452,81 @@ async def create_recipient(
     )
 
 
+# ---- Transfer intent store (in-memory) ----
+
+_INTENT_TTL = timedelta(minutes=5)
+_intent_store: dict[str, PreparedTransfer] = {}
+
+
+async def prepare_transfer(
+    *,
+    debtor_account_id: str,
+    creditor: dict,
+    amount: float,
+    currency: str,
+    rail: str,
+    local_instrument: Optional[str] = None,
+    requested_execution_date: Optional[str] = None,
+    remittance_information: Optional[dict] = None,
+    end_to_end_id: Optional[str] = None,
+    description: Optional[str] = None,
+) -> PrepareTransferResponse:
+    logger.info(
+        "prepare_transfer: rail=%s amount=%s currency=%s debtor=%s",
+        rail, amount, currency, debtor_account_id,
+    )
+    creditor_party = Party.model_validate(creditor)
+    if creditor_party.accountIdentifier is None:
+        return PrepareTransferResponse(
+            content="creditor.accountIdentifier is required for routing.",
+        )
+
+    accounts = (await get_accounts()).items
+    debtor = next((a for a in accounts if a.id == debtor_account_id), None)
+    if debtor is None:
+        return PrepareTransferResponse(
+            content=f"No debtor account with id '{debtor_account_id}'.",
+        )
+    if debtor.availableBalance is not None and debtor.availableBalance < amount:
+        return PrepareTransferResponse(content="Insufficient funds.")
+
+    resolved_end_to_end_id = end_to_end_id or f"e2e_{uuid4().hex[:16]}"
+    intent_id = f"intent_{uuid4().hex}"
+    now = datetime.now(timezone.utc)
+
+    summary = TransferSummary(
+        debtorAccount=debtor,
+        creditor=creditor_party,
+        amount=amount,
+        currency=currency,
+        rail=Rail(rail),
+        localInstrument=local_instrument,
+        requestedExecutionDate=requested_execution_date,
+        remittanceInformation=(
+            RemittanceInformation.model_validate(remittance_information)
+            if remittance_information
+            else None
+        ),
+        endToEndId=resolved_end_to_end_id,
+        description=description,
+    )
+    prepared = PreparedTransfer(
+        transferIntentId=intent_id,
+        expiresAt=now + _INTENT_TTL,
+        summary=summary,
+    )
+    _intent_store[intent_id] = prepared
+
+    return PrepareTransferResponse(
+        content=(
+            "A transfer has been prepared. Confirm the details with the "
+            "user, then call execute-transfer with the transferIntentId."
+        ),
+        item=prepared,
+        actions=[TransferAction(title="Transfer", link="/transfer")],
+    )
+
+
 async def prepare_transfer_icelandic(
     *,
     amount: float,
@@ -453,8 +535,14 @@ async def prepare_transfer_icelandic(
     description: str = "",
     withdrawal_account_number: str = "",
     currency: str = "",
-) -> TransferPreparedResponse:
-    logger.info("prepare_transfer_icelandic: amount=%s recipient_ssn=%s", amount, recipient_ssn)
+) -> PrepareTransferResponse:
+    """Deprecated alias: maps legacy Icelandic-specific inputs onto the
+    polymorphic prepare-transfer with rail=domestic-IS."""
+
+    logger.info(
+        "prepare_transfer_icelandic (deprecated alias): amount=%s recipient_ssn=%s",
+        amount, recipient_ssn,
+    )
     accounts = (await get_accounts()).items
     if withdrawal_account_number:
         account = next(
@@ -465,12 +553,7 @@ async def prepare_transfer_icelandic(
         account = next((a for a in accounts if a.isDefaultAccount), None)
 
     if not account:
-        logger.warning("prepare_transfer_icelandic: no valid account found")
-        return TransferPreparedResponse(content="Invalid or no default account found.")
-
-    if account.availableBalance is not None and account.availableBalance < amount:
-        logger.warning("prepare_transfer_icelandic: insufficient funds")
-        return TransferPreparedResponse(content="Insufficient funds.")
+        return PrepareTransferResponse(content="Invalid or no default account found.")
 
     recipient = next(
         (
@@ -480,32 +563,58 @@ async def prepare_transfer_icelandic(
         None,
     )
 
-    return TransferPreparedResponse(
-        content="A transfer has been prepared. Please confirm the details with the user before calling execute-transfer.",
-        item=TransferPreparedItem(
-            amount=amount,
-            description=description,
-            currency=currency or account.currency,
-            recipient_account_number=recipient_account_number,
-            recipient_ssn=recipient_ssn,
-            recipient_name=recipient.name if recipient else "Unknown",
-            withdrawal_account_id=account.id,
-            withdrawal_account=account,
-        ),
-        actions=[TransferAction(title="Transfer", link="/transfer")],
+    return await prepare_transfer(
+        debtor_account_id=account.id,
+        creditor={
+            "name": recipient.name if recipient else "Unknown",
+            "accountIdentifier": {
+                "type": "bban",
+                "bban": recipient_account_number,
+                "country": "IS",
+            },
+            "nationalId": (
+                recipient.nationalId.model_dump() if recipient and recipient.nationalId else None
+            ),
+        },
+        amount=amount,
+        currency=currency or account.currency,
+        rail=Rail.DomesticIS.value,
+        description=description or None,
     )
 
 
 async def execute_transfer(
     *,
-    withdrawal_account_id: str,
-    recipient_account_number: str,
-    amount: float,
-    description: str = "Transfer",
+    transfer_intent_id: str,
+    idempotency_key: Optional[str] = None,
 ) -> ExecuteTransferResponse:
-    logger.info("execute_transfer: amount=%s to=%s", amount, recipient_account_number)
+    logger.info(
+        "execute_transfer: intent=%s idempotency_key=%s",
+        transfer_intent_id, idempotency_key,
+    )
+    intent = _intent_store.get(transfer_intent_id)
+    if intent is None:
+        return ExecuteTransferResponse(
+            content=f"No such transfer intent '{transfer_intent_id}'.",
+        )
+    now = datetime.now(timezone.utc)
+    if now >= intent.expiresAt:
+        return ExecuteTransferResponse(
+            content=(
+                f"Transfer intent '{transfer_intent_id}' expired at "
+                f"{intent.expiresAt.isoformat()}. Call prepare-transfer again."
+            ),
+        )
     return ExecuteTransferResponse(
-        content=f"Transfer of {amount:,.2f} completed successfully.",
+        content=(
+            f"Transfer of {intent.summary.amount:,.2f} {intent.summary.currency} "
+            "submitted to Meniga."
+        ),
+        item=ExecutedTransfer(
+            transactionId=f"tx_{uuid4().hex[:12]}",
+            status=TransferExecutionStatus.Pending,
+            executedAt=now,
+        ),
     )
 
 
@@ -522,6 +631,7 @@ register_tools(
     get_transactions_summary=get_transactions_summary,
     get_recipients=get_recipients,
     create_recipient=create_recipient,
+    prepare_transfer=prepare_transfer,
     prepare_transfer_icelandic=prepare_transfer_icelandic,
     execute_transfer=execute_transfer,
 )

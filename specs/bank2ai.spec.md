@@ -33,8 +33,9 @@ A bank2ai server MAY register any subset of the following tools. Tools that are 
 | `get-transactions-summary` | Aggregated transactions, scoped to either income or expenses (required `direction`). Group by `none`, `category`, `month`, or `both`; each row reports the corresponding `category_id` and/or `month`. Filters mirror `get-transactions`: account, date, amount, category ids. |
 | `get-recipients`           | Look up saved payment recipients by partial name match.            |
 | `create-recipient`         | Save a new recipient for future transfers.                         |
-| `prepare-transfer-icelandic` | **Prepare** a domestic Icelandic transfer; validates inputs and returns details for confirmation. Does **not** execute. |
-| `execute-transfer`         | Execute a transfer that the user has already confirmed.            |
+| `prepare-transfer`         | **Prepare** a transfer on any supported rail (`Rail` enum: `domestic-IS`, `sepa`, `sepa-instant`, `swift`, plus vendor extensions). Returns a `transferIntentId`, a validated `summary` for user confirmation, and rail-specific metadata (fees, FX, Confirmation of Payee, warnings). Does **not** execute. |
+| `prepare-transfer-icelandic` | **Deprecated**: thin alias that maps legacy Icelandic-specific inputs onto `prepare-transfer` with `rail=domestic-IS`. New clients SHOULD call `prepare-transfer` directly. |
+| `execute-transfer`         | Execute a previously prepared transfer by `transferIntentId`. Servers reject expired or unknown intents with a structured error; the intent's amount, creditor, debtor, and rail are immutable. |
 
 Servers MAY also register additional, vendor-specific tools, but they MUST NOT alter the names, inputs, or outputs of the tools above.
 

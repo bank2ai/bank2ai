@@ -49,13 +49,16 @@ EXPECTED_TOOL_INPUTS = {
         "name", "account_identifier", "national_id",
         "nickname", "bic", "default_description",
     },
+    "prepare-transfer": {
+        "debtor_account_id", "creditor", "amount", "currency", "rail",
+        "local_instrument", "requested_execution_date",
+        "remittance_information", "end_to_end_id", "description",
+    },
     "prepare-transfer-icelandic": {
         "amount", "recipient_ssn", "recipient_account_number",
         "description", "withdrawal_account_number", "currency",
     },
-    "execute-transfer": {
-        "withdrawal_account_id", "recipient_account_number", "amount", "description",
-    },
+    "execute-transfer": {"transfer_intent_id", "idempotency_key"},
 }
 
 
