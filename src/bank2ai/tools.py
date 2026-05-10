@@ -18,11 +18,13 @@ from fastmcp import FastMCP
 from pydantic import Field
 
 from .models import (
+    AccountIdentifier,
     AccountList,
     CategoryList,
     CreateRecipientResponse,
     ExecuteTransferResponse,
     GetTransactionResponse,
+    NationalId,
     RecipientList,
     TransactionList,
     TransactionsSummary,
@@ -367,26 +369,55 @@ def register_tools(
         @app.tool(
             name="create-recipient",
             description=(
-                "Create a new payment recipient with their name, "
-                "account number, and national ID. The recipient can then be used for transfers."
+                "Create a new payment recipient. Account routing goes "
+                "through the typed `account_identifier` discriminated "
+                "union (IBAN, BBAN with country, country-specific account "
+                "number, or alias). National identification, when known, "
+                "uses the typed `national_id` sub-object. The recipient "
+                "can then be used for transfers."
             ),
         )
         async def _create_recipient(
             name: str = Field(description="Recipient's full name or business name."),
-            account_number: str = Field(
-                description="Recipient's bank account number (format varies by country).",
-                examples=["5678-90-123456"],
+            account_identifier: AccountIdentifier = Field(
+                description=(
+                    "Typed account identifier. One of: "
+                    "`{type: 'iban', iban}`, "
+                    "`{type: 'bban', bban, country}`, "
+                    "`{type: 'accountNumber', accountNumber, country, routing?, sortCode?}`, "
+                    "`{type: 'alias', alias, aliasType}`."
+                ),
             ),
-            kennitala: str = Field(
-                default="",
-                description="Icelandic national ID for the recipient, if known.",
-                examples=["010190-1234"],
+            national_id: Optional[NationalId] = Field(
+                default=None,
+                description=(
+                    "Recipient's national identifier when known. Shape: "
+                    "`{value, country, type?}` where `type` is an opaque "
+                    "label (`kennitala`, `ssn`, `cpr`, `personnummer`, "
+                    "`cpf`, `other`). bank2ai does not validate the value."
+                ),
+            ),
+            nickname: Optional[str] = Field(
+                default=None,
+                description="Optional user-friendly handle (e.g., 'Mom').",
+            ),
+            bic: Optional[str] = Field(
+                default=None,
+                description="BIC / SWIFT code of the recipient's bank, ISO 9362.",
+                pattern=r"^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$",
+            ),
+            default_description: Optional[str] = Field(
+                default=None,
+                description="Pre-fill text for transfers' description field.",
             ),
         ) -> CreateRecipientResponse:
             return await _create_recipient_handler(
                 name=name,
-                account_number=account_number,
-                kennitala=kennitala,
+                account_identifier=account_identifier,
+                national_id=national_id,
+                nickname=nickname,
+                bic=bic,
+                default_description=default_description,
             )
 
     if prepare_transfer_icelandic is not None:

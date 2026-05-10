@@ -422,15 +422,21 @@ async def get_recipients(*, name: str) -> RecipientList:
 async def create_recipient(
     *,
     name: str,
-    account_number: str,
-    kennitala: str = "",
+    account_identifier: dict,
+    national_id: Optional[dict] = None,
+    nickname: Optional[str] = None,
+    bic: Optional[str] = None,
+    default_description: Optional[str] = None,
 ) -> CreateRecipientResponse:
-    logger.info("create_recipient: name=%s account=%s", name, account_number)
+    logger.info("create_recipient: name=%s", name)
     recipient = Recipient(
         id=str(uuid4()),
         name=name,
-        accountNumber=account_number,
-        socialSecurityNumber=kennitala,
+        accountIdentifier=account_identifier,
+        nationalId=national_id,
+        nickname=nickname,
+        bic=bic,
+        defaultDescription=default_description,
     )
     _recipients_store.append(recipient)
     return CreateRecipientResponse(
@@ -466,9 +472,12 @@ async def prepare_transfer_icelandic(
         logger.warning("prepare_transfer_icelandic: insufficient funds")
         return TransferPreparedResponse(content="Insufficient funds.")
 
-    recipients = (await get_recipients(name=recipient_ssn)).items
     recipient = next(
-        (r for r in recipients if r.socialSecurityNumber == recipient_ssn), None
+        (
+            r for r in _recipients_store
+            if r.nationalId is not None and r.nationalId.value == recipient_ssn
+        ),
+        None,
     )
 
     return TransferPreparedResponse(

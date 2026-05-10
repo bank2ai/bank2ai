@@ -296,19 +296,21 @@ async def get_recipients(*, name: str) -> RecipientList:
 async def create_recipient(
     *,
     name: str,
-    account_number: str,
-    kennitala: str = "",
+    account_identifier: dict,
+    national_id: Optional[dict] = None,
+    nickname: Optional[str] = None,
+    bic: Optional[str] = None,
+    default_description: Optional[str] = None,
 ) -> CreateRecipientResponse:
     logger.info("create_recipient: name=%s", name)
     recipient = Recipient(
         id=f"rcpt_{len(demo_data.RECIPIENTS) + 1:03d}",
         name=name,
-        accountNumber=account_number,
-        socialSecurityNumber=kennitala,
-        accountNumberType="Domestic",
-        bankInfo="Demo Bank",
-        paymentType="Domestic",
-        isFavorite=False,
+        accountIdentifier=account_identifier,
+        nationalId=national_id,
+        nickname=nickname,
+        bic=bic,
+        defaultDescription=default_description,
     )
     return CreateRecipientResponse(
         content=f"Recipient '{name}' created successfully.",
@@ -327,7 +329,11 @@ async def prepare_transfer_icelandic(
 ) -> TransferPreparedResponse:
     logger.info("prepare_transfer_icelandic: amount=%s", amount)
     recipient_data = next(
-        (r for r in demo_data.RECIPIENTS if r["socialSecurityNumber"] == recipient_ssn),
+        (
+            r for r in demo_data.RECIPIENTS
+            if (nid := r.get("nationalId")) is not None
+            and nid.get("value") == recipient_ssn
+        ),
         None,
     )
     if not recipient_data:

@@ -287,54 +287,63 @@ CATEGORIES = [
     {"id": "Shopping", "name": "Shopping"},
 ]
 
-# Recipients
+# Recipients. Demo carries one Icelandic-style recipient (BBAN + kennitala)
+# so the Icelandic transfer flow runs end-to-end against the spec, plus US
+# (accountNumber + routing) and UK (IBAN) flavours to exercise every variant
+# of the AccountIdentifier discriminated union.
 RECIPIENTS = [
     {
         "id": "rcpt_001",
-        "name": "Jane Smith",
-        "accountNumber": "5678-90-123456",
-        "accountNumberType": "Domestic",
-        "bankInfo": "Demo Bank",
-        "paymentType": "Domestic",
-        "socialSecurityNumber": "123-45-6789",
-        "address": "456 Oak Ave, City, State 12345",
+        "name": "Jón Jónsson",
+        "accountIdentifier": {
+            "type": "bban",
+            "bban": "0133-26-007890",
+            "country": "IS",
+        },
+        "nationalId": {
+            "value": "010190-1234",
+            "country": "IS",
+            "type": "kennitala",
+        },
         "isFavorite": True,
-        "description": "Friend",
+        "nickname": "Friend",
     },
     {
         "id": "rcpt_002",
         "name": "John Doe",
-        "accountNumber": "5678-90-123457",
-        "accountNumberType": "Domestic",
-        "bankInfo": "Demo Bank",
-        "paymentType": "Domestic",
-        "socialSecurityNumber": "234-56-7890",
-        "address": "789 Elm St, City, State 12345",
+        "accountIdentifier": {
+            "type": "accountNumber",
+            "accountNumber": "5678-90-123457",
+            "country": "US",
+            "routing": "021000021",
+        },
+        "nationalId": {
+            "value": "234-56-7890",
+            "country": "US",
+            "type": "ssn",
+        },
         "isFavorite": False,
-        "description": "Contractor",
+        "nickname": "Contractor",
     },
     {
         "id": "rcpt_003",
         "name": "Alice Johnson",
-        "accountNumber": "5678-90-123458",
-        "accountNumberType": "Domestic",
-        "bankInfo": "Demo Bank",
-        "paymentType": "Domestic",
-        "socialSecurityNumber": "345-67-8901",
-        "address": "321 Pine Rd, City, State 12345",
+        "accountIdentifier": {
+            "type": "iban",
+            "iban": "GB29NWBK60161331926819",
+        },
         "isFavorite": True,
-        "description": "Family",
+        "nickname": "Family",
     },
     {
         "id": "rcpt_004",
         "name": "Bob Williams",
-        "accountNumber": "5678-90-123459",
-        "accountNumberType": "Domestic",
-        "bankInfo": "Demo Bank",
-        "paymentType": "Domestic",
-        "socialSecurityNumber": "456-78-9012",
-        "address": "654 Maple Dr, City, State 12345",
+        "accountIdentifier": {
+            "type": "accountNumber",
+            "accountNumber": "5678-90-123459",
+            "country": "US",
+        },
         "isFavorite": False,
-        "description": "Landlord",
+        "nickname": "Landlord",
     },
 ]

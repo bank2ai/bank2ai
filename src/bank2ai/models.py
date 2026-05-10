@@ -172,56 +172,55 @@ class Party(_Bank2aiModel):
     )
 
 
-class RecipientInfo(_Bank2aiModel):
-    """Basic recipient information for transfers."""
+class Recipient(_Bank2aiModel):
+    """Saved payment recipient.
 
-    name: str = Field(description="Recipient's full name or business name")
-    socialSecurityNumber: str = Field(
-        description="National ID / SSN (format varies by country)",
-    )
-    accountNumber: str = Field(description="Recipient's bank account number")
+    Profile of: ISO 20022 `Creditor` and `CreditorAccount` (subset).
+    Account routing goes through the typed `accountIdentifier`
+    discriminated union (IBAN, BBAN, country-specific account number,
+    or alias); national identification is opaque to bank2ai and lives
+    in the typed `nationalId` sub-object.
+    """
 
-
-class Recipient(RecipientInfo):
-    """Payment recipient with account details"""
-
-    id: Optional[str] = Field(default=None, description="Unique recipient identifier")
-    name: str = Field(description="Recipient's full name or business name")
-    accountNumber: str = Field(
-        description="Recipient's bank account number",
-        examples=["5678-90-123456", "GB29NWBK60161331926819"],
+    id: str = Field(description="Unique recipient identifier (server-scoped).")
+    name: str = Field(
+        description="Recipient's full name or business name.",
+        examples=["Jane Doe", "Acme Corp"],
     )
-    accountNumberType: Optional[str] = Field(
+    accountIdentifier: AccountIdentifier = Field(
+        description="Typed account identifier for routing the transfer.",
+    )
+    nickname: Optional[str] = Field(
         default=None,
-        description="Type of account number",
-        examples=["Domestic", "IBAN", "SWIFT"],
+        description="Optional user-friendly handle for the recipient.",
+        examples=["Mom", "Landlord"],
     )
-    bankInfo: Optional[str] = Field(
+    nationalId: Optional[NationalId] = Field(
         default=None,
-        description="Bank name or identifier",
-        examples=["Example Bank", "Bank of America"],
+        description="Recipient's national identifier when known.",
     )
-    paymentType: Optional[str] = Field(
+    bic: Optional[str] = Field(
         default=None,
-        description="Type of payment supported",
-        examples=["Domestic", "International", "SEPA"],
+        description="BIC / SWIFT code of the recipient's bank, ISO 9362.",
+        pattern=r"^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$",
+        examples=["NWBKGB2L"],
     )
-    socialSecurityNumber: str = Field(
-        description="National ID / SSN (format varies by country)",
-        examples=["010190-1234", "123-45-6789"],
-    )
-    address: Optional[str] = Field(
+    defaultDescription: Optional[str] = Field(
         default=None,
-        description="Recipient's address (if available)",
+        description=(
+            "Pre-filled free-text shown on the recipient's statement "
+            "for transfers prepared against this recipient. Clients MAY "
+            "use this as the default `description` when preparing a "
+            "transfer; users can override per transfer."
+        ),
+    )
+    lastUsedAt: Optional[datetime] = Field(
+        default=None,
+        description="ISO 8601 timestamp of the most recent transfer to this recipient.",
     )
     isFavorite: bool = Field(
         default=False,
-        description="Whether this recipient is marked as favorite",
-    )
-    description: Optional[str] = Field(
-        default=None,
-        description="User-provided description or note",
-        examples=["Friend", "Landlord", "Contractor"],
+        description="Whether this recipient is marked as favorite.",
     )
 
 

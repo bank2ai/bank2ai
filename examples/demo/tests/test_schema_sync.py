@@ -45,7 +45,10 @@ EXPECTED_TOOL_INPUTS = {
         "category_ids", "account_ids", "min_amount", "max_amount",
     },
     "get-recipients": {"name"},
-    "create-recipient": {"name", "account_number", "kennitala"},
+    "create-recipient": {
+        "name", "account_identifier", "national_id",
+        "nickname", "bic", "default_description",
+    },
     "prepare-transfer-icelandic": {
         "amount", "recipient_ssn", "recipient_account_number",
         "description", "withdrawal_account_number", "currency",
