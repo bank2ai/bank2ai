@@ -33,6 +33,7 @@ from bank2ai import (
     CategoryList,
     CreateRecipientResponse,
     ExecuteTransferResponse,
+    GetTransactionResponse,
     Recipient,
     RecipientList,
     Transaction,
@@ -305,6 +306,39 @@ async def get_transactions(
     return TransactionList(items=transactions, nextCursor=next_cursor)
 
 
+async def get_transaction(
+    *,
+    transaction_id: str,
+    account_id: Optional[str] = None,
+) -> GetTransactionResponse:
+    logger.info("get_transaction: id=%s account_id=%s", transaction_id, account_id)
+    async with await _client() as client:
+        response = await client.get(f"{_BASE_URL}/v1/transactions/{transaction_id}")
+    if response.status_code == 404:
+        return GetTransactionResponse(
+            content=f"No transaction with id '{transaction_id}'.",
+        )
+    response.raise_for_status()
+    t = response.json()["data"]
+    if account_id is not None and str(t.get("accountId")) != account_id:
+        return GetTransactionResponse(
+            content=f"Transaction '{transaction_id}' is not on account '{account_id}'.",
+        )
+    return GetTransactionResponse(
+        content="Transaction found.",
+        item=Transaction(
+            id=str(t["id"]),
+            accountId=str(t["accountId"]),
+            description=t["text"],
+            amount=t["amount"],
+            bookingDate=t["date"],
+            originalAmount=t.get("amountInCurrency"),
+            originalCurrency=t.get("currency"),
+            categoryId=str(t["categoryId"]) if t.get("categoryId") is not None else None,
+        ),
+    )
+
+
 async def get_transactions_summary(
     *,
     direction: str,
@@ -474,6 +508,7 @@ register_tools(
     app,
     get_accounts=get_accounts,
     get_transactions=get_transactions,
+    get_transaction=get_transaction,
     get_categories=get_categories,
     get_transactions_summary=get_transactions_summary,
     get_recipients=get_recipients,

@@ -22,6 +22,7 @@ from bank2ai import (
     CreateRecipientResponse,
     ExecuteTransferDetail,
     ExecuteTransferResponse,
+    GetTransactionResponse,
     Recipient,
     RecipientList,
     Transaction,
@@ -170,6 +171,30 @@ async def get_transactions(
     return TransactionList(
         items=[_apply_verbosity(Transaction(**t), verbosity) for t in transactions],
         nextCursor=next_cursor,
+    )
+
+
+async def get_transaction(
+    *,
+    transaction_id: str,
+    account_id: Optional[str] = None,
+) -> GetTransactionResponse:
+    logger.info("get_transaction: id=%s account_id=%s", transaction_id, account_id)
+    record = next(
+        (t for t in demo_data.TRANSACTIONS if t.get("id") == transaction_id),
+        None,
+    )
+    if record is None:
+        return GetTransactionResponse(
+            content=f"No transaction with id '{transaction_id}'.",
+        )
+    if account_id is not None and record.get("accountId") != account_id:
+        return GetTransactionResponse(
+            content=f"Transaction '{transaction_id}' is not on account '{account_id}'.",
+        )
+    return GetTransactionResponse(
+        content="Transaction found.",
+        item=Transaction(**record),
     )
 
 
@@ -365,6 +390,7 @@ register_tools(
     app,
     get_accounts=get_accounts,
     get_transactions=get_transactions,
+    get_transaction=get_transaction,
     get_categories=get_categories,
     get_transactions_summary=get_transactions_summary,
     get_recipients=get_recipients,

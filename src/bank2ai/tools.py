@@ -22,6 +22,7 @@ from .models import (
     CategoryList,
     CreateRecipientResponse,
     ExecuteTransferResponse,
+    GetTransactionResponse,
     RecipientList,
     TransactionList,
     TransactionsSummary,
@@ -44,6 +45,7 @@ def register_tools(
     *,
     get_accounts: Optional[Handler] = None,
     get_transactions: Optional[Handler] = None,
+    get_transaction: Optional[Handler] = None,
     get_categories: Optional[Handler] = None,
     get_transactions_summary: Optional[Handler] = None,
     get_recipients: Optional[Handler] = None,
@@ -219,6 +221,38 @@ def register_tools(
                 min_amount=min_amount,
                 max_amount=max_amount,
                 cursor=cursor,
+            )
+
+    if get_transaction is not None:
+        _get_transaction_handler = get_transaction
+
+        @app.tool(
+            name="get-transaction",
+            description=(
+                "Look up a single transaction by id and return every "
+                "field the server can populate, including ISO 20022 "
+                "metadata (transactionCode, remittanceInformation, "
+                "endToEndId, merchantCategoryCode, etc.). Use this for "
+                "audit / reconciliation flows; for compact lists prefer "
+                "`get-transactions` with a `verbosity` cap."
+            ),
+        )
+        async def _get_transaction(
+            transaction_id: str = Field(
+                description="Transaction id (the `id` field from get-transactions).",
+            ),
+            account_id: Optional[str] = Field(
+                default=None,
+                description=(
+                    "Source account.id (from get-accounts). Optional; servers "
+                    "MAY require it for routing or for additional "
+                    "authorization checks."
+                ),
+            ),
+        ) -> GetTransactionResponse:
+            return await _get_transaction_handler(
+                transaction_id=transaction_id,
+                account_id=account_id,
             )
 
     if get_categories is not None:

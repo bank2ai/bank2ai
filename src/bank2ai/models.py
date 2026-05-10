@@ -667,6 +667,23 @@ class AccountList(BaseModel):
     items: list[Account] = Field(description="Accounts matching the request.")
 
 
+class GetTransactionResponse(BaseModel):
+    """Result of looking up a single transaction by id.
+
+    Returned by the `get-transaction` tool. The envelope mirrors the
+    recoverable-error pattern used elsewhere in bank2ai: when the
+    transaction is found `item` is populated and `content` is a brief
+    status message; when it isn't, `item` is omitted and `content`
+    explains why.
+    """
+
+    content: str = Field(description="Human-readable status message.")
+    item: Optional[Transaction] = Field(
+        default=None,
+        description="The transaction when found.",
+    )
+
+
 class TransactionList(BaseModel):
     """Envelope for a list of transactions"""
 

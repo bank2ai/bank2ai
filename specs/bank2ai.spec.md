@@ -27,7 +27,8 @@ A bank2ai server MAY register any subset of the following tools. Tools that are 
 | Name                       | Purpose                                                            |
 | -------------------------- | ------------------------------------------------------------------ |
 | `get-accounts`             | List bank accounts and cards with balances and identifiers (account number plus IBAN/BBAN/BIC or masked PAN where available), optionally filtered by type, lifecycle status, usage, or withdrawal-eligibility. |
-| `get-transactions`         | List transactions, with filters for account, date range, signed amount range, categories, free-text search, and result count. Supports cursor-based paging via `cursor` / `nextCursor`. |
+| `get-transactions`         | List transactions, with filters for account, date range, signed amount range, categories, free-text search, and result count. Supports cursor-based paging via `cursor` / `nextCursor`, and a `verbosity` cap (`minimal` / `standard` / `full`) that limits how many optional fields each Transaction may carry. |
+| `get-transaction`          | Look up a single transaction by id. Returns every optional field the server can populate, including ISO 20022 metadata. The audit / reconciliation entry point. |
 | `get-categories`           | List the bank's transaction categories.                            |
 | `get-transactions-summary` | Aggregated transactions, scoped to either income or expenses (required `direction`). Group by `none`, `category`, `month`, or `both`; each row reports the corresponding `category_id` and/or `month`. Filters mirror `get-transactions`: account, date, amount, category ids. |
 | `get-recipients`           | Look up saved payment recipients by partial name match.            |
