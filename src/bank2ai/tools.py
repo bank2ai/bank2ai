@@ -414,6 +414,16 @@ def register_tools(
                 default=None,
                 description="Pre-fill text for transfers' description field.",
             ),
+            idempotency_key: Optional[str] = Field(
+                default=None,
+                description=(
+                    "Optional idempotency key, scoped to this tool. "
+                    "Servers SHOULD return the original response for "
+                    "repeat calls with the same key within at least 24 "
+                    "hours."
+                ),
+                max_length=128,
+            ),
         ) -> CreateRecipientResponse:
             return await _create_recipient_handler(
                 name=name,
@@ -422,6 +432,7 @@ def register_tools(
                 nickname=nickname,
                 bic=bic,
                 default_description=default_description,
+                idempotency_key=idempotency_key,
             )
 
     if prepare_transfer is not None:
@@ -503,6 +514,16 @@ def register_tools(
                     "when both are set."
                 ),
             ),
+            idempotency_key: Optional[str] = Field(
+                default=None,
+                description=(
+                    "Optional idempotency key, scoped to this tool. "
+                    "Servers SHOULD return the original prepared-transfer "
+                    "response for repeat calls with the same key within "
+                    "at least 24 hours."
+                ),
+                max_length=128,
+            ),
         ) -> PrepareTransferResponse:
             return await _prepare_transfer_handler(
                 debtor_account_id=debtor_account_id,
@@ -515,6 +536,7 @@ def register_tools(
                 remittance_information=remittance_information,
                 end_to_end_id=end_to_end_id,
                 description=description,
+                idempotency_key=idempotency_key,
             )
 
     if prepare_transfer_icelandic is not None:
@@ -556,6 +578,11 @@ def register_tools(
                 pattern=r"^[A-Z]{3}$|^$",
                 examples=["ISK", "EUR", "USD"],
             ),
+            idempotency_key: Optional[str] = Field(
+                default=None,
+                description="Forwarded to the underlying `prepare-transfer` call.",
+                max_length=128,
+            ),
         ) -> PrepareTransferResponse:
             return await _prepare_transfer_icelandic_handler(
                 amount=amount,
@@ -564,6 +591,7 @@ def register_tools(
                 description=description,
                 withdrawal_account_number=withdrawal_account_number,
                 currency=currency,
+                idempotency_key=idempotency_key,
             )
 
     if execute_transfer is not None:

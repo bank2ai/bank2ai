@@ -1549,6 +1549,19 @@
             "default": null,
             "description": "Pre-fill text for transfers' description field."
           },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional idempotency key, scoped to this tool. Servers SHOULD return the original response for repeat calls with the same key within at least 24 hours."
+          },
           "name": {
             "description": "Recipient's full name or business name.",
             "type": "string"
@@ -1633,6 +1646,18 @@
       "outputSchema": {
         "description": "Result of creating a payment recipient",
         "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Server-defined code identifying a recoverable error (e.g., `duplicate_recipient`). Omitted on success."
+          },
           "content": {
             "description": "Human-readable status message",
             "type": "string"
@@ -1976,6 +2001,18 @@
       "outputSchema": {
         "description": "Envelope for `execute-transfer`.",
         "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Server-defined code identifying a recoverable error. Canonical values: `intent_expired`, `intent_not_found`. Omitted on success."
+          },
           "content": {
             "description": "Human-readable status message.",
             "type": "string"
@@ -4590,6 +4627,19 @@
             "default": null,
             "description": "Optional client-supplied ISO 20022 cross-rail identifier. Servers MUST generate one when the client omits it; the resolved value is echoed in the response summary."
           },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional idempotency key, scoped to this tool. Servers SHOULD return the original prepared-transfer response for repeat calls with the same key within at least 24 hours."
+          },
           "local_instrument": {
             "anyOf": [
               {
@@ -4702,6 +4752,18 @@
               "type": "object"
             },
             "type": "array"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Server-defined code identifying a recoverable error (e.g., `insufficient_funds`, `invalid_account`, `missing_creditor_identifier`). Omitted on success."
           },
           "content": {
             "description": "Human-readable status message.",
@@ -5670,6 +5732,19 @@
             "description": "Free-text note shown on the recipient's statement.",
             "type": "string"
           },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Forwarded to the underlying `prepare-transfer` call."
+          },
           "recipient_account_number": {
             "description": "Destination bank account number.",
             "examples": [
@@ -5722,6 +5797,18 @@
               "type": "object"
             },
             "type": "array"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Server-defined code identifying a recoverable error (e.g., `insufficient_funds`, `invalid_account`, `missing_creditor_identifier`). Omitted on success."
           },
           "content": {
             "description": "Human-readable status message.",

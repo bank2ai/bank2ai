@@ -194,6 +194,7 @@ async def get_accounts(
             overdraftLimit=acc["limit"],
             currency=acc["currencyCode"],
             accountType=at,
+            isWithdrawalAccount=is_withdrawal,
             status=st,
         ))
 
@@ -434,8 +435,11 @@ async def create_recipient(
     nickname: Optional[str] = None,
     bic: Optional[str] = None,
     default_description: Optional[str] = None,
+    idempotency_key: Optional[str] = None,
 ) -> CreateRecipientResponse:
-    logger.info("create_recipient: name=%s", name)
+    logger.info("create_recipient: name=%s idempotency_key=%s", name, idempotency_key)
+    if (cached := _idempotent_get("create-recipient", idempotency_key)) is not None:
+        return cached  # type: ignore[return-value]
     recipient = Recipient(
         id=str(uuid4()),
         name=name,
@@ -446,16 +450,34 @@ async def create_recipient(
         defaultDescription=default_description,
     )
     _recipients_store.append(recipient)
-    return CreateRecipientResponse(
+    response = CreateRecipientResponse(
         content=f"Recipient '{name}' created successfully.",
         item=recipient,
     )
+    _idempotent_put("create-recipient", idempotency_key, response)
+    return response
 
 
 # ---- Transfer intent store (in-memory) ----
 
 _INTENT_TTL = timedelta(minutes=5)
 _intent_store: dict[str, PreparedTransfer] = {}
+
+
+# ---- Idempotency cache ----
+
+_idempotency_cache: dict[tuple[str, str], object] = {}
+
+
+def _idempotent_get(tool: str, key: Optional[str]) -> Optional[object]:
+    if key is None:
+        return None
+    return _idempotency_cache.get((tool, key))
+
+
+def _idempotent_put(tool: str, key: Optional[str], response: object) -> None:
+    if key is not None:
+        _idempotency_cache[(tool, key)] = response
 
 
 async def prepare_transfer(
@@ -470,15 +492,20 @@ async def prepare_transfer(
     remittance_information: Optional[dict] = None,
     end_to_end_id: Optional[str] = None,
     description: Optional[str] = None,
+    idempotency_key: Optional[str] = None,
 ) -> PrepareTransferResponse:
     logger.info(
-        "prepare_transfer: rail=%s amount=%s currency=%s debtor=%s",
-        rail, amount, currency, debtor_account_id,
+        "prepare_transfer: rail=%s amount=%s currency=%s debtor=%s idempotency_key=%s",
+        rail, amount, currency, debtor_account_id, idempotency_key,
     )
+    if (cached := _idempotent_get("prepare-transfer", idempotency_key)) is not None:
+        return cached  # type: ignore[return-value]
+
     creditor_party = Party.model_validate(creditor)
     if creditor_party.accountIdentifier is None:
         return PrepareTransferResponse(
             content="creditor.accountIdentifier is required for routing.",
+            code="missing_creditor_identifier",
         )
 
     accounts = (await get_accounts()).items
@@ -486,9 +513,13 @@ async def prepare_transfer(
     if debtor is None:
         return PrepareTransferResponse(
             content=f"No debtor account with id '{debtor_account_id}'.",
+            code="invalid_account",
         )
     if debtor.availableBalance is not None and debtor.availableBalance < amount:
-        return PrepareTransferResponse(content="Insufficient funds.")
+        return PrepareTransferResponse(
+            content="Insufficient funds.",
+            code="insufficient_funds",
+        )
 
     resolved_end_to_end_id = end_to_end_id or f"e2e_{uuid4().hex[:16]}"
     intent_id = f"intent_{uuid4().hex}"
@@ -517,7 +548,7 @@ async def prepare_transfer(
     )
     _intent_store[intent_id] = prepared
 
-    return PrepareTransferResponse(
+    response = PrepareTransferResponse(
         content=(
             "A transfer has been prepared. Confirm the details with the "
             "user, then call execute-transfer with the transferIntentId."
@@ -525,6 +556,8 @@ async def prepare_transfer(
         item=prepared,
         actions=[TransferAction(title="Transfer", link="/transfer")],
     )
+    _idempotent_put("prepare-transfer", idempotency_key, response)
+    return response
 
 
 async def prepare_transfer_icelandic(
@@ -535,6 +568,7 @@ async def prepare_transfer_icelandic(
     description: str = "",
     withdrawal_account_number: str = "",
     currency: str = "",
+    idempotency_key: Optional[str] = None,
 ) -> PrepareTransferResponse:
     """Deprecated alias: maps legacy Icelandic-specific inputs onto the
     polymorphic prepare-transfer with rail=domestic-IS."""
@@ -553,7 +587,10 @@ async def prepare_transfer_icelandic(
         account = next((a for a in accounts if a.isDefaultAccount), None)
 
     if not account:
-        return PrepareTransferResponse(content="Invalid or no default account found.")
+        return PrepareTransferResponse(
+            content="Invalid or no default account found.",
+            code="invalid_account",
+        )
 
     recipient = next(
         (
@@ -580,6 +617,7 @@ async def prepare_transfer_icelandic(
         currency=currency or account.currency,
         rail=Rail.DomesticIS.value,
         description=description or None,
+        idempotency_key=idempotency_key,
     )
 
 
@@ -592,10 +630,14 @@ async def execute_transfer(
         "execute_transfer: intent=%s idempotency_key=%s",
         transfer_intent_id, idempotency_key,
     )
+    if (cached := _idempotent_get("execute-transfer", idempotency_key)) is not None:
+        return cached  # type: ignore[return-value]
+
     intent = _intent_store.get(transfer_intent_id)
     if intent is None:
         return ExecuteTransferResponse(
             content=f"No such transfer intent '{transfer_intent_id}'.",
+            code="intent_not_found",
         )
     now = datetime.now(timezone.utc)
     if now >= intent.expiresAt:
@@ -604,8 +646,9 @@ async def execute_transfer(
                 f"Transfer intent '{transfer_intent_id}' expired at "
                 f"{intent.expiresAt.isoformat()}. Call prepare-transfer again."
             ),
+            code="intent_expired",
         )
-    return ExecuteTransferResponse(
+    response = ExecuteTransferResponse(
         content=(
             f"Transfer of {intent.summary.amount:,.2f} {intent.summary.currency} "
             "submitted to Meniga."
@@ -616,6 +659,8 @@ async def execute_transfer(
             executedAt=now,
         ),
     )
+    _idempotent_put("execute-transfer", idempotency_key, response)
+    return response
 
 
 # ---- Wire up ----

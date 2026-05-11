@@ -783,6 +783,13 @@ class CreateRecipientResponse(BaseModel):
         default=None,
         description="The created recipient when creation succeeded.",
     )
+    code: Optional[str] = Field(
+        default=None,
+        description=(
+            "Server-defined code identifying a recoverable error (e.g., "
+            "`duplicate_recipient`). Omitted on success."
+        ),
+    )
 
 
 class TransferAction(BaseModel):
@@ -1006,6 +1013,14 @@ class PrepareTransferResponse(BaseModel):
         default_factory=list,
         description="Optional follow-up actions the client may surface.",
     )
+    code: Optional[str] = Field(
+        default=None,
+        description=(
+            "Server-defined code identifying a recoverable error (e.g., "
+            "`insufficient_funds`, `invalid_account`, `missing_creditor_identifier`). "
+            "Omitted on success."
+        ),
+    )
 
 
 class TransferExecutionStatus(str, Enum):
@@ -1045,6 +1060,14 @@ class ExecuteTransferResponse(BaseModel):
     item: Optional[ExecutedTransfer] = Field(
         default=None,
         description="Receipt details when the transfer was accepted by the bank.",
+    )
+    code: Optional[str] = Field(
+        default=None,
+        description=(
+            "Server-defined code identifying a recoverable error. "
+            "Canonical values: `intent_expired`, `intent_not_found`. "
+            "Omitted on success."
+        ),
     )
 
 

@@ -79,7 +79,19 @@ Servers MUST NOT register a bank2ai-defined `authenticate` tool, earlier drafts 
 ## 5. Error model
 
 * Servers SHOULD return MCP `ToolError` (or equivalent protocol-level error) for unrecoverable failures, including authentication failures.
-* For recoverable user-facing conditions (e.g. "Insufficient funds", "Invalid recipient"), servers SHOULD return a successful tool call whose response model includes a human-readable `content` field describing the problem. `prepare-transfer-icelandic` and `create-recipient` model this explicitly.
+* For recoverable user-facing conditions (e.g. "Insufficient funds", "Invalid recipient"), servers SHOULD return a successful tool call whose response model includes a human-readable `content` field describing the problem. The mutating tools' response envelopes (`CreateRecipientResponse`, `PrepareTransferResponse`, `ExecuteTransferResponse`) additionally carry an optional `code` field with a server-defined machine-readable identifier. Canonical codes:
+    * `intent_not_found`, `intent_expired` (`execute-transfer`).
+    * `missing_creditor_identifier`, `insufficient_funds`, `invalid_account`, `invalid_recipient` (`prepare-transfer` and the deprecated alias).
+    * Servers MAY emit additional, server-specific codes; clients MUST treat unknown codes as opaque.
+
+## 5a. Safety contract for mutating tools
+
+These rules apply to every mutating tool in §1: `create-recipient`, `prepare-transfer`, `prepare-transfer-icelandic`, `execute-transfer`.
+
+* **Idempotency.** Every mutating tool accepts an optional `idempotency_key` (≤128 chars). Servers SHOULD return the original response for repeat calls with the same key within at least 24 hours. The key is scoped to `(tool name, caller)`, so two unrelated callers, or the same caller across two different tools, do not collide on the same key. Clients SHOULD generate keys that are unique to the *logical operation* being performed (e.g., a UUID per user action), not per request.
+* **Intent expiry.** `prepare-transfer` MUST return `expiresAt`. Servers SHOULD set this 5 minutes ahead of the prepare time as a recommended default; per-rail values MAY shorten or extend. `execute-transfer` against an expired intent MUST return a recoverable error with `code: "intent_expired"`. The client is expected to call `prepare-transfer` again to obtain a fresh intent.
+* **Immutable binding.** The prepared transfer's `amount`, creditor, debtor account, and rail MUST NOT be modified between `prepare-transfer` and `execute-transfer`. The `execute-transfer` input takes only `transfer_intent_id` (and an optional `idempotency_key`) precisely so that the only intent that can be executed is the one the user confirmed. Any change to amount, creditor, debtor, or rail requires a fresh `prepare-transfer` call.
+* **Structured Confirmation of Payee.** On rails that support payee verification (UK Confirmation of Payee, EU Verification of Payee, etc.), servers MUST populate `PreparedTransfer.confirmationOfPayee` when the verification has run; on rails that do not, servers MUST omit the field. The four `status` values (`match`, `close-match`, `no-match`, `unavailable`) are the structured signal the client renders; `suggestedName` carries the actual name on the destination account when the rail returns it on `close-match` or `no-match`.
 
 ## 6. Localization
 
