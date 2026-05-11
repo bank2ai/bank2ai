@@ -33,6 +33,59 @@
           ],
           "title": "AccountUsage",
           "type": "string"
+        },
+        "Balance": {
+          "description": "One typed balance entry on an account.\n\nProfile of: Berlin Group PSD2 `balances` array element.",
+          "properties": {
+            "amount": {
+              "description": "Balance amount in `currency`.",
+              "title": "Amount",
+              "type": "number"
+            },
+            "asOf": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "ISO 8601 timestamp when this balance was last refreshed.",
+              "title": "Asof"
+            },
+            "currency": {
+              "description": "ISO 4217 currency code.",
+              "pattern": "^[A-Z]{3}$",
+              "title": "Currency",
+              "type": "string"
+            },
+            "type": {
+              "$ref": "#/$defs/BalanceType",
+              "description": "Balance type."
+            }
+          },
+          "required": [
+            "type",
+            "amount",
+            "currency"
+          ],
+          "title": "Balance",
+          "type": "object"
+        },
+        "BalanceType": {
+          "description": "Type of balance per Berlin Group PSD2 `balanceType`.",
+          "enum": [
+            "ClosingBooked",
+            "Expected",
+            "InterimAvailable",
+            "ForwardAvailable",
+            "NonInvoiced"
+          ],
+          "title": "BalanceType",
+          "type": "string"
         }
       },
       "description": "Bank account with balance and metadata.\n\nProperty names follow Berlin Group PSD2 `accountDetails` where they\noverlap (`iban`, `bban`, `bic`, `maskedPan`, `product`, `status`,\n`usage`), so servers fronting a PSD2 backend can map fields directly.\nServers SHOULD populate at least one of `accountNumber`, `iban`,\n`bban`, or `maskedPan`.",
@@ -90,6 +143,22 @@
           "default": null,
           "description": "ISO 8601 timestamp at which `balance` and `availableBalance` were last refreshed by the bank.",
           "title": "Balanceupdatedat"
+        },
+        "balances": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Balance"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Typed balance entries when the bank exposes more than just the booked and available scalars (`ClosingBooked`, `Expected`, `InterimAvailable`, `ForwardAvailable`, `NonInvoiced`). When populated, the top-level `balance` and `availableBalance` scalars are derived shortcuts for the most-recent `ClosingBooked` and `InterimAvailable` entries; servers MUST keep them consistent. Servers without typed balance support SHOULD omit this field and emit only the scalars.",
+          "title": "Balances"
         },
         "bban": {
           "anyOf": [
@@ -2206,6 +2275,62 @@
                   ],
                   "default": null,
                   "description": "ISO 8601 timestamp at which `balance` and `availableBalance` were last refreshed by the bank."
+                },
+                "balances": {
+                  "anyOf": [
+                    {
+                      "items": {
+                        "description": "One typed balance entry on an account.\n\nProfile of: Berlin Group PSD2 `balances` array element.",
+                        "properties": {
+                          "amount": {
+                            "description": "Balance amount in `currency`.",
+                            "type": "number"
+                          },
+                          "asOf": {
+                            "anyOf": [
+                              {
+                                "format": "date-time",
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "description": "ISO 8601 timestamp when this balance was last refreshed."
+                          },
+                          "currency": {
+                            "description": "ISO 4217 currency code.",
+                            "pattern": "^[A-Z]{3}$",
+                            "type": "string"
+                          },
+                          "type": {
+                            "description": "Balance type.",
+                            "enum": [
+                              "ClosingBooked",
+                              "Expected",
+                              "InterimAvailable",
+                              "ForwardAvailable",
+                              "NonInvoiced"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "amount",
+                          "currency"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Typed balance entries when the bank exposes more than just the booked and available scalars (`ClosingBooked`, `Expected`, `InterimAvailable`, `ForwardAvailable`, `NonInvoiced`). When populated, the top-level `balance` and `availableBalance` scalars are derived shortcuts for the most-recent `ClosingBooked` and `InterimAvailable` entries; servers MUST keep them consistent. Servers without typed balance support SHOULD omit this field and emit only the scalars."
                 },
                 "bban": {
                   "anyOf": [
@@ -5259,6 +5384,62 @@
                             "default": null,
                             "description": "ISO 8601 timestamp at which `balance` and `availableBalance` were last refreshed by the bank."
                           },
+                          "balances": {
+                            "anyOf": [
+                              {
+                                "items": {
+                                  "description": "One typed balance entry on an account.\n\nProfile of: Berlin Group PSD2 `balances` array element.",
+                                  "properties": {
+                                    "amount": {
+                                      "description": "Balance amount in `currency`.",
+                                      "type": "number"
+                                    },
+                                    "asOf": {
+                                      "anyOf": [
+                                        {
+                                          "format": "date-time",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "default": null,
+                                      "description": "ISO 8601 timestamp when this balance was last refreshed."
+                                    },
+                                    "currency": {
+                                      "description": "ISO 4217 currency code.",
+                                      "pattern": "^[A-Z]{3}$",
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "description": "Balance type.",
+                                      "enum": [
+                                        "ClosingBooked",
+                                        "Expected",
+                                        "InterimAvailable",
+                                        "ForwardAvailable",
+                                        "NonInvoiced"
+                                      ],
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "amount",
+                                    "currency"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "description": "Typed balance entries when the bank exposes more than just the booked and available scalars (`ClosingBooked`, `Expected`, `InterimAvailable`, `ForwardAvailable`, `NonInvoiced`). When populated, the top-level `balance` and `availableBalance` scalars are derived shortcuts for the most-recent `ClosingBooked` and `InterimAvailable` entries; servers MUST keep them consistent. Servers without typed balance support SHOULD omit this field and emit only the scalars."
+                          },
                           "bban": {
                             "anyOf": [
                               {
@@ -6303,6 +6484,62 @@
                             ],
                             "default": null,
                             "description": "ISO 8601 timestamp at which `balance` and `availableBalance` were last refreshed by the bank."
+                          },
+                          "balances": {
+                            "anyOf": [
+                              {
+                                "items": {
+                                  "description": "One typed balance entry on an account.\n\nProfile of: Berlin Group PSD2 `balances` array element.",
+                                  "properties": {
+                                    "amount": {
+                                      "description": "Balance amount in `currency`.",
+                                      "type": "number"
+                                    },
+                                    "asOf": {
+                                      "anyOf": [
+                                        {
+                                          "format": "date-time",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "default": null,
+                                      "description": "ISO 8601 timestamp when this balance was last refreshed."
+                                    },
+                                    "currency": {
+                                      "description": "ISO 4217 currency code.",
+                                      "pattern": "^[A-Z]{3}$",
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "description": "Balance type.",
+                                      "enum": [
+                                        "ClosingBooked",
+                                        "Expected",
+                                        "InterimAvailable",
+                                        "ForwardAvailable",
+                                        "NonInvoiced"
+                                      ],
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "amount",
+                                    "currency"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "description": "Typed balance entries when the bank exposes more than just the booked and available scalars (`ClosingBooked`, `Expected`, `InterimAvailable`, `ForwardAvailable`, `NonInvoiced`). When populated, the top-level `balance` and `availableBalance` scalars are derived shortcuts for the most-recent `ClosingBooked` and `InterimAvailable` entries; servers MUST keep them consistent. Servers without typed balance support SHOULD omit this field and emit only the scalars."
                           },
                           "bban": {
                             "anyOf": [

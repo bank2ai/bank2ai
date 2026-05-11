@@ -18,6 +18,24 @@ ACCOUNTS = [
         "balance": 5420.50,
         "availableBalance": 5420.50,
         "overdraftLimit": 0.0,
+        # Typed balances exercise the optional `balances` array; the
+        # top-level `balance` / `availableBalance` scalars stay as
+        # derived shortcuts that clients on the lean payload path can
+        # use without parsing the array.
+        "balances": [
+            {
+                "type": "ClosingBooked",
+                "amount": 5420.50,
+                "currency": "USD",
+                "asOf": "2024-03-15T08:30:00Z",
+            },
+            {
+                "type": "InterimAvailable",
+                "amount": 5420.50,
+                "currency": "USD",
+                "asOf": "2024-03-15T08:30:00Z",
+            },
+        ],
         "ownerName": "Alex Demo",
         "product": "Demo Everyday Checking",
         "status": "Enabled",

@@ -270,6 +270,34 @@ class AccountUsage(str, Enum):
     Business = "Business"
 
 
+class BalanceType(str, Enum):
+    """Type of balance per Berlin Group PSD2 `balanceType`."""
+
+    ClosingBooked = "ClosingBooked"
+    Expected = "Expected"
+    InterimAvailable = "InterimAvailable"
+    ForwardAvailable = "ForwardAvailable"
+    NonInvoiced = "NonInvoiced"
+
+
+class Balance(_Bank2aiModel):
+    """One typed balance entry on an account.
+
+    Profile of: Berlin Group PSD2 `balances` array element.
+    """
+
+    type: BalanceType = Field(description="Balance type.")
+    amount: float = Field(description="Balance amount in `currency`.")
+    currency: str = Field(
+        description="ISO 4217 currency code.",
+        pattern="^[A-Z]{3}$",
+    )
+    asOf: Optional[datetime] = Field(
+        default=None,
+        description="ISO 8601 timestamp when this balance was last refreshed.",
+    )
+
+
 class Account(_Bank2aiModel):
     """Bank account with balance and metadata.
 
@@ -343,6 +371,20 @@ class Account(_Bank2aiModel):
             "Funds available to spend right now in `currency`, after pending "
             "authorisations and including any `overdraftLimit` headroom. "
             "Aligns with the PSD2 `interimAvailable` balance type."
+        ),
+    )
+    balances: Optional[list[Balance]] = Field(
+        default=None,
+        description=(
+            "Typed balance entries when the bank exposes more than just "
+            "the booked and available scalars (`ClosingBooked`, "
+            "`Expected`, `InterimAvailable`, `ForwardAvailable`, "
+            "`NonInvoiced`). When populated, the top-level `balance` and "
+            "`availableBalance` scalars are derived shortcuts for the "
+            "most-recent `ClosingBooked` and `InterimAvailable` entries; "
+            "servers MUST keep them consistent. Servers without typed "
+            "balance support SHOULD omit this field and emit only the "
+            "scalars."
         ),
     )
     overdraftLimit: Optional[float] = Field(
