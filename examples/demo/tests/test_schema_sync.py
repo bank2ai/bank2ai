@@ -55,11 +55,6 @@ EXPECTED_TOOL_INPUTS = {
         "remittance_information", "end_to_end_id", "description",
         "idempotency_key",
     },
-    "prepare-transfer-icelandic": {
-        "amount", "recipient_ssn", "recipient_account_number",
-        "description", "withdrawal_account_number", "currency",
-        "idempotency_key",
-    },
     "execute-transfer": {"transfer_intent_id", "idempotency_key"},
 }
 

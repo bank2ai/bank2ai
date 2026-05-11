@@ -56,7 +56,6 @@ def register_tools(
     get_recipients: Optional[Handler] = None,
     create_recipient: Optional[Handler] = None,
     prepare_transfer: Optional[Handler] = None,
-    prepare_transfer_icelandic: Optional[Handler] = None,
     execute_transfer: Optional[Handler] = None,
 ) -> None:
     """Register bank2ai MCP tools on `app`, dispatching to the handlers
@@ -539,61 +538,6 @@ def register_tools(
                 idempotency_key=idempotency_key,
             )
 
-    if prepare_transfer_icelandic is not None:
-        _prepare_transfer_icelandic_handler = prepare_transfer_icelandic
-
-        @app.tool(
-            name="prepare-transfer-icelandic",
-            description=(
-                "DEPRECATED: use `prepare-transfer` with `rail=domestic-IS`. "
-                "Maintained as a thin alias for legacy clients; servers "
-                "implement it by delegating internally to "
-                "`prepare-transfer`."
-            ),
-        )
-        async def _prepare_transfer_icelandic(
-            amount: float = Field(
-                description="Transfer amount in the source account's currency.",
-                gt=0,
-            ),
-            recipient_ssn: str = Field(
-                description="Recipient's Icelandic kennitala.",
-                examples=["010190-1234"],
-            ),
-            recipient_account_number: str = Field(
-                description="Destination bank account number.",
-                examples=["5678-90-123456"],
-            ),
-            description: str = Field(
-                default="",
-                description="Free-text note shown on the recipient's statement.",
-            ),
-            withdrawal_account_number: str = Field(
-                default="",
-                description="Source account number; if empty, the user's default withdrawal account is used.",
-            ),
-            currency: str = Field(
-                default="",
-                description="ISO 4217 currency code; if empty, source-account currency is used.",
-                pattern=r"^[A-Z]{3}$|^$",
-                examples=["ISK", "EUR", "USD"],
-            ),
-            idempotency_key: Optional[str] = Field(
-                default=None,
-                description="Forwarded to the underlying `prepare-transfer` call.",
-                max_length=128,
-            ),
-        ) -> PrepareTransferResponse:
-            return await _prepare_transfer_icelandic_handler(
-                amount=amount,
-                recipient_ssn=recipient_ssn,
-                recipient_account_number=recipient_account_number,
-                description=description,
-                withdrawal_account_number=withdrawal_account_number,
-                currency=currency,
-                idempotency_key=idempotency_key,
-            )
-
     if execute_transfer is not None:
         _execute_transfer_handler = execute_transfer
 
@@ -601,8 +545,7 @@ def register_tools(
             name="execute-transfer",
             description=(
                 "Execute a transfer the user has confirmed. Takes only "
-                "the `transfer_intent_id` returned by `prepare-transfer` "
-                "(or the deprecated `prepare-transfer-icelandic` alias). "
+                "the `transfer_intent_id` returned by `prepare-transfer`. "
                 "The intent's amount, creditor, debtor, and rail are "
                 "immutable: any change requires a new prepare call. "
                 "Servers reject expired intents with a structured error."

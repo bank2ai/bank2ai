@@ -560,67 +560,6 @@ async def prepare_transfer(
     return response
 
 
-async def prepare_transfer_icelandic(
-    *,
-    amount: float,
-    recipient_ssn: str,
-    recipient_account_number: str,
-    description: str = "",
-    withdrawal_account_number: str = "",
-    currency: str = "",
-    idempotency_key: Optional[str] = None,
-) -> PrepareTransferResponse:
-    """Deprecated alias: maps legacy Icelandic-specific inputs onto the
-    polymorphic prepare-transfer with rail=domestic-IS."""
-
-    logger.info(
-        "prepare_transfer_icelandic (deprecated alias): amount=%s recipient_ssn=%s",
-        amount, recipient_ssn,
-    )
-    accounts = (await get_accounts()).items
-    if withdrawal_account_number:
-        account = next(
-            (a for a in accounts if a.accountNumber == withdrawal_account_number),
-            None,
-        )
-    else:
-        account = next((a for a in accounts if a.isDefaultAccount), None)
-
-    if not account:
-        return PrepareTransferResponse(
-            content="Invalid or no default account found.",
-            code="invalid_account",
-        )
-
-    recipient = next(
-        (
-            r for r in _recipients_store
-            if r.nationalId is not None and r.nationalId.value == recipient_ssn
-        ),
-        None,
-    )
-
-    return await prepare_transfer(
-        debtor_account_id=account.id,
-        creditor={
-            "name": recipient.name if recipient else "Unknown",
-            "accountIdentifier": {
-                "type": "bban",
-                "bban": recipient_account_number,
-                "country": "IS",
-            },
-            "nationalId": (
-                recipient.nationalId.model_dump() if recipient and recipient.nationalId else None
-            ),
-        },
-        amount=amount,
-        currency=currency or account.currency,
-        rail=Rail.DomesticIS.value,
-        description=description or None,
-        idempotency_key=idempotency_key,
-    )
-
-
 async def execute_transfer(
     *,
     transfer_intent_id: str,
@@ -677,7 +616,6 @@ register_tools(
     get_recipients=get_recipients,
     create_recipient=create_recipient,
     prepare_transfer=prepare_transfer,
-    prepare_transfer_icelandic=prepare_transfer_icelandic,
     execute_transfer=execute_transfer,
 )
 

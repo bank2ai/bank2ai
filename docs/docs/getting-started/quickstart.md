@@ -63,7 +63,7 @@ if __name__ == "__main__":
     app.run()
 ```
 
-Tools whose handler is omitted are simply not registered. Add `get_transactions`, `get_transactions_summary`, `get_recipients`, `create_recipient`, `prepare_transfer_icelandic`, and `execute_transfer` as you implement them.
+Tools whose handler is omitted are simply not registered. Add `get_transactions`, `get_transaction`, `get_transactions_summary`, `get_recipients`, `create_recipient`, `prepare_transfer`, and `execute_transfer` as you implement them.
 
 ## 3. Run it
 

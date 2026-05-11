@@ -185,7 +185,8 @@ await client.call_tool("execute-transfer", {
     "description": "Lunch share",
 })
 
-# 0.11 — polymorphic prepare-transfer with rail; execute takes only the intent id
+# 0.11 — polymorphic prepare-transfer with rail; execute takes only the intent id;
+# prepare-transfer-icelandic is removed
 prepared = await client.call_tool("prepare-transfer", {
     "debtor_account_id": "acc_checking_001",
     "creditor": {
@@ -212,7 +213,7 @@ await client.call_tool("execute-transfer", {"transfer_intent_id": intent_id})
 
 The `Rail` enum ships with `domestic-IS`, `sepa`, `sepa-instant`, `swift`; servers MAY register more values via vendor extensions.
 
-`prepare-transfer-icelandic` stays registered as a deprecated alias that maps the legacy inputs onto the polymorphic tool internally, so old clients keep working unchanged. Plan to call `prepare-transfer` directly in new code.
+`prepare-transfer-icelandic` is no longer registered. Replace any call site with `prepare-transfer` and `rail=domestic-IS`.
 
 ### `PreparedTransfer` envelope
 
@@ -244,7 +245,7 @@ The `Rail` enum ships with `domestic-IS`, `sepa`, `sepa-instant`, `swift`; serve
 
 ## Safety contract on mutating tools
 
-Every mutating tool (`create-recipient`, `prepare-transfer`, `prepare-transfer-icelandic`, `execute-transfer`) accepts an optional `idempotency_key` (≤128 chars). Servers SHOULD return the original response for repeat calls with the same key within at least 24 hours. The key is scoped per `(tool, caller)`; two unrelated callers cannot collide.
+Every mutating tool (`create-recipient`, `prepare-transfer`, `execute-transfer`) accepts an optional `idempotency_key` (≤128 chars). Servers SHOULD return the original response for repeat calls with the same key within at least 24 hours. The key is scoped per `(tool, caller)`; two unrelated callers cannot collide.
 
 The mutating-tool response envelopes (`CreateRecipientResponse`, `PrepareTransferResponse`, `ExecuteTransferResponse`) carry an optional structured `code` field on recoverable errors. Canonical values: `intent_not_found`, `intent_expired`, `missing_creditor_identifier`, `insufficient_funds`, `invalid_account`, `invalid_recipient`. Unknown codes MUST be treated as opaque.
 
@@ -276,7 +277,7 @@ The spec preamble now documents the lean-payload rule explicitly: servers SHOULD
 2. Migrate model field names to camelCase in any handler that constructs `Transaction` or `TransactionsSummary*` objects.
 3. Make `Transaction.id` and `Transaction.accountId` populated on every transaction your server emits.
 4. Update `create-recipient` handler signature: `account_identifier`, `national_id`, `nickname`, `bic`, `default_description`, `idempotency_key` (replacing `account_number` and `kennitala`).
-5. Add a new `prepare_transfer` handler with the polymorphic signature; keep `prepare_transfer_icelandic` as a thin alias that delegates internally.
+5. Replace any `prepare_transfer_icelandic` handler with a polymorphic `prepare_transfer` handler.
 6. Replace your `execute_transfer` handler to take only `transfer_intent_id` (and optional `idempotency_key`); add a short-lived intent store keyed by `transferIntentId`.
 7. (Optional) Map your bank's category labels onto the canonical `CANONICAL_CATEGORY_IDS` taxonomy.
 8. (Optional) Populate `Transaction` optional fields (`status`, `counterparty`, `transactionCode`, ...) and `Account.balances` from your upstream data when available.

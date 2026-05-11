@@ -31,9 +31,9 @@ register_tools(
     app,
     get_accounts=...,
     get_categories=...,
-    # get_transactions=..., get_transactions_summary=...,
+    # get_transactions=..., get_transaction=..., get_transactions_summary=...,
     # get_recipients=..., create_recipient=...,
-    # prepare_transfer_icelandic=..., execute_transfer=...,
+    # prepare_transfer=..., execute_transfer=...,
 )
 ```
 

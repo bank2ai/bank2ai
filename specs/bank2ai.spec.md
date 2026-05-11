@@ -34,7 +34,6 @@ A bank2ai server MAY register any subset of the following tools. Tools that are 
 | `get-recipients`           | Look up saved payment recipients by partial name match.            |
 | `create-recipient`         | Save a new recipient for future transfers.                         |
 | `prepare-transfer`         | **Prepare** a transfer on any supported rail (`Rail` enum: `domestic-IS`, `sepa`, `sepa-instant`, `swift`, plus vendor extensions). Returns a `transferIntentId`, a validated `summary` for user confirmation, and rail-specific metadata (fees, FX, Confirmation of Payee, warnings). Does **not** execute. |
-| `prepare-transfer-icelandic` | **Deprecated**: thin alias that maps legacy Icelandic-specific inputs onto `prepare-transfer` with `rail=domestic-IS`. New clients SHOULD call `prepare-transfer` directly. |
 | `execute-transfer`         | Execute a previously prepared transfer by `transferIntentId`. Servers reject expired or unknown intents with a structured error; the intent's amount, creditor, debtor, and rail are immutable. |
 
 Servers MAY also register additional, vendor-specific tools, but they MUST NOT alter the names, inputs, or outputs of the tools above.
@@ -47,7 +46,7 @@ A typical bank2ai session looks like this:
 
 1. The MCP client connects and calls `tools/list`. The server returns the bank2ai tools it has registered (any subset of those listed in §1).
 2. The client calls bank2ai tools as the user requests them. The server resolves credentials internally (see §4) and rejects calls it cannot authenticate.
-3. On a transfer, the client calls `prepare-transfer-icelandic` first to validate, surfaces the prepared details to the user, and only invokes `execute-transfer` after explicit confirmation.
+3. On a transfer, the client calls `prepare-transfer` first to validate, surfaces the prepared details to the user, and only invokes `execute-transfer` after explicit confirmation.
 
 ## 3. Shared data models
 
@@ -81,12 +80,12 @@ Servers MUST NOT register a bank2ai-defined `authenticate` tool, earlier drafts 
 * Servers SHOULD return MCP `ToolError` (or equivalent protocol-level error) for unrecoverable failures, including authentication failures.
 * For recoverable user-facing conditions (e.g. "Insufficient funds", "Invalid recipient"), servers SHOULD return a successful tool call whose response model includes a human-readable `content` field describing the problem. The mutating tools' response envelopes (`CreateRecipientResponse`, `PrepareTransferResponse`, `ExecuteTransferResponse`) additionally carry an optional `code` field with a server-defined machine-readable identifier. Canonical codes:
     * `intent_not_found`, `intent_expired` (`execute-transfer`).
-    * `missing_creditor_identifier`, `insufficient_funds`, `invalid_account`, `invalid_recipient` (`prepare-transfer` and the deprecated alias).
+    * `missing_creditor_identifier`, `insufficient_funds`, `invalid_account` (`prepare-transfer`).
     * Servers MAY emit additional, server-specific codes; clients MUST treat unknown codes as opaque.
 
 ## 5a. Safety contract for mutating tools
 
-These rules apply to every mutating tool in §1: `create-recipient`, `prepare-transfer`, `prepare-transfer-icelandic`, `execute-transfer`.
+These rules apply to every mutating tool in §1: `create-recipient`, `prepare-transfer`, `execute-transfer`.
 
 * **Idempotency.** Every mutating tool accepts an optional `idempotency_key` (≤128 chars). Servers SHOULD return the original response for repeat calls with the same key within at least 24 hours. The key is scoped to `(tool name, caller)`, so two unrelated callers, or the same caller across two different tools, do not collide on the same key. Clients SHOULD generate keys that are unique to the *logical operation* being performed (e.g., a UUID per user action), not per request.
 * **Intent expiry.** `prepare-transfer` MUST return `expiresAt`. Servers SHOULD set this 5 minutes ahead of the prepare time as a recommended default; per-rail values MAY shorten or extend. `execute-transfer` against an expired intent MUST return a recoverable error with `code: "intent_expired"`. The client is expected to call `prepare-transfer` again to obtain a fresh intent.

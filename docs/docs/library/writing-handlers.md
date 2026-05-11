@@ -87,21 +87,21 @@ def _to_bank2ai_account(row: AcmeAccountRow) -> Account:
 
 ## Pattern: prepare → execute for transfers
 
-The two-step transfer flow exists so the user can confirm a structured preview before money moves. A reasonable implementation:
+The two-step transfer flow exists so the user can confirm a structured preview before money moves. The contract:
 
-1. `prepare_transfer_icelandic`, validate everything (amount, recipient, source account), then return a `TransferPreparedResponse` with a populated `item` and a short, idempotent token (e.g. a UUID) embedded somewhere your `execute_transfer` can recognize. Cache the prepared transfer server-side keyed by that token.
-2. `execute_transfer`, look up the prepared transfer by `(withdrawal_account_id, recipient_account_number, amount)` (or by the token if your client surfaces it) and call your backend's transfer API. Return an `ExecuteTransferResponse` with the bank-issued receipt.
+1. `prepare_transfer`, validate everything (debtor account, creditor identifier, amount, rail), then return a `PrepareTransferResponse` with a populated `item` containing a server-generated `transferIntentId` and an `expiresAt` 5 minutes ahead. Cache the prepared transfer server-side keyed by the intent id.
+2. `execute_transfer`, look up the intent by `transfer_intent_id`. Reject unknown or expired intents with the structured `code: "intent_not_found"` or `code: "intent_expired"` so the client can branch without parsing `content`. On a fresh intent, call your backend's transfer API and return an `ExecuteTransferResponse` with the bank-issued receipt.
 
-Reject `execute_transfer` calls with no matching preparation. This is the single most important safety property of the surface, don't shortcut it.
+The intent's amount, creditor, debtor, and rail are immutable — any change requires a fresh `prepare_transfer` call. This is the single most important safety property of the surface; don't shortcut it.
 
 ## Pattern: returning user-facing errors
 
-For *unrecoverable* failures, raise `ToolError` (or let your client raise an MCP error). For *user-facing* conditions ("Insufficient funds", "Invalid recipient"), return a successful response with a `content` field that explains the situation:
+For *unrecoverable* failures, raise `ToolError` (or let your client raise an MCP error). For *user-facing* conditions ("Insufficient funds", "Invalid recipient"), return a successful response with a `content` field that explains the situation, plus a `code` field with a structured value:
 
 ```python
-return TransferPreparedResponse(
+return PrepareTransferResponse(
     content="Insufficient funds in your default account.",
-    actions=[],  # no preview surfaced
+    code="insufficient_funds",
 )
 ```
 

@@ -442,67 +442,6 @@ async def prepare_transfer(
     return response
 
 
-async def prepare_transfer_icelandic(
-    *,
-    amount: float,
-    recipient_ssn: str,
-    recipient_account_number: str,
-    description: str = "",
-    withdrawal_account_number: str = "",
-    currency: str = "",
-    idempotency_key: Optional[str] = None,
-) -> PrepareTransferResponse:
-    """Deprecated alias: maps legacy Icelandic-specific inputs onto the
-    polymorphic prepare-transfer with rail=domestic-IS."""
-
-    logger.info("prepare_transfer_icelandic (deprecated alias): amount=%s", amount)
-    recipient_data = next(
-        (
-            r for r in demo_data.RECIPIENTS
-            if (nid := r.get("nationalId")) is not None
-            and nid.get("value") == recipient_ssn
-        ),
-        None,
-    )
-    if not recipient_data:
-        return PrepareTransferResponse(
-            content="Invalid social security number.",
-            code="invalid_recipient",
-        )
-
-    if withdrawal_account_number:
-        account_data = next(
-            (a for a in demo_data.ACCOUNTS if a["accountNumber"] == withdrawal_account_number),
-            None,
-        )
-    else:
-        account_data = next((a for a in demo_data.ACCOUNTS if a["isDefaultAccount"]), None)
-
-    if not account_data:
-        return PrepareTransferResponse(
-            content="Invalid or no default account found.",
-            code="invalid_account",
-        )
-
-    return await prepare_transfer(
-        debtor_account_id=account_data["id"],
-        creditor={
-            "name": recipient_data["name"],
-            "accountIdentifier": {
-                "type": "bban",
-                "bban": recipient_account_number,
-                "country": "IS",
-            },
-            "nationalId": recipient_data.get("nationalId"),
-        },
-        amount=amount,
-        currency=currency or account_data["currency"],
-        rail=Rail.DomesticIS.value,
-        description=description or None,
-        idempotency_key=idempotency_key,
-    )
-
-
 async def execute_transfer(
     *,
     transfer_intent_id: str,
@@ -559,7 +498,6 @@ register_tools(
     get_recipients=get_recipients,
     create_recipient=create_recipient,
     prepare_transfer=prepare_transfer,
-    prepare_transfer_icelandic=prepare_transfer_icelandic,
     execute_transfer=execute_transfer,
 )
 

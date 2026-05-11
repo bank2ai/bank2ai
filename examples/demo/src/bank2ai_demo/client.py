@@ -55,7 +55,7 @@ async def main():
             data = json.loads(result.content[0].text)
             print(f"Last {len(data['items'])} transactions:")
             for tx in data["items"]:
-                print(f"  {tx['transaction_date']}: {tx['description'][:30]:30s} {tx['amount']:>10,.2f}")
+                print(f"  {tx['bookingDate']}: {tx['description'][:30]:30s} {tx['amount']:>10,.2f}")
             print()
 
             # Test 3: Get categories
@@ -77,37 +77,56 @@ async def main():
             print(f"Total spending: {data['total']:,.2f}")
             print("\nTop spending categories:")
             for item in data["summary"][:5]:
-                print(f"  {item.get('category_id', '-'):20s}: {item['total_amount']:>10,.2f} ({item['transaction_count']} txs)")
+                print(f"  {item.get('categoryId', '-'):24s}: {item['totalAmount']:>10,.2f} ({item['transactionCount']} txs)")
             print()
 
             # Test 5: Search recipients
             print("Test 5: Search Recipients")
             print("-" * 50)
-            result = await session.call_tool("get-recipients", {"name": "Smith"})
+            result = await session.call_tool("get-recipients", {"name": "Jón"})
             data = json.loads(result.content[0].text)
-            print(f"Found {len(data['items'])} recipients matching 'Smith':")
+            print(f"Found {len(data['items'])} recipients matching 'Jón':")
             for recipient in data["items"]:
-                print(f"  {recipient['name']}: {recipient['accountNumber']} ({recipient.get('description') or ''})")
+                ident = recipient["accountIdentifier"]
+                routing = ident.get("iban") or ident.get("bban") or ident.get("accountNumber") or ident.get("alias")
+                print(f"  {recipient['name']}: {routing} ({recipient.get('nickname') or ''})")
             print()
 
             # Test 6: Prepare transfer (not executing!)
             print("Test 6: Prepare Transfer (Validation Only)")
             print("-" * 50)
-            result = await session.call_tool("prepare-transfer-icelandic", {
+            result = await session.call_tool("prepare-transfer", {
+                "debtor_account_id": "acc_checking_001",
+                "creditor": {
+                    "name": "Jón Jónsson",
+                    "accountIdentifier": {
+                        "type": "bban",
+                        "bban": "0133-26-007890",
+                        "country": "IS",
+                    },
+                    "nationalId": {
+                        "value": "010190-1234",
+                        "country": "IS",
+                        "type": "kennitala",
+                    },
+                },
                 "amount": 100.00,
-                "recipient_ssn": "123-45-6789",
-                "recipient_account_number": "5678-90-123456",
+                "currency": "ISK",
+                "rail": "domestic-IS",
                 "description": "Demo payment",
             })
             data = json.loads(result.content[0].text)
             print(data["content"])
-            if "item" in data:
-                item = data["item"]
-                print(f"\nTransfer details:")
-                print(f"  From: {item['withdrawal_account']['name']} ({item['withdrawal_account']['accountNumber']})")
-                print(f"  To: {item['recipient_name']} ({item['recipient_account_number']})")
-                print(f"  Amount: {item['amount']:,.2f} {item['currency']}")
-                print(f"  Note: This is demo mode - no actual transfer would be executed")
+            item = data.get("item")
+            if item is not None:
+                summary = item["summary"]
+                debtor = summary["debtorAccount"]
+                print("\nTransfer details:")
+                print(f"  From: {debtor['name']} ({debtor['accountNumber']})")
+                print(f"  To: {summary['creditor']['name']} on rail {summary['rail']}")
+                print(f"  Amount: {summary['amount']:,.2f} {summary['currency']}")
+                print(f"  Intent: {item['transferIntentId']} (expires {item['expiresAt']})")
+                print("  Note: This is demo mode - no actual transfer would be executed")
             print()
 
             print("=" * 50)
