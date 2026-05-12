@@ -78,7 +78,11 @@ To expose the full surface, define the other eight handlers and pass them as add
 
 ## Response envelopes
 
-The MCP spec requires `structuredContent` to be a JSON object, so list-returning tools use an envelope model with an `items` field. Handlers return the envelope directly, this leaves room to add `nextCursor`, `total`, or other pagination metadata later without breaking the tool contract.
+The MCP spec requires `structuredContent` to be a JSON object, so every bank2ai tool wraps its result in an envelope. Handlers return the envelope directly, so additional metadata (`nextCursor`, `actions`, `code`, …) can grow over time without breaking the tool contract.
+
+### List envelopes
+
+List-returning tools wrap their results under an `items` field. The envelope leaves room for pagination and aggregation metadata alongside the array.
 
 | Tool | Response model | Wire shape |
 | --- | --- | --- |
@@ -87,7 +91,24 @@ The MCP spec requires `structuredContent` to be a JSON object, so list-returning
 | `get-categories` | `CategoryList` | `{ "items": Category[] }` |
 | `get-recipients` | `RecipientList` | `{ "items": Recipient[] }` |
 
-Single-object tools (`get-transaction`, `get-transactions-summary`, `create-recipient`, `prepare-transfer`, `execute-transfer`) return their natural response model.
+### Single-item envelopes
+
+Mutating tools and single-object reads wrap their result under an `item` field alongside a human-readable `content` status string. Recoverable errors populate `content` (and the structured `code`) and leave `item` absent; the tool call itself still succeeds.
+
+| Tool | Response model | Wire shape |
+| --- | --- | --- |
+| `get-transaction` | `GetTransactionResponse` | `{ "content": string, "item": Transaction \| null }` |
+| `create-recipient` | `CreateRecipientResponse` | `{ "content": string, "item": Recipient \| null, "code": string \| null }` |
+| `prepare-transfer` | `PrepareTransferResponse` | `{ "content": string, "item": PreparedTransfer \| null, "actions": TransferAction[], "code": string \| null }` |
+| `execute-transfer` | `ExecuteTransferResponse` | `{ "content": string, "item": ExecutedTransfer \| null, "code": string \| null }` |
+
+### Aggregate envelope
+
+`get-transactions-summary` is structurally different: it returns a `summary` array of grouped rows plus the `period` covered and an overall `total`, rather than the `items` / `item` pattern.
+
+| Tool | Response model | Wire shape |
+| --- | --- | --- |
+| `get-transactions-summary` | `TransactionsSummary` | `{ "summary": TransactionsSummaryGroup[], "period": { "startDate": string, "endDate": string }, "total": number }` |
 
 ## What `register_tools` does *not* do
 

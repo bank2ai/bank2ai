@@ -199,10 +199,10 @@ function renderSchemaSection(schema) {
     out.push(`Returns an array of ${describeType(display.items ?? {})}.`);
     out.push('');
     if (display.items?.properties) {
-      out.push(...renderPropertiesTable(display.items));
+      out.push(...renderObjectTree(display.items, 3, 3, new Set(), schema));
     }
   } else if (display.kind === 'object') {
-    out.push(...renderPropertiesTable(display.schema));
+    out.push(...renderObjectTree(display.schema, 3, 3, new Set(), schema));
   } else if (display.kind === 'scalar') {
     out.push(`Returns ${describeType(display.schema)}.`);
     out.push('');
@@ -217,6 +217,103 @@ function renderSchemaSection(schema) {
   out.push('');
   out.push('</details>');
   return out;
+}
+
+// Render a property table for `schema`, then recurse into any property
+// whose value is a nested object (or array of objects, or anyOf of
+// objects) so each item shape is documented inline. `depth` caps how
+// deep recursion goes to keep the page bounded. `rootSchema` carries
+// the top-level schema so `$ref` pointers can be resolved against its
+// `$defs`.
+function renderObjectTree(schema, depth, headingLevel = 3, seen = new Set(), rootSchema = schema) {
+  const out = renderPropertiesTable(schema);
+  if (depth <= 0) return out;
+
+  const properties = schema?.properties ?? {};
+  for (const [name, prop] of Object.entries(properties)) {
+    const nested = extractNestedSchemas(prop, rootSchema);
+    for (const sub of nested) {
+      // Dedupe within a single recursion path so a model that recursively
+      // references itself doesn't blow up.
+      const fingerprint = sub.schema && JSON.stringify(sub.schema).slice(0, 200);
+      if (seen.has(fingerprint)) continue;
+      const nextSeen = new Set(seen);
+      nextSeen.add(fingerprint);
+
+      const heading = '#'.repeat(headingLevel);
+      const suffix = sub.kind === 'array' ? '[]' : '';
+      const variantLabel = sub.label ? ` — ${sub.label}` : '';
+      out.push(`${heading} \`${name}${suffix}\`${variantLabel}`);
+      out.push('');
+      const desc = oneLine(sub.schema.description);
+      if (desc) {
+        out.push(desc);
+        out.push('');
+      }
+      out.push(...renderObjectTree(sub.schema, depth - 1, headingLevel + 1, nextSeen, rootSchema));
+    }
+  }
+  return out;
+}
+
+// Return the list of object-shaped sub-schemas reachable from a single
+// property declaration. Handles direct objects, arrays of objects,
+// `$ref` pointers (resolved against `rootSchema.$defs`), and `anyOf` /
+// `oneOf` unions (Optional[X], discriminated unions, etc.) — each
+// object variant is returned as its own entry so each can be
+// documented.
+function extractNestedSchemas(prop, rootSchema) {
+  if (!prop) return [];
+  if (prop.$ref) {
+    const resolved = resolveRef(rootSchema, prop.$ref);
+    if (resolved) return extractNestedSchemas(resolved, rootSchema);
+    return [];
+  }
+  if (prop.type === 'object' && prop.properties) {
+    return [{kind: 'object', schema: prop}];
+  }
+  if (!prop.type && prop.properties) {
+    return [{kind: 'object', schema: prop}];
+  }
+  if (prop.type === 'array' && prop.items) {
+    const inner = extractNestedSchemas(prop.items, rootSchema);
+    return inner.map((s) => ({...s, kind: 'array'}));
+  }
+  const unionMembers = prop.anyOf || prop.oneOf;
+  if (unionMembers) {
+    const out = [];
+    for (const member of unionMembers) {
+      out.push(...extractNestedSchemas(member, rootSchema));
+    }
+    if (out.length > 1) {
+      for (const entry of out) {
+        if (!entry.label) entry.label = variantLabel(entry.schema);
+      }
+    }
+    return out;
+  }
+  return [];
+}
+
+function resolveRef(rootSchema, ref) {
+  if (!ref || !ref.startsWith('#/')) return null;
+  const parts = ref.slice(2).split('/');
+  let cursor = rootSchema;
+  for (const part of parts) {
+    if (cursor == null) return null;
+    cursor = cursor[part];
+  }
+  return cursor ?? null;
+}
+
+// Best-effort name for an anyOf variant: prefer a literal `type`
+// discriminator value when present (e.g. `iban`, `bban`), otherwise
+// fall back to nothing.
+function variantLabel(schema) {
+  const typeProp = schema?.properties?.type;
+  if (typeProp?.const) return `\`type: "${typeProp.const}"\``;
+  if (typeProp?.enum?.length === 1) return `\`type: "${typeProp.enum[0]}"\``;
+  return null;
 }
 
 function renderPropertiesTable(schema) {
