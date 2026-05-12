@@ -1,5 +1,3056 @@
 {
   "$schema": "https://bank2ai.com/specs/bank2ai.schema.json",
+  "componentSchemas": {
+    "AccountNumberIdentifier": {
+      "description": "Country-specific composite for non-IBAN markets (US, UK pre-IBAN, etc.).",
+      "properties": {
+        "accountNumber": {
+          "description": "Account number in the country's native format.",
+          "title": "Accountnumber",
+          "type": "string"
+        },
+        "country": {
+          "description": "ISO 3166-1 alpha-2 country code.",
+          "examples": [
+            "US",
+            "GB"
+          ],
+          "pattern": "^[A-Z]{2}$",
+          "title": "Country",
+          "type": "string"
+        },
+        "routing": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "US ABA routing number, when applicable.",
+          "title": "Routing"
+        },
+        "sortCode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "UK sort code, when applicable.",
+          "title": "Sortcode"
+        },
+        "type": {
+          "const": "accountNumber",
+          "default": "accountNumber",
+          "description": "Discriminator: `accountNumber`.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "accountNumber",
+        "country"
+      ],
+      "title": "AccountNumberIdentifier",
+      "type": "object"
+    },
+    "AliasIdentifier": {
+      "$defs": {
+        "AliasType": {
+          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.).",
+          "enum": [
+            "email",
+            "phone",
+            "vpa",
+            "pix",
+            "other"
+          ],
+          "title": "AliasType",
+          "type": "string"
+        }
+      },
+      "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+      "properties": {
+        "alias": {
+          "description": "The alias value as the user knows it.",
+          "examples": [
+            "alex@upi",
+            "+44-7700-900000"
+          ],
+          "title": "Alias",
+          "type": "string"
+        },
+        "aliasType": {
+          "$ref": "#/$defs/AliasType",
+          "description": "Kind of alias."
+        },
+        "type": {
+          "const": "alias",
+          "default": "alias",
+          "description": "Discriminator: `alias`.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "alias",
+        "aliasType"
+      ],
+      "title": "AliasIdentifier",
+      "type": "object"
+    },
+    "Balance": {
+      "$defs": {
+        "BalanceType": {
+          "description": "Type of balance per Berlin Group PSD2 `balanceType`.",
+          "enum": [
+            "ClosingBooked",
+            "Expected",
+            "InterimAvailable",
+            "ForwardAvailable",
+            "NonInvoiced"
+          ],
+          "title": "BalanceType",
+          "type": "string"
+        }
+      },
+      "description": "One typed balance entry on an account.\n\nProfile of: Berlin Group PSD2 `balances` array element.",
+      "properties": {
+        "amount": {
+          "description": "Balance amount in `currency`.",
+          "title": "Amount",
+          "type": "number"
+        },
+        "asOf": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 8601 timestamp when this balance was last refreshed.",
+          "title": "Asof"
+        },
+        "currency": {
+          "description": "ISO 4217 currency code.",
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/BalanceType",
+          "description": "Balance type."
+        }
+      },
+      "required": [
+        "type",
+        "amount",
+        "currency"
+      ],
+      "title": "Balance",
+      "type": "object"
+    },
+    "BbanIdentifier": {
+      "description": "Domestic Basic Bank Account Number, used in markets without an IBAN.",
+      "properties": {
+        "bban": {
+          "description": "Domestic account identifier in the country's native format.",
+          "examples": [
+            "0133-26-007890"
+          ],
+          "title": "Bban",
+          "type": "string"
+        },
+        "country": {
+          "description": "ISO 3166-1 alpha-2 country code.",
+          "examples": [
+            "IS",
+            "GB"
+          ],
+          "pattern": "^[A-Z]{2}$",
+          "title": "Country",
+          "type": "string"
+        },
+        "type": {
+          "const": "bban",
+          "default": "bban",
+          "description": "Discriminator: `bban`.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bban",
+        "country"
+      ],
+      "title": "BbanIdentifier",
+      "type": "object"
+    },
+    "ConfirmationOfPayee": {
+      "$defs": {
+        "ConfirmationOfPayeeStatus": {
+          "description": "Outcome of a payee verification check (UK CoP, EU VoP, etc.).",
+          "enum": [
+            "match",
+            "close-match",
+            "no-match",
+            "unavailable"
+          ],
+          "title": "ConfirmationOfPayeeStatus",
+          "type": "string"
+        }
+      },
+      "description": "Result of a payee-name verification against the destination account.",
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/ConfirmationOfPayeeStatus",
+          "description": "Verification outcome."
+        },
+        "suggestedName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "On a `close-match` or `no-match`, the actual name on the destination account when the rail returns it.",
+          "title": "Suggestedname"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "ConfirmationOfPayee",
+      "type": "object"
+    },
+    "ExecutedTransfer": {
+      "$defs": {
+        "TransferExecutionStatus": {
+          "description": "Reported execution outcome for `execute-transfer`.",
+          "enum": [
+            "Accepted",
+            "Pending",
+            "Settled",
+            "Rejected"
+          ],
+          "title": "TransferExecutionStatus",
+          "type": "string"
+        }
+      },
+      "description": "Bank-issued receipt for an executed transfer.",
+      "properties": {
+        "executedAt": {
+          "description": "ISO 8601 timestamp when the bank recorded the transfer.",
+          "format": "date-time",
+          "title": "Executedat",
+          "type": "string"
+        },
+        "rejectionReason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable reason when `status` is `Rejected`.",
+          "title": "Rejectionreason"
+        },
+        "status": {
+          "$ref": "#/$defs/TransferExecutionStatus",
+          "description": "Execution status reported by the bank."
+        },
+        "transactionId": {
+          "description": "`Transaction.id` of the resulting bank transaction. Use with `get-transaction` to fetch full details.",
+          "title": "Transactionid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "transactionId",
+        "status",
+        "executedAt"
+      ],
+      "title": "ExecutedTransfer",
+      "type": "object"
+    },
+    "IbanIdentifier": {
+      "description": "IBAN-routed account, ISO 13616.",
+      "properties": {
+        "iban": {
+          "description": "IBAN, ISO 13616.",
+          "examples": [
+            "GB29NWBK60161331926819",
+            "DE89370400440532013000"
+          ],
+          "pattern": "^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$",
+          "title": "Iban",
+          "type": "string"
+        },
+        "type": {
+          "const": "iban",
+          "default": "iban",
+          "description": "Discriminator: `iban`.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "iban"
+      ],
+      "title": "IbanIdentifier",
+      "type": "object"
+    },
+    "NationalId": {
+      "$defs": {
+        "NationalIdType": {
+          "description": "Opaque label for the kind of national identifier carried in `NationalId.value`.\n\nbank2ai does not validate national-ID formats; this is a hint so\nclients can render or route appropriately. Servers SHOULD set the\nclosest-matching value or use `other`.",
+          "enum": [
+            "ssn",
+            "kennitala",
+            "cpr",
+            "personnummer",
+            "cpf",
+            "other"
+          ],
+          "title": "NationalIdType",
+          "type": "string"
+        }
+      },
+      "description": "Person or business national identifier.",
+      "properties": {
+        "country": {
+          "description": "ISO 3166-1 alpha-2 country code.",
+          "examples": [
+            "IS",
+            "US"
+          ],
+          "pattern": "^[A-Z]{2}$",
+          "title": "Country",
+          "type": "string"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NationalIdType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hint for the kind of identifier. bank2ai does not validate the value."
+        },
+        "value": {
+          "description": "National identifier value, in the country's native format.",
+          "examples": [
+            "010190-1234",
+            "123-45-6789"
+          ],
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "country"
+      ],
+      "title": "NationalId",
+      "type": "object"
+    },
+    "Party": {
+      "$defs": {
+        "AccountNumberIdentifier": {
+          "description": "Country-specific composite for non-IBAN markets (US, UK pre-IBAN, etc.).",
+          "properties": {
+            "accountNumber": {
+              "description": "Account number in the country's native format.",
+              "title": "Accountnumber",
+              "type": "string"
+            },
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "US",
+                "GB"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "routing": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "US ABA routing number, when applicable.",
+              "title": "Routing"
+            },
+            "sortCode": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "UK sort code, when applicable.",
+              "title": "Sortcode"
+            },
+            "type": {
+              "const": "accountNumber",
+              "default": "accountNumber",
+              "description": "Discriminator: `accountNumber`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "accountNumber",
+            "country"
+          ],
+          "title": "AccountNumberIdentifier",
+          "type": "object"
+        },
+        "AliasIdentifier": {
+          "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+          "properties": {
+            "alias": {
+              "description": "The alias value as the user knows it.",
+              "examples": [
+                "alex@upi",
+                "+44-7700-900000"
+              ],
+              "title": "Alias",
+              "type": "string"
+            },
+            "aliasType": {
+              "$ref": "#/$defs/AliasType",
+              "description": "Kind of alias."
+            },
+            "type": {
+              "const": "alias",
+              "default": "alias",
+              "description": "Discriminator: `alias`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "alias",
+            "aliasType"
+          ],
+          "title": "AliasIdentifier",
+          "type": "object"
+        },
+        "AliasType": {
+          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.).",
+          "enum": [
+            "email",
+            "phone",
+            "vpa",
+            "pix",
+            "other"
+          ],
+          "title": "AliasType",
+          "type": "string"
+        },
+        "BbanIdentifier": {
+          "description": "Domestic Basic Bank Account Number, used in markets without an IBAN.",
+          "properties": {
+            "bban": {
+              "description": "Domestic account identifier in the country's native format.",
+              "examples": [
+                "0133-26-007890"
+              ],
+              "title": "Bban",
+              "type": "string"
+            },
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "IS",
+                "GB"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "type": {
+              "const": "bban",
+              "default": "bban",
+              "description": "Discriminator: `bban`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "bban",
+            "country"
+          ],
+          "title": "BbanIdentifier",
+          "type": "object"
+        },
+        "IbanIdentifier": {
+          "description": "IBAN-routed account, ISO 13616.",
+          "properties": {
+            "iban": {
+              "description": "IBAN, ISO 13616.",
+              "examples": [
+                "GB29NWBK60161331926819",
+                "DE89370400440532013000"
+              ],
+              "pattern": "^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$",
+              "title": "Iban",
+              "type": "string"
+            },
+            "type": {
+              "const": "iban",
+              "default": "iban",
+              "description": "Discriminator: `iban`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "iban"
+          ],
+          "title": "IbanIdentifier",
+          "type": "object"
+        },
+        "NationalId": {
+          "description": "Person or business national identifier.",
+          "properties": {
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "IS",
+                "US"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "type": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/NationalIdType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Hint for the kind of identifier. bank2ai does not validate the value."
+            },
+            "value": {
+              "description": "National identifier value, in the country's native format.",
+              "examples": [
+                "010190-1234",
+                "123-45-6789"
+              ],
+              "title": "Value",
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "country"
+          ],
+          "title": "NationalId",
+          "type": "object"
+        },
+        "NationalIdType": {
+          "description": "Opaque label for the kind of national identifier carried in `NationalId.value`.\n\nbank2ai does not validate national-ID formats; this is a hint so\nclients can render or route appropriately. Servers SHOULD set the\nclosest-matching value or use `other`.",
+          "enum": [
+            "ssn",
+            "kennitala",
+            "cpr",
+            "personnummer",
+            "cpf",
+            "other"
+          ],
+          "title": "NationalIdType",
+          "type": "string"
+        }
+      },
+      "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset).",
+      "properties": {
+        "accountIdentifier": {
+          "anyOf": [
+            {
+              "description": "Discriminated union of typed account identifiers. Profile of: ISO 20022 `AccountIdentification4Choice`.",
+              "discriminator": {
+                "mapping": {
+                  "accountNumber": "#/$defs/AccountNumberIdentifier",
+                  "alias": "#/$defs/AliasIdentifier",
+                  "bban": "#/$defs/BbanIdentifier",
+                  "iban": "#/$defs/IbanIdentifier"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/IbanIdentifier"
+                },
+                {
+                  "$ref": "#/$defs/BbanIdentifier"
+                },
+                {
+                  "$ref": "#/$defs/AccountNumberIdentifier"
+                },
+                {
+                  "$ref": "#/$defs/AliasIdentifier"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Party's account identifier when known.",
+          "title": "Accountidentifier"
+        },
+        "bic": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "BIC / SWIFT code of the party's bank, ISO 9362.",
+          "examples": [
+            "NWBKGB2L"
+          ],
+          "title": "Bic"
+        },
+        "name": {
+          "description": "Party's full name or business name.",
+          "title": "Name",
+          "type": "string"
+        },
+        "nationalId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NationalId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Party's national identifier when known."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Party",
+      "type": "object"
+    },
+    "PreparedTransfer": {
+      "$defs": {
+        "Account": {
+          "description": "Bank account with balance and metadata.\n\nProperty names follow Berlin Group PSD2 `accountDetails` where they\noverlap (`iban`, `bban`, `bic`, `maskedPan`, `product`, `status`,\n`usage`), so servers fronting a PSD2 backend can map fields directly.\nServers SHOULD populate at least one of `accountNumber`, `iban`,\n`bban`, or `maskedPan`.",
+          "properties": {
+            "accountNumber": {
+              "description": "Display-friendly account number in the locally familiar format. For European accounts this is typically the IBAN; otherwise the domestic account number. Use the typed identifier fields (`iban`, `bban`, `maskedPan`) when you need to parse or route on it.",
+              "examples": [
+                "1234-56-789012",
+                "GB29NWBK60161331926819",
+                "0133-26-007890"
+              ],
+              "title": "Accountnumber",
+              "type": "string"
+            },
+            "accountType": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AccountType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Type of account."
+            },
+            "availableBalance": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Funds available to spend right now in `currency`, after pending authorisations and including any `overdraftLimit` headroom. Aligns with the PSD2 `interimAvailable` balance type.",
+              "title": "Availablebalance"
+            },
+            "balance": {
+              "description": "Current booked balance in `currency`. For credit accounts a negative value indicates an outstanding balance owed.",
+              "title": "Balance",
+              "type": "number"
+            },
+            "balanceUpdatedAt": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "ISO 8601 timestamp at which `balance` and `availableBalance` were last refreshed by the bank.",
+              "title": "Balanceupdatedat"
+            },
+            "balances": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Balance"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Typed balance entries when the bank exposes more than just the booked and available scalars (`ClosingBooked`, `Expected`, `InterimAvailable`, `ForwardAvailable`, `NonInvoiced`). When populated, the top-level `balance` and `availableBalance` scalars are derived shortcuts for the most-recent `ClosingBooked` and `InterimAvailable` entries; servers MUST keep them consistent. Servers without typed balance support SHOULD omit this field and emit only the scalars.",
+              "title": "Balances"
+            },
+            "bban": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Basic Bank Account Number, the domestic identifier used in countries (or for products) without an IBAN.",
+              "examples": [
+                "BARC12345612345678",
+                "0133-26-007890"
+              ],
+              "title": "Bban"
+            },
+            "bic": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "BIC / SWIFT code of the holding bank (ISO 9362).",
+              "examples": [
+                "NWBKGB2L",
+                "DEUTDEFF"
+              ],
+              "title": "Bic"
+            },
+            "currency": {
+              "description": "ISO 4217 currency code of the account. For multi-currency accounts (per PSD2 convention) use `XXX`.",
+              "examples": [
+                "USD",
+                "EUR",
+                "ISK",
+                "GBP",
+                "XXX"
+              ],
+              "pattern": "^[A-Z]{3}$",
+              "title": "Currency",
+              "type": "string"
+            },
+            "iban": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "IBAN (ISO 13616), when the account has one.",
+              "examples": [
+                "GB29NWBK60161331926819",
+                "DE89370400440532013000"
+              ],
+              "title": "Iban"
+            },
+            "id": {
+              "description": "Unique account identifier (server-scoped)",
+              "title": "Id",
+              "type": "string"
+            },
+            "isDefaultAccount": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Whether this is the user's default account for new transfers. At most one account per response SHOULD have this set to true.",
+              "title": "Isdefaultaccount"
+            },
+            "isWithdrawalAccount": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Whether this account can be used as the source of an outgoing transfer or withdrawal.",
+              "title": "Iswithdrawalaccount"
+            },
+            "maskedPan": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Masked Primary Account Number for card accounts. The middle digits MUST be obscured.",
+              "examples": [
+                "411111xxxxxx1111",
+                "****-****-****-1234"
+              ],
+              "title": "Maskedpan"
+            },
+            "minimumPaymentDue": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Credit accounts only. Minimum payment required by `paymentDueDate` to keep the account current and avoid late fees, in `currency`. Servers MUST omit on non-credit accounts.",
+              "title": "Minimumpaymentdue"
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Human-readable account name set by the bank or the user.",
+              "examples": [
+                "Main Checking",
+                "Emergency Fund",
+                "Visa Credit Card"
+              ],
+              "title": "Name"
+            },
+            "openedDate": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Date the account was opened, ISO 8601 (YYYY-MM-DD).",
+              "title": "Openeddate"
+            },
+            "overdraftLimit": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Approved overdraft on a current/savings account or credit limit on a credit/card account, in `currency`. `0` (or omitted) means no extra headroom beyond `balance`.",
+              "title": "Overdraftlimit"
+            },
+            "ownerName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Primary account holder's name as the bank holds it. For joint accounts, servers MAY join multiple names with `, `.",
+              "examples": [
+                "Jane Doe",
+                "Jane Doe & John Doe",
+                "Acme Corp"
+              ],
+              "title": "Ownername"
+            },
+            "paymentDueDate": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Credit accounts only. ISO 8601 date by which `minimumPaymentDue` must be paid. Servers MUST omit on non-credit accounts.",
+              "title": "Paymentduedate"
+            },
+            "product": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Bank's marketing name for the account product, per PSD2 `product`. Free-form and proprietary to the issuer.",
+              "examples": [
+                "Premium Checking",
+                "Visa Signature",
+                "Easy Saver"
+              ],
+              "title": "Product"
+            },
+            "statementBalance": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Credit accounts only. Total billed on the most recent closed statement, in `currency`. Pay this in full by `paymentDueDate` to avoid interest charges. Servers MUST omit on non-credit accounts.",
+              "title": "Statementbalance"
+            },
+            "statementClosingDate": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Credit accounts only. ISO 8601 date the current billing cycle closes and the next statement is generated. Optional even on credit accounts; servers MUST omit on non-credit accounts.",
+              "title": "Statementclosingdate"
+            },
+            "status": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AccountStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Lifecycle status. If omitted, clients SHOULD treat the account as `Enabled`."
+            },
+            "usage": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AccountUsage"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Whether this is a personal or business account."
+            }
+          },
+          "required": [
+            "id",
+            "accountNumber",
+            "currency",
+            "balance"
+          ],
+          "title": "Account",
+          "type": "object"
+        },
+        "AccountNumberIdentifier": {
+          "description": "Country-specific composite for non-IBAN markets (US, UK pre-IBAN, etc.).",
+          "properties": {
+            "accountNumber": {
+              "description": "Account number in the country's native format.",
+              "title": "Accountnumber",
+              "type": "string"
+            },
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "US",
+                "GB"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "routing": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "US ABA routing number, when applicable.",
+              "title": "Routing"
+            },
+            "sortCode": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "UK sort code, when applicable.",
+              "title": "Sortcode"
+            },
+            "type": {
+              "const": "accountNumber",
+              "default": "accountNumber",
+              "description": "Discriminator: `accountNumber`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "accountNumber",
+            "country"
+          ],
+          "title": "AccountNumberIdentifier",
+          "type": "object"
+        },
+        "AccountStatus": {
+          "description": "Lifecycle status of an account, per Berlin Group PSD2 `accountStatus`.",
+          "enum": [
+            "Enabled",
+            "Blocked",
+            "Deleted"
+          ],
+          "title": "AccountStatus",
+          "type": "string"
+        },
+        "AccountType": {
+          "description": "Type of bank account.\n\nAligned with the ISO 20022 ExternalCashAccountType1Code values exposed\nvia the Berlin Group PSD2 `cashAccountType`, collapsed to the buckets\nthat map cleanly across regions and reflect distinctions a user would\nactually ask about:\n\n  - `Current`  - day-to-day transaction account (ISO 20022 CACC).\n                 Debit cards and stored-value / prepaid cards live\n                 here too: `maskedPan` flags an attached card and the\n                 balance/availableBalance pair answers \"can I use it?\"\n  - `Savings`  - interest-bearing savings (ISO 20022 SVGS)\n  - `Credit`   - revolving credit / credit card account; carries the\n                 statement-cycle fields below (`statementBalance`,\n                 `minimumPaymentDue`, `paymentDueDate`, ...).\n  - `Loan`     - amortizing loan or mortgage (ISO 20022 LOAN)\n  - `Other`    - anything else (escrow, brokerage, etc.)",
+          "enum": [
+            "Current",
+            "Credit",
+            "Savings",
+            "Loan",
+            "Other"
+          ],
+          "title": "AccountType",
+          "type": "string"
+        },
+        "AccountUsage": {
+          "description": "How the account is used, per Berlin Group PSD2 `usage`.\n\n`Private` corresponds to PSD2 `PRIV` (personal); `Business` to `ORGA`\n(professional / organisation).",
+          "enum": [
+            "Private",
+            "Business"
+          ],
+          "title": "AccountUsage",
+          "type": "string"
+        },
+        "AliasIdentifier": {
+          "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+          "properties": {
+            "alias": {
+              "description": "The alias value as the user knows it.",
+              "examples": [
+                "alex@upi",
+                "+44-7700-900000"
+              ],
+              "title": "Alias",
+              "type": "string"
+            },
+            "aliasType": {
+              "$ref": "#/$defs/AliasType",
+              "description": "Kind of alias."
+            },
+            "type": {
+              "const": "alias",
+              "default": "alias",
+              "description": "Discriminator: `alias`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "alias",
+            "aliasType"
+          ],
+          "title": "AliasIdentifier",
+          "type": "object"
+        },
+        "AliasType": {
+          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.).",
+          "enum": [
+            "email",
+            "phone",
+            "vpa",
+            "pix",
+            "other"
+          ],
+          "title": "AliasType",
+          "type": "string"
+        },
+        "Balance": {
+          "description": "One typed balance entry on an account.\n\nProfile of: Berlin Group PSD2 `balances` array element.",
+          "properties": {
+            "amount": {
+              "description": "Balance amount in `currency`.",
+              "title": "Amount",
+              "type": "number"
+            },
+            "asOf": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "ISO 8601 timestamp when this balance was last refreshed.",
+              "title": "Asof"
+            },
+            "currency": {
+              "description": "ISO 4217 currency code.",
+              "pattern": "^[A-Z]{3}$",
+              "title": "Currency",
+              "type": "string"
+            },
+            "type": {
+              "$ref": "#/$defs/BalanceType",
+              "description": "Balance type."
+            }
+          },
+          "required": [
+            "type",
+            "amount",
+            "currency"
+          ],
+          "title": "Balance",
+          "type": "object"
+        },
+        "BalanceType": {
+          "description": "Type of balance per Berlin Group PSD2 `balanceType`.",
+          "enum": [
+            "ClosingBooked",
+            "Expected",
+            "InterimAvailable",
+            "ForwardAvailable",
+            "NonInvoiced"
+          ],
+          "title": "BalanceType",
+          "type": "string"
+        },
+        "BbanIdentifier": {
+          "description": "Domestic Basic Bank Account Number, used in markets without an IBAN.",
+          "properties": {
+            "bban": {
+              "description": "Domestic account identifier in the country's native format.",
+              "examples": [
+                "0133-26-007890"
+              ],
+              "title": "Bban",
+              "type": "string"
+            },
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "IS",
+                "GB"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "type": {
+              "const": "bban",
+              "default": "bban",
+              "description": "Discriminator: `bban`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "bban",
+            "country"
+          ],
+          "title": "BbanIdentifier",
+          "type": "object"
+        },
+        "ConfirmationOfPayee": {
+          "description": "Result of a payee-name verification against the destination account.",
+          "properties": {
+            "status": {
+              "$ref": "#/$defs/ConfirmationOfPayeeStatus",
+              "description": "Verification outcome."
+            },
+            "suggestedName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "On a `close-match` or `no-match`, the actual name on the destination account when the rail returns it.",
+              "title": "Suggestedname"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "title": "ConfirmationOfPayee",
+          "type": "object"
+        },
+        "ConfirmationOfPayeeStatus": {
+          "description": "Outcome of a payee verification check (UK CoP, EU VoP, etc.).",
+          "enum": [
+            "match",
+            "close-match",
+            "no-match",
+            "unavailable"
+          ],
+          "title": "ConfirmationOfPayeeStatus",
+          "type": "string"
+        },
+        "IbanIdentifier": {
+          "description": "IBAN-routed account, ISO 13616.",
+          "properties": {
+            "iban": {
+              "description": "IBAN, ISO 13616.",
+              "examples": [
+                "GB29NWBK60161331926819",
+                "DE89370400440532013000"
+              ],
+              "pattern": "^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$",
+              "title": "Iban",
+              "type": "string"
+            },
+            "type": {
+              "const": "iban",
+              "default": "iban",
+              "description": "Discriminator: `iban`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "iban"
+          ],
+          "title": "IbanIdentifier",
+          "type": "object"
+        },
+        "NationalId": {
+          "description": "Person or business national identifier.",
+          "properties": {
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "IS",
+                "US"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "type": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/NationalIdType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Hint for the kind of identifier. bank2ai does not validate the value."
+            },
+            "value": {
+              "description": "National identifier value, in the country's native format.",
+              "examples": [
+                "010190-1234",
+                "123-45-6789"
+              ],
+              "title": "Value",
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "country"
+          ],
+          "title": "NationalId",
+          "type": "object"
+        },
+        "NationalIdType": {
+          "description": "Opaque label for the kind of national identifier carried in `NationalId.value`.\n\nbank2ai does not validate national-ID formats; this is a hint so\nclients can render or route appropriately. Servers SHOULD set the\nclosest-matching value or use `other`.",
+          "enum": [
+            "ssn",
+            "kennitala",
+            "cpr",
+            "personnummer",
+            "cpf",
+            "other"
+          ],
+          "title": "NationalIdType",
+          "type": "string"
+        },
+        "Party": {
+          "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset).",
+          "properties": {
+            "accountIdentifier": {
+              "anyOf": [
+                {
+                  "description": "Discriminated union of typed account identifiers. Profile of: ISO 20022 `AccountIdentification4Choice`.",
+                  "discriminator": {
+                    "mapping": {
+                      "accountNumber": "#/$defs/AccountNumberIdentifier",
+                      "alias": "#/$defs/AliasIdentifier",
+                      "bban": "#/$defs/BbanIdentifier",
+                      "iban": "#/$defs/IbanIdentifier"
+                    },
+                    "propertyName": "type"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/IbanIdentifier"
+                    },
+                    {
+                      "$ref": "#/$defs/BbanIdentifier"
+                    },
+                    {
+                      "$ref": "#/$defs/AccountNumberIdentifier"
+                    },
+                    {
+                      "$ref": "#/$defs/AliasIdentifier"
+                    }
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Party's account identifier when known.",
+              "title": "Accountidentifier"
+            },
+            "bic": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "BIC / SWIFT code of the party's bank, ISO 9362.",
+              "examples": [
+                "NWBKGB2L"
+              ],
+              "title": "Bic"
+            },
+            "name": {
+              "description": "Party's full name or business name.",
+              "title": "Name",
+              "type": "string"
+            },
+            "nationalId": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/NationalId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Party's national identifier when known."
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "title": "Party",
+          "type": "object"
+        },
+        "Rail": {
+          "description": "Payment rail used to settle a transfer.\n\nServers MAY register additional rails via vendor extensions; the\ncanonical list reflects the rails the reference implementations\nexercise today.",
+          "enum": [
+            "domestic-IS",
+            "sepa",
+            "sepa-instant",
+            "swift"
+          ],
+          "title": "Rail",
+          "type": "string"
+        },
+        "RemittanceInformation": {
+          "description": "Free-text and/or structured remittance information for a transaction.\n\nProfile of: ISO 20022 `RemittanceInformation`. Servers SHOULD populate\nthis only when remittance info is genuinely present and not just a\nduplicate of `Transaction.description`.",
+          "properties": {
+            "creditorReference": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Structured creditor reference, typically an ISO 11649 RF-prefixed reference. The reference is opaque to bank2ai; servers pass it through as the bank exposes it.",
+              "examples": [
+                "RF18539007547034"
+              ],
+              "title": "Creditorreference"
+            },
+            "unstructured": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Free-text remittance line (e.g., the SEPA `RemittanceInformation/Unstructured` field).",
+              "title": "Unstructured"
+            }
+          },
+          "title": "RemittanceInformation",
+          "type": "object"
+        },
+        "TransferFee": {
+          "description": "One fee line item that will apply to the transfer.",
+          "properties": {
+            "amount": {
+              "description": "Fee amount in `currency`.",
+              "title": "Amount",
+              "type": "number"
+            },
+            "currency": {
+              "description": "ISO 4217 currency code.",
+              "pattern": "^[A-Z]{3}$",
+              "title": "Currency",
+              "type": "string"
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Human-readable label for the fee.",
+              "examples": [
+                "Wire fee",
+                "FX margin"
+              ],
+              "title": "Description"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "title": "TransferFee",
+          "type": "object"
+        },
+        "TransferFx": {
+          "description": "Foreign-exchange details for a cross-currency transfer.",
+          "properties": {
+            "lockedUntil": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "ISO 8601 timestamp until which the quoted rate is held.",
+              "title": "Lockeduntil"
+            },
+            "rate": {
+              "description": "Exchange rate applied (sourceAmount * rate = targetAmount).",
+              "title": "Rate",
+              "type": "number"
+            },
+            "sourceAmount": {
+              "description": "Amount debited from the debtor account.",
+              "title": "Sourceamount",
+              "type": "number"
+            },
+            "sourceCurrency": {
+              "description": "Currency of the debtor account.",
+              "pattern": "^[A-Z]{3}$",
+              "title": "Sourcecurrency",
+              "type": "string"
+            },
+            "targetAmount": {
+              "description": "Amount credited to the creditor.",
+              "title": "Targetamount",
+              "type": "number"
+            },
+            "targetCurrency": {
+              "description": "Currency the creditor receives.",
+              "pattern": "^[A-Z]{3}$",
+              "title": "Targetcurrency",
+              "type": "string"
+            }
+          },
+          "required": [
+            "rate",
+            "sourceAmount",
+            "sourceCurrency",
+            "targetAmount",
+            "targetCurrency"
+          ],
+          "title": "TransferFx",
+          "type": "object"
+        },
+        "TransferSummary": {
+          "description": "Validated, normalized echo of the prepare-transfer inputs.\n\nThe user-facing confirmation surface: clients should render this\nso the user can confirm before `execute-transfer` is called.",
+          "properties": {
+            "amount": {
+              "description": "Transfer amount in `currency`.",
+              "exclusiveMinimum": 0,
+              "title": "Amount",
+              "type": "number"
+            },
+            "creditor": {
+              "$ref": "#/$defs/Party",
+              "description": "Validated creditor record. The `accountIdentifier` field carries the routing identifier; servers MUST populate it."
+            },
+            "currency": {
+              "description": "ISO 4217 currency code of the instructed amount.",
+              "examples": [
+                "ISK",
+                "EUR",
+                "USD"
+              ],
+              "pattern": "^[A-Z]{3}$",
+              "title": "Currency",
+              "type": "string"
+            },
+            "debtorAccount": {
+              "$ref": "#/$defs/Account",
+              "description": "Resolved snapshot of the debtor (source) account."
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Free-text shown on the counterparty's statement. Falls back to `remittanceInformation.unstructured` when both are present.",
+              "title": "Description"
+            },
+            "endToEndId": {
+              "description": "ISO 20022 cross-rail identifier. Server-generated when the client did not supply one; populated either way so the client can show / audit the value.",
+              "title": "Endtoendid",
+              "type": "string"
+            },
+            "localInstrument": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Rail-specific local instrument code (e.g., `INST` for SEPA Instant).",
+              "title": "Localinstrument"
+            },
+            "rail": {
+              "$ref": "#/$defs/Rail",
+              "description": "Settlement rail."
+            },
+            "remittanceInformation": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/RemittanceInformation"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Remittance information, when present."
+            },
+            "requestedExecutionDate": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Requested execution date, ISO 8601. Omitted means as-soon-as-possible per the rail's defaults.",
+              "title": "Requestedexecutiondate"
+            }
+          },
+          "required": [
+            "debtorAccount",
+            "creditor",
+            "amount",
+            "currency",
+            "rail",
+            "endToEndId"
+          ],
+          "title": "TransferSummary",
+          "type": "object"
+        },
+        "TransferWarning": {
+          "description": "Server-emitted advisory about a prepared transfer.\n\nUsed for AML hits, sanctions matches, unusual-amount notices, etc.\n`severity: \"block\"` indicates the server will refuse `execute-transfer`\nagainst this intent unless the user explicitly overrides.",
+          "properties": {
+            "code": {
+              "description": "Server-defined warning code.",
+              "title": "Code",
+              "type": "string"
+            },
+            "message": {
+              "description": "Human-readable explanation.",
+              "title": "Message",
+              "type": "string"
+            },
+            "severity": {
+              "$ref": "#/$defs/TransferWarningSeverity",
+              "description": "Warning severity."
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "severity"
+          ],
+          "title": "TransferWarning",
+          "type": "object"
+        },
+        "TransferWarningSeverity": {
+          "description": "How a client should treat a transfer warning.",
+          "enum": [
+            "info",
+            "warn",
+            "block"
+          ],
+          "title": "TransferWarningSeverity",
+          "type": "string"
+        }
+      },
+      "description": "Result of a successful `prepare-transfer` call.\n\n`transferIntentId` is the opaque token the client passes to\n`execute-transfer`. `summary` is what the user confirms; everything\nelse is supporting metadata (fees, FX, payee verification, warnings).",
+      "properties": {
+        "confirmationOfPayee": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConfirmationOfPayee"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Payee verification outcome. Servers on rails that support Confirmation of Payee / Verification of Payee MUST populate this when known. Servers on rails that do not SHOULD omit."
+        },
+        "estimatedSettlement": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 8601 estimated settlement time at the creditor.",
+          "title": "Estimatedsettlement"
+        },
+        "expiresAt": {
+          "description": "ISO 8601 timestamp after which `execute-transfer` will reject the intent. Servers SHOULD set this 5 minutes ahead of the prepare time; rails MAY shorten or extend.",
+          "format": "date-time",
+          "title": "Expiresat",
+          "type": "string"
+        },
+        "fees": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/TransferFee"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Fees the bank will charge for this transfer.",
+          "title": "Fees"
+        },
+        "fx": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TransferFx"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "FX details when the transfer crosses currencies."
+        },
+        "summary": {
+          "$ref": "#/$defs/TransferSummary",
+          "description": "Validated echo of the prepare-transfer inputs; the user-facing confirmation surface."
+        },
+        "transferIntentId": {
+          "description": "Opaque intent token; pass to `execute-transfer`.",
+          "title": "Transferintentid",
+          "type": "string"
+        },
+        "warnings": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/TransferWarning"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Advisory or blocking warnings emitted during validation.",
+          "title": "Warnings"
+        }
+      },
+      "required": [
+        "transferIntentId",
+        "expiresAt",
+        "summary"
+      ],
+      "title": "PreparedTransfer",
+      "type": "object"
+    },
+    "RemittanceInformation": {
+      "description": "Free-text and/or structured remittance information for a transaction.\n\nProfile of: ISO 20022 `RemittanceInformation`. Servers SHOULD populate\nthis only when remittance info is genuinely present and not just a\nduplicate of `Transaction.description`.",
+      "properties": {
+        "creditorReference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Structured creditor reference, typically an ISO 11649 RF-prefixed reference. The reference is opaque to bank2ai; servers pass it through as the bank exposes it.",
+          "examples": [
+            "RF18539007547034"
+          ],
+          "title": "Creditorreference"
+        },
+        "unstructured": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Free-text remittance line (e.g., the SEPA `RemittanceInformation/Unstructured` field).",
+          "title": "Unstructured"
+        }
+      },
+      "title": "RemittanceInformation",
+      "type": "object"
+    },
+    "TransactionCode": {
+      "description": "ISO 20022 BankTransactionCode taxonomy.\n\nThree-level hierarchy (`domain` / `family` / `subFamily`). Servers\nMAY emit only `domain` if that is all the bank exposes; the deeper\nlevels are populated when known.",
+      "properties": {
+        "domain": {
+          "description": "Top-level transaction domain (e.g., `PMNT` for payments).",
+          "examples": [
+            "PMNT",
+            "CASH",
+            "ACMT"
+          ],
+          "title": "Domain",
+          "type": "string"
+        },
+        "family": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Mid-level family (e.g., `RCDT` for received credit transfers).",
+          "examples": [
+            "RCDT",
+            "ICDT"
+          ],
+          "title": "Family"
+        },
+        "subFamily": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sub-family (e.g., `SALA` for salary, `SUBS` for subscription).",
+          "examples": [
+            "SALA",
+            "SUBS",
+            "UPMT"
+          ],
+          "title": "Subfamily"
+        }
+      },
+      "required": [
+        "domain"
+      ],
+      "title": "TransactionCode",
+      "type": "object"
+    },
+    "TransactionsSummaryGroup": {
+      "description": "One row of an aggregated transactions summary.",
+      "properties": {
+        "averageAmount": {
+          "description": "Mean transaction amount within this group.",
+          "title": "Averageamount",
+          "type": "number"
+        },
+        "categoryId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Category id when the request grouped by `category` or `both`; null otherwise. Resolve to a name via get-categories.",
+          "title": "Categoryid"
+        },
+        "month": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 8601 month (YYYY-MM) when the request grouped by `month` or `both`; null otherwise.",
+          "examples": [
+            "2024-03"
+          ],
+          "title": "Month"
+        },
+        "totalAmount": {
+          "description": "Sum of transaction amounts in this group.",
+          "title": "Totalamount",
+          "type": "number"
+        },
+        "transactionCount": {
+          "description": "Number of transactions contributing to this group.",
+          "minimum": 0,
+          "title": "Transactioncount",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "totalAmount",
+        "transactionCount",
+        "averageAmount"
+      ],
+      "title": "TransactionsSummaryGroup",
+      "type": "object"
+    },
+    "TransactionsSummaryPeriod": {
+      "description": "Inclusive date range covered by a transactions summary.",
+      "properties": {
+        "endDate": {
+          "description": "Inclusive upper bound, ISO 8601 (YYYY-MM-DD).",
+          "examples": [
+            "2024-03-31"
+          ],
+          "title": "Enddate",
+          "type": "string"
+        },
+        "startDate": {
+          "description": "Inclusive lower bound, ISO 8601 (YYYY-MM-DD).",
+          "examples": [
+            "2024-03-01"
+          ],
+          "title": "Startdate",
+          "type": "string"
+        }
+      },
+      "required": [
+        "startDate",
+        "endDate"
+      ],
+      "title": "TransactionsSummaryPeriod",
+      "type": "object"
+    },
+    "TransferAction": {
+      "description": "Suggested follow-up action for a prepared transfer.",
+      "properties": {
+        "link": {
+          "description": "Target URL or in-app link to perform the action.",
+          "title": "Link",
+          "type": "string"
+        },
+        "title": {
+          "description": "Human-readable label for the action.",
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "link"
+      ],
+      "title": "TransferAction",
+      "type": "object"
+    },
+    "TransferFee": {
+      "description": "One fee line item that will apply to the transfer.",
+      "properties": {
+        "amount": {
+          "description": "Fee amount in `currency`.",
+          "title": "Amount",
+          "type": "number"
+        },
+        "currency": {
+          "description": "ISO 4217 currency code.",
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable label for the fee.",
+          "examples": [
+            "Wire fee",
+            "FX margin"
+          ],
+          "title": "Description"
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "title": "TransferFee",
+      "type": "object"
+    },
+    "TransferFx": {
+      "description": "Foreign-exchange details for a cross-currency transfer.",
+      "properties": {
+        "lockedUntil": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 8601 timestamp until which the quoted rate is held.",
+          "title": "Lockeduntil"
+        },
+        "rate": {
+          "description": "Exchange rate applied (sourceAmount * rate = targetAmount).",
+          "title": "Rate",
+          "type": "number"
+        },
+        "sourceAmount": {
+          "description": "Amount debited from the debtor account.",
+          "title": "Sourceamount",
+          "type": "number"
+        },
+        "sourceCurrency": {
+          "description": "Currency of the debtor account.",
+          "pattern": "^[A-Z]{3}$",
+          "title": "Sourcecurrency",
+          "type": "string"
+        },
+        "targetAmount": {
+          "description": "Amount credited to the creditor.",
+          "title": "Targetamount",
+          "type": "number"
+        },
+        "targetCurrency": {
+          "description": "Currency the creditor receives.",
+          "pattern": "^[A-Z]{3}$",
+          "title": "Targetcurrency",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rate",
+        "sourceAmount",
+        "sourceCurrency",
+        "targetAmount",
+        "targetCurrency"
+      ],
+      "title": "TransferFx",
+      "type": "object"
+    },
+    "TransferSummary": {
+      "$defs": {
+        "Account": {
+          "description": "Bank account with balance and metadata.\n\nProperty names follow Berlin Group PSD2 `accountDetails` where they\noverlap (`iban`, `bban`, `bic`, `maskedPan`, `product`, `status`,\n`usage`), so servers fronting a PSD2 backend can map fields directly.\nServers SHOULD populate at least one of `accountNumber`, `iban`,\n`bban`, or `maskedPan`.",
+          "properties": {
+            "accountNumber": {
+              "description": "Display-friendly account number in the locally familiar format. For European accounts this is typically the IBAN; otherwise the domestic account number. Use the typed identifier fields (`iban`, `bban`, `maskedPan`) when you need to parse or route on it.",
+              "examples": [
+                "1234-56-789012",
+                "GB29NWBK60161331926819",
+                "0133-26-007890"
+              ],
+              "title": "Accountnumber",
+              "type": "string"
+            },
+            "accountType": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AccountType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Type of account."
+            },
+            "availableBalance": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Funds available to spend right now in `currency`, after pending authorisations and including any `overdraftLimit` headroom. Aligns with the PSD2 `interimAvailable` balance type.",
+              "title": "Availablebalance"
+            },
+            "balance": {
+              "description": "Current booked balance in `currency`. For credit accounts a negative value indicates an outstanding balance owed.",
+              "title": "Balance",
+              "type": "number"
+            },
+            "balanceUpdatedAt": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "ISO 8601 timestamp at which `balance` and `availableBalance` were last refreshed by the bank.",
+              "title": "Balanceupdatedat"
+            },
+            "balances": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Balance"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Typed balance entries when the bank exposes more than just the booked and available scalars (`ClosingBooked`, `Expected`, `InterimAvailable`, `ForwardAvailable`, `NonInvoiced`). When populated, the top-level `balance` and `availableBalance` scalars are derived shortcuts for the most-recent `ClosingBooked` and `InterimAvailable` entries; servers MUST keep them consistent. Servers without typed balance support SHOULD omit this field and emit only the scalars.",
+              "title": "Balances"
+            },
+            "bban": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Basic Bank Account Number, the domestic identifier used in countries (or for products) without an IBAN.",
+              "examples": [
+                "BARC12345612345678",
+                "0133-26-007890"
+              ],
+              "title": "Bban"
+            },
+            "bic": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "BIC / SWIFT code of the holding bank (ISO 9362).",
+              "examples": [
+                "NWBKGB2L",
+                "DEUTDEFF"
+              ],
+              "title": "Bic"
+            },
+            "currency": {
+              "description": "ISO 4217 currency code of the account. For multi-currency accounts (per PSD2 convention) use `XXX`.",
+              "examples": [
+                "USD",
+                "EUR",
+                "ISK",
+                "GBP",
+                "XXX"
+              ],
+              "pattern": "^[A-Z]{3}$",
+              "title": "Currency",
+              "type": "string"
+            },
+            "iban": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "IBAN (ISO 13616), when the account has one.",
+              "examples": [
+                "GB29NWBK60161331926819",
+                "DE89370400440532013000"
+              ],
+              "title": "Iban"
+            },
+            "id": {
+              "description": "Unique account identifier (server-scoped)",
+              "title": "Id",
+              "type": "string"
+            },
+            "isDefaultAccount": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Whether this is the user's default account for new transfers. At most one account per response SHOULD have this set to true.",
+              "title": "Isdefaultaccount"
+            },
+            "isWithdrawalAccount": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Whether this account can be used as the source of an outgoing transfer or withdrawal.",
+              "title": "Iswithdrawalaccount"
+            },
+            "maskedPan": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Masked Primary Account Number for card accounts. The middle digits MUST be obscured.",
+              "examples": [
+                "411111xxxxxx1111",
+                "****-****-****-1234"
+              ],
+              "title": "Maskedpan"
+            },
+            "minimumPaymentDue": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Credit accounts only. Minimum payment required by `paymentDueDate` to keep the account current and avoid late fees, in `currency`. Servers MUST omit on non-credit accounts.",
+              "title": "Minimumpaymentdue"
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Human-readable account name set by the bank or the user.",
+              "examples": [
+                "Main Checking",
+                "Emergency Fund",
+                "Visa Credit Card"
+              ],
+              "title": "Name"
+            },
+            "openedDate": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Date the account was opened, ISO 8601 (YYYY-MM-DD).",
+              "title": "Openeddate"
+            },
+            "overdraftLimit": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Approved overdraft on a current/savings account or credit limit on a credit/card account, in `currency`. `0` (or omitted) means no extra headroom beyond `balance`.",
+              "title": "Overdraftlimit"
+            },
+            "ownerName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Primary account holder's name as the bank holds it. For joint accounts, servers MAY join multiple names with `, `.",
+              "examples": [
+                "Jane Doe",
+                "Jane Doe & John Doe",
+                "Acme Corp"
+              ],
+              "title": "Ownername"
+            },
+            "paymentDueDate": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Credit accounts only. ISO 8601 date by which `minimumPaymentDue` must be paid. Servers MUST omit on non-credit accounts.",
+              "title": "Paymentduedate"
+            },
+            "product": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Bank's marketing name for the account product, per PSD2 `product`. Free-form and proprietary to the issuer.",
+              "examples": [
+                "Premium Checking",
+                "Visa Signature",
+                "Easy Saver"
+              ],
+              "title": "Product"
+            },
+            "statementBalance": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Credit accounts only. Total billed on the most recent closed statement, in `currency`. Pay this in full by `paymentDueDate` to avoid interest charges. Servers MUST omit on non-credit accounts.",
+              "title": "Statementbalance"
+            },
+            "statementClosingDate": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Credit accounts only. ISO 8601 date the current billing cycle closes and the next statement is generated. Optional even on credit accounts; servers MUST omit on non-credit accounts.",
+              "title": "Statementclosingdate"
+            },
+            "status": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AccountStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Lifecycle status. If omitted, clients SHOULD treat the account as `Enabled`."
+            },
+            "usage": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AccountUsage"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Whether this is a personal or business account."
+            }
+          },
+          "required": [
+            "id",
+            "accountNumber",
+            "currency",
+            "balance"
+          ],
+          "title": "Account",
+          "type": "object"
+        },
+        "AccountNumberIdentifier": {
+          "description": "Country-specific composite for non-IBAN markets (US, UK pre-IBAN, etc.).",
+          "properties": {
+            "accountNumber": {
+              "description": "Account number in the country's native format.",
+              "title": "Accountnumber",
+              "type": "string"
+            },
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "US",
+                "GB"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "routing": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "US ABA routing number, when applicable.",
+              "title": "Routing"
+            },
+            "sortCode": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "UK sort code, when applicable.",
+              "title": "Sortcode"
+            },
+            "type": {
+              "const": "accountNumber",
+              "default": "accountNumber",
+              "description": "Discriminator: `accountNumber`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "accountNumber",
+            "country"
+          ],
+          "title": "AccountNumberIdentifier",
+          "type": "object"
+        },
+        "AccountStatus": {
+          "description": "Lifecycle status of an account, per Berlin Group PSD2 `accountStatus`.",
+          "enum": [
+            "Enabled",
+            "Blocked",
+            "Deleted"
+          ],
+          "title": "AccountStatus",
+          "type": "string"
+        },
+        "AccountType": {
+          "description": "Type of bank account.\n\nAligned with the ISO 20022 ExternalCashAccountType1Code values exposed\nvia the Berlin Group PSD2 `cashAccountType`, collapsed to the buckets\nthat map cleanly across regions and reflect distinctions a user would\nactually ask about:\n\n  - `Current`  - day-to-day transaction account (ISO 20022 CACC).\n                 Debit cards and stored-value / prepaid cards live\n                 here too: `maskedPan` flags an attached card and the\n                 balance/availableBalance pair answers \"can I use it?\"\n  - `Savings`  - interest-bearing savings (ISO 20022 SVGS)\n  - `Credit`   - revolving credit / credit card account; carries the\n                 statement-cycle fields below (`statementBalance`,\n                 `minimumPaymentDue`, `paymentDueDate`, ...).\n  - `Loan`     - amortizing loan or mortgage (ISO 20022 LOAN)\n  - `Other`    - anything else (escrow, brokerage, etc.)",
+          "enum": [
+            "Current",
+            "Credit",
+            "Savings",
+            "Loan",
+            "Other"
+          ],
+          "title": "AccountType",
+          "type": "string"
+        },
+        "AccountUsage": {
+          "description": "How the account is used, per Berlin Group PSD2 `usage`.\n\n`Private` corresponds to PSD2 `PRIV` (personal); `Business` to `ORGA`\n(professional / organisation).",
+          "enum": [
+            "Private",
+            "Business"
+          ],
+          "title": "AccountUsage",
+          "type": "string"
+        },
+        "AliasIdentifier": {
+          "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+          "properties": {
+            "alias": {
+              "description": "The alias value as the user knows it.",
+              "examples": [
+                "alex@upi",
+                "+44-7700-900000"
+              ],
+              "title": "Alias",
+              "type": "string"
+            },
+            "aliasType": {
+              "$ref": "#/$defs/AliasType",
+              "description": "Kind of alias."
+            },
+            "type": {
+              "const": "alias",
+              "default": "alias",
+              "description": "Discriminator: `alias`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "alias",
+            "aliasType"
+          ],
+          "title": "AliasIdentifier",
+          "type": "object"
+        },
+        "AliasType": {
+          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.).",
+          "enum": [
+            "email",
+            "phone",
+            "vpa",
+            "pix",
+            "other"
+          ],
+          "title": "AliasType",
+          "type": "string"
+        },
+        "Balance": {
+          "description": "One typed balance entry on an account.\n\nProfile of: Berlin Group PSD2 `balances` array element.",
+          "properties": {
+            "amount": {
+              "description": "Balance amount in `currency`.",
+              "title": "Amount",
+              "type": "number"
+            },
+            "asOf": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "ISO 8601 timestamp when this balance was last refreshed.",
+              "title": "Asof"
+            },
+            "currency": {
+              "description": "ISO 4217 currency code.",
+              "pattern": "^[A-Z]{3}$",
+              "title": "Currency",
+              "type": "string"
+            },
+            "type": {
+              "$ref": "#/$defs/BalanceType",
+              "description": "Balance type."
+            }
+          },
+          "required": [
+            "type",
+            "amount",
+            "currency"
+          ],
+          "title": "Balance",
+          "type": "object"
+        },
+        "BalanceType": {
+          "description": "Type of balance per Berlin Group PSD2 `balanceType`.",
+          "enum": [
+            "ClosingBooked",
+            "Expected",
+            "InterimAvailable",
+            "ForwardAvailable",
+            "NonInvoiced"
+          ],
+          "title": "BalanceType",
+          "type": "string"
+        },
+        "BbanIdentifier": {
+          "description": "Domestic Basic Bank Account Number, used in markets without an IBAN.",
+          "properties": {
+            "bban": {
+              "description": "Domestic account identifier in the country's native format.",
+              "examples": [
+                "0133-26-007890"
+              ],
+              "title": "Bban",
+              "type": "string"
+            },
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "IS",
+                "GB"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "type": {
+              "const": "bban",
+              "default": "bban",
+              "description": "Discriminator: `bban`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "bban",
+            "country"
+          ],
+          "title": "BbanIdentifier",
+          "type": "object"
+        },
+        "IbanIdentifier": {
+          "description": "IBAN-routed account, ISO 13616.",
+          "properties": {
+            "iban": {
+              "description": "IBAN, ISO 13616.",
+              "examples": [
+                "GB29NWBK60161331926819",
+                "DE89370400440532013000"
+              ],
+              "pattern": "^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$",
+              "title": "Iban",
+              "type": "string"
+            },
+            "type": {
+              "const": "iban",
+              "default": "iban",
+              "description": "Discriminator: `iban`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "iban"
+          ],
+          "title": "IbanIdentifier",
+          "type": "object"
+        },
+        "NationalId": {
+          "description": "Person or business national identifier.",
+          "properties": {
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "IS",
+                "US"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "type": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/NationalIdType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Hint for the kind of identifier. bank2ai does not validate the value."
+            },
+            "value": {
+              "description": "National identifier value, in the country's native format.",
+              "examples": [
+                "010190-1234",
+                "123-45-6789"
+              ],
+              "title": "Value",
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "country"
+          ],
+          "title": "NationalId",
+          "type": "object"
+        },
+        "NationalIdType": {
+          "description": "Opaque label for the kind of national identifier carried in `NationalId.value`.\n\nbank2ai does not validate national-ID formats; this is a hint so\nclients can render or route appropriately. Servers SHOULD set the\nclosest-matching value or use `other`.",
+          "enum": [
+            "ssn",
+            "kennitala",
+            "cpr",
+            "personnummer",
+            "cpf",
+            "other"
+          ],
+          "title": "NationalIdType",
+          "type": "string"
+        },
+        "Party": {
+          "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset).",
+          "properties": {
+            "accountIdentifier": {
+              "anyOf": [
+                {
+                  "description": "Discriminated union of typed account identifiers. Profile of: ISO 20022 `AccountIdentification4Choice`.",
+                  "discriminator": {
+                    "mapping": {
+                      "accountNumber": "#/$defs/AccountNumberIdentifier",
+                      "alias": "#/$defs/AliasIdentifier",
+                      "bban": "#/$defs/BbanIdentifier",
+                      "iban": "#/$defs/IbanIdentifier"
+                    },
+                    "propertyName": "type"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/IbanIdentifier"
+                    },
+                    {
+                      "$ref": "#/$defs/BbanIdentifier"
+                    },
+                    {
+                      "$ref": "#/$defs/AccountNumberIdentifier"
+                    },
+                    {
+                      "$ref": "#/$defs/AliasIdentifier"
+                    }
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Party's account identifier when known.",
+              "title": "Accountidentifier"
+            },
+            "bic": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "BIC / SWIFT code of the party's bank, ISO 9362.",
+              "examples": [
+                "NWBKGB2L"
+              ],
+              "title": "Bic"
+            },
+            "name": {
+              "description": "Party's full name or business name.",
+              "title": "Name",
+              "type": "string"
+            },
+            "nationalId": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/NationalId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Party's national identifier when known."
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "title": "Party",
+          "type": "object"
+        },
+        "Rail": {
+          "description": "Payment rail used to settle a transfer.\n\nServers MAY register additional rails via vendor extensions; the\ncanonical list reflects the rails the reference implementations\nexercise today.",
+          "enum": [
+            "domestic-IS",
+            "sepa",
+            "sepa-instant",
+            "swift"
+          ],
+          "title": "Rail",
+          "type": "string"
+        },
+        "RemittanceInformation": {
+          "description": "Free-text and/or structured remittance information for a transaction.\n\nProfile of: ISO 20022 `RemittanceInformation`. Servers SHOULD populate\nthis only when remittance info is genuinely present and not just a\nduplicate of `Transaction.description`.",
+          "properties": {
+            "creditorReference": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Structured creditor reference, typically an ISO 11649 RF-prefixed reference. The reference is opaque to bank2ai; servers pass it through as the bank exposes it.",
+              "examples": [
+                "RF18539007547034"
+              ],
+              "title": "Creditorreference"
+            },
+            "unstructured": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Free-text remittance line (e.g., the SEPA `RemittanceInformation/Unstructured` field).",
+              "title": "Unstructured"
+            }
+          },
+          "title": "RemittanceInformation",
+          "type": "object"
+        }
+      },
+      "description": "Validated, normalized echo of the prepare-transfer inputs.\n\nThe user-facing confirmation surface: clients should render this\nso the user can confirm before `execute-transfer` is called.",
+      "properties": {
+        "amount": {
+          "description": "Transfer amount in `currency`.",
+          "exclusiveMinimum": 0,
+          "title": "Amount",
+          "type": "number"
+        },
+        "creditor": {
+          "$ref": "#/$defs/Party",
+          "description": "Validated creditor record. The `accountIdentifier` field carries the routing identifier; servers MUST populate it."
+        },
+        "currency": {
+          "description": "ISO 4217 currency code of the instructed amount.",
+          "examples": [
+            "ISK",
+            "EUR",
+            "USD"
+          ],
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "debtorAccount": {
+          "$ref": "#/$defs/Account",
+          "description": "Resolved snapshot of the debtor (source) account."
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Free-text shown on the counterparty's statement. Falls back to `remittanceInformation.unstructured` when both are present.",
+          "title": "Description"
+        },
+        "endToEndId": {
+          "description": "ISO 20022 cross-rail identifier. Server-generated when the client did not supply one; populated either way so the client can show / audit the value.",
+          "title": "Endtoendid",
+          "type": "string"
+        },
+        "localInstrument": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Rail-specific local instrument code (e.g., `INST` for SEPA Instant).",
+          "title": "Localinstrument"
+        },
+        "rail": {
+          "$ref": "#/$defs/Rail",
+          "description": "Settlement rail."
+        },
+        "remittanceInformation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RemittanceInformation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Remittance information, when present."
+        },
+        "requestedExecutionDate": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Requested execution date, ISO 8601. Omitted means as-soon-as-possible per the rail's defaults.",
+          "title": "Requestedexecutiondate"
+        }
+      },
+      "required": [
+        "debtorAccount",
+        "creditor",
+        "amount",
+        "currency",
+        "rail",
+        "endToEndId"
+      ],
+      "title": "TransferSummary",
+      "type": "object"
+    },
+    "TransferWarning": {
+      "$defs": {
+        "TransferWarningSeverity": {
+          "description": "How a client should treat a transfer warning.",
+          "enum": [
+            "info",
+            "warn",
+            "block"
+          ],
+          "title": "TransferWarningSeverity",
+          "type": "string"
+        }
+      },
+      "description": "Server-emitted advisory about a prepared transfer.\n\nUsed for AML hits, sanctions matches, unusual-amount notices, etc.\n`severity: \"block\"` indicates the server will refuse `execute-transfer`\nagainst this intent unless the user explicitly overrides.",
+      "properties": {
+        "code": {
+          "description": "Server-defined warning code.",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "description": "Human-readable explanation.",
+          "title": "Message",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/TransferWarningSeverity",
+          "description": "Warning severity."
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "severity"
+      ],
+      "title": "TransferWarning",
+      "type": "object"
+    }
+  },
   "models": {
     "Account": {
       "$defs": {
