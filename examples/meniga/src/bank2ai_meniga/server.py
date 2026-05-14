@@ -245,13 +245,32 @@ async def get_categories() -> CategoryList:
 
 _ISO_ALPHA2_RE = re.compile(r"^[A-Z]{2}$")
 
+_MINIMAL_TRANSACTION_FIELDS = frozenset({
+    "id",
+    "accountId",
+    "description",
+    "amount",
+    "date",
+    "categoryId",
+    "originalCurrency",
+    "originalAmount",
+})
+
+
+def _apply_verbosity(t: Transaction, verbosity: str) -> Transaction:
+    if verbosity == "full":
+        return t
+    for field in Transaction.model_fields:
+        if field not in _MINIMAL_TRANSACTION_FIELDS:
+            setattr(t, field, None)
+    return t
+
 
 def _map_transaction(t: dict) -> Transaction:
     # Meniga's `amount` is in the account currency and `amountInCurrency` is
     # in the transaction's original currency; they're equal for domestic
     # transactions. Per the bank2ai spec, originalAmount/originalCurrency are
     # populated only when the transaction was in a foreign currency.
-    primary_date = t["date"]
     original_date = t.get("originalDate")
     is_foreign = (
         t.get("amountInCurrency") is not None
@@ -278,16 +297,12 @@ def _map_transaction(t: dict) -> Transaction:
         accountId=str(t["accountId"]),
         description=text,
         amount=t["amount"],
-        date=primary_date,
-        transactionDate=(
-            original_date if original_date and original_date != primary_date else None
-        ),
+        date=original_date,
         originalAmount=t["amountInCurrency"] if is_foreign else None,
         originalCurrency=t["currency"] if is_foreign else None,
         categoryId=str(t["categoryId"]) if t.get("categoryId") is not None else None,
         merchantCategoryCode=str(t["mcc"]) if t.get("mcc") is not None else None,
         counterparty=counterparty,
-        entryReference=t.get("parentIdentifier"),
     )
 
 
@@ -295,7 +310,7 @@ async def get_transactions(
     *,
     count: Optional[int] = None,
     order: str = "NewestFirst",
-    verbosity: str = "standard",
+    verbosity: str = "minimal",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     description: Optional[str] = None,
@@ -305,10 +320,6 @@ async def get_transactions(
     max_amount: Optional[float] = None,
     cursor: Optional[str] = None,
 ) -> TransactionList:
-    # The Meniga adapter does not populate any of the optional ISO 20022
-    # fields, so verbosity caps to fields the upstream API exposes today
-    # regardless of the requested level. Accept the parameter so callers
-    # can pass it; honouring the cap is a no-op until the field set grows.
     logger.info(
         "get_transactions: count=%s order=%s verbosity=%s start=%s end=%s desc=%s cats=%s account_ids=%s min=%s max=%s cursor=%s",
         count, order, verbosity, start_date, end_date, description, category_ids, account_ids, min_amount, max_amount, cursor,
@@ -316,14 +327,17 @@ async def get_transactions(
     params: dict[str, str] = {
         "includeChildCategoriesForParentWhenUsingSearchText": "true",
     }
+    if verbosity == "minimal":
+        params["fields"] = "id,accountId,amount,amountInCurrency,currency,categoryId,text,originalDate,isSplitChild"
+
     if count is not None:
         params["take"] = str(count)
     if cursor:
         params["pageToken"] = cursor
     if start_date is not None:
-        params["periodFrom"] = start_date
+        params["originalPeriodFrom"] = start_date
     if end_date is not None:
-        params["periodTo"] = end_date
+        params["originalPeriodTo"] = end_date
     if description:
         params["searchText"] = description
         params["useAccentInsensitiveSearch"] = "true"
@@ -347,7 +361,7 @@ async def get_transactions(
     response_json = response.json()
     for t in response_json["data"]:
         logger.info(t)
-        transactions.append(_map_transaction(t))
+        transactions.append(_apply_verbosity(_map_transaction(t), verbosity))
 
     next_cursor: Optional[str] = response_json["meta"]["pageToken"]
 

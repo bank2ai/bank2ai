@@ -79,43 +79,31 @@ async def get_accounts(
     return AccountList(items=[Account(**a) for a in accounts])
 
 
-_FULL_ONLY_TRANSACTION_FIELDS = (
-    "valueDate",
-    "categoryRaw",
-    "transactionCode",
-    "proprietaryBankTransactionCode",
-    "remittanceInformation",
-    "endToEndId",
-    "mandateId",
-    "creditorId",
-    "purposeCode",
-    "entryReference",
-    "additionalInformation",
-)
-_STANDARD_AND_ABOVE_FIELDS = (
-    "status",
+_MINIMAL_TRANSACTION_FIELDS = frozenset({
+    "id",
+    "accountId",
+    "description",
+    "amount",
+    "date",
     "categoryId",
     "originalCurrency",
     "originalAmount",
-    "transactionDate",
-    "maskedPan",
-    "merchantCategoryCode",
-    "counterparty",
-)
+})
 
 
 def _apply_verbosity(t: Transaction, verbosity: str) -> Transaction:
     """Clear optional fields above the requested verbosity cap. The
     Pydantic base class drops None-valued keys on serialization, so
-    suppressed fields are simply absent in the wire payload.
+    suppressed fields are simply absent in the wire payload. Tracking
+    the minimal set (rather than its inverse) means new Transaction
+    fields default to `full`-only without anyone having to update this
+    list.
     """
 
     if verbosity == "full":
         return t
-    for field in _FULL_ONLY_TRANSACTION_FIELDS:
-        setattr(t, field, None)
-    if verbosity == "minimal":
-        for field in _STANDARD_AND_ABOVE_FIELDS:
+    for field in Transaction.model_fields:
+        if field not in _MINIMAL_TRANSACTION_FIELDS:
             setattr(t, field, None)
     return t
 
@@ -124,7 +112,7 @@ async def get_transactions(
     *,
     count: Optional[int] = None,
     order: str = "NewestFirst",
-    verbosity: str = "standard",
+    verbosity: str = "minimal",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     description: Optional[str] = None,

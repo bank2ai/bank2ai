@@ -12,6 +12,11 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Specification
 
+### 0.14.0, Draft
+
+- **Breaking, `get-transactions` `verbosity` collapsed to two levels.** The middle `standard` tier is removed and `minimal` becomes the default. `minimal` carries `id`, `accountId`, `description`, `amount`, `date`, `categoryId`, and `originalCurrency` / `originalAmount` (populated only on FX entries) — the fields an LLM typically needs to answer everyday questions, with the merchant / counterparty name read off `description`. `full` allows every optional ISO 20022 / Open Finance audit field on top. Servers MAY still omit any optional field even at `full` when they don't have it.
+- **Migration.** Callers passing `verbosity="standard"` or relying on the previous `standard` default need to pick a tier: stay on the new `minimal` default for list rendering, or pass `verbosity="full"` when the agent actually needs ISO 20022 / SEPA / card metadata. The `get-transaction` (singular) tool is unchanged and remains the canonical audit / reconciliation entry point.
+
 ### 0.13.0, Draft
 
 - **Breaking, `Transaction.bookingDate` renamed to `Transaction.date`.** The field carries the booking date when `status` is `Booked` (formerly `bookingDate`; profile of ISO 20022 / Berlin Group `bookingDate`) and the authorisation / point-of-sale date when `status` is `Pending`. Previously, pending entries had to either fabricate a `bookingDate` or be dropped — neither is correct. `date` is always populated, so clients can sort and chart by it without branching on `status`. The spec narrative documents the deliberate divergence from ISO 20022 naming.

@@ -29,11 +29,10 @@ def register_get_transactions(
         description=desc(
             "Get bank transactions. Returns a list of transactions "
             "with amounts, dates, descriptions, and categories. The "
-            "`verbosity` parameter caps how many optional fields the "
-            "server populates: use `minimal` for compact lists, "
-            "`standard` (default) for general use, `full` for an "
-            "audit / reconciliation view including ISO 20022 "
-            "metadata when the server can populate it."
+            "`verbosity` parameter selects between a compact default "
+            "(`minimal`) and full transactions view (`full`) "
+            "that surfaces every optional ISO 20022 / Open Finance "
+            "field the server can populate."
         ),
         **out_kwarg,
     )
@@ -47,29 +46,19 @@ def register_get_transactions(
             default="NewestFirst",
             description="Sort order.",
         ),
-        verbosity: Literal["minimal", "standard", "full"] = Field(
-            default="standard",
+        verbosity: Literal["minimal", "full"] = Field(
+            default="minimal",
             description=(
                 "Upper bound on optional fields each Transaction may "
-                "carry. `minimal` keeps only the required fields "
-                "(`id`, `accountId`, `description`, `amount`, "
-                "`date`); the merchant / counterparty name "
-                "comes from `description`, which for most bank "
-                "entries already embeds it. `standard` adds the "
-                "fields an LLM typically needs to answer everyday "
-                "questions: `status`, `categoryId`, "
-                "`originalCurrency`, `originalAmount`, "
-                "`transactionDate`, `maskedPan`, "
-                "`merchantCategoryCode`, and the typed `counterparty` "
-                "(name plus merchant address — `townName`, `country`, "
-                "`postCode`, `streetName`). `full` additionally allows "
-                "every audit / reconciliation field: `valueDate`, "
-                "`categoryRaw`, `transactionCode`, "
-                "`proprietaryBankTransactionCode`, "
-                "`remittanceInformation`, `endToEndId`, `mandateId`, "
-                "`creditorId`, `purposeCode`, `entryReference`, "
-                "`additionalInformation`. Servers MAY omit any "
-                "optional field even at `full` if they don't have it."
+                "carry. `minimal` (default) keeps `id`, `accountId`, "
+                "`description`, `amount`, `date`, `categoryId`, and "
+                "`originalCurrency` / `originalAmount` for FX entries — "
+                "the fields an LLM typically needs to answer everyday "
+                "questions, with the merchant / counterparty name "
+                "read off `description`. `full` additionally allows "
+                "every optional ISO 20022 / Open Finance audit field. "
+                "Servers MAY omit any optional field even at `full` "
+                "if they don't have it."
             ),
         ),
         start_date: Optional[str] = Field(
