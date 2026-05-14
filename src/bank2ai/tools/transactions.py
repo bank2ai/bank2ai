@@ -1,4 +1,4 @@
-"""Registrations for the transaction-oriented tools."""
+"""Registrations for the transaction-oriented tools (including `get-categories`)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,12 @@ from typing import Literal, Optional
 from fastmcp import FastMCP
 from pydantic import Field
 
-from ..models import GetTransactionResponse, TransactionList, TransactionsSummary
+from ..models import (
+    CategoryList,
+    GetTransactionResponse,
+    TransactionList,
+    TransactionsSummary,
+)
 from .base import Handler, OutputSchemaMode, build_decorator_helpers
 
 
@@ -248,3 +253,25 @@ def register_get_transactions_summary(
         )
 
     return "get-transactions-summary"
+
+
+def register_get_categories(
+    app: FastMCP,
+    handler: Handler,
+    *,
+    output_schemas: OutputSchemaMode,
+) -> str:
+    out_kwarg, desc = build_decorator_helpers(output_schemas)
+
+    @app.tool(
+        name="get-categories",
+        description=desc(
+            "Get transaction categories. Returns a list of categories "
+            "that transactions can be classified into."
+        ),
+        **out_kwarg,
+    )
+    async def _get_categories() -> CategoryList:
+        return await handler()
+
+    return "get-categories"

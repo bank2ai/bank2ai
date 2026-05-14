@@ -13,11 +13,6 @@ from .accounts import (
     Balance,
     BalanceType,
 )
-from .categories import (
-    CANONICAL_CATEGORY_IDS,
-    Category,
-    CategoryList,
-)
 from .identity import (
     AccountIdentifier,
     AccountNumberIdentifier,
@@ -35,6 +30,9 @@ from .recipients import (
     RecipientList,
 )
 from .transactions import (
+    CANONICAL_CATEGORY_IDS,
+    Category,
+    CategoryList,
     GetTransactionResponse,
     RemittanceInformation,
     Transaction,
