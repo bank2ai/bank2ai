@@ -82,17 +82,25 @@ async def get_accounts(
 _FULL_ONLY_TRANSACTION_FIELDS = (
     "valueDate",
     "categoryRaw",
-    "counterparty",
     "transactionCode",
+    "proprietaryBankTransactionCode",
     "remittanceInformation",
     "endToEndId",
-    "merchantCategoryCode",
+    "mandateId",
+    "creditorId",
+    "purposeCode",
+    "entryReference",
+    "additionalInformation",
 )
 _STANDARD_AND_ABOVE_FIELDS = (
     "status",
     "categoryId",
     "originalCurrency",
     "originalAmount",
+    "transactionDate",
+    "maskedPan",
+    "merchantCategoryCode",
+    "counterparty",
 )
 
 

@@ -23,6 +23,7 @@ from .identity import (
     NationalId,
     NationalIdType,
     Party,
+    PostalAddress,
 )
 from .recipients import (
     CreateRecipientResponse,
@@ -88,6 +89,7 @@ __all__ = [
     "NationalId",
     "NationalIdType",
     "Party",
+    "PostalAddress",
     "PrepareTransferResponse",
     "PreparedTransfer",
     "Rail",

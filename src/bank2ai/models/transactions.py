@@ -75,8 +75,18 @@ class RemittanceInformation(_Bank2aiModel):
 class Transaction(_Bank2aiModel):
     """Financial transaction with date, amount and metadata.
 
-    Profile of: ISO 20022 `EntryDetails2` and Berlin Group PSD2
-    `transactions` array element.
+    Profile of: ISO 20022 `EntryDetails2`, Berlin Group PSD2
+    `transactions` array element, and Open Finance card transactions
+    (`cardTransactions`). One shape covers both account and card
+    transactions: the `_card` family of fields (`transactionDate`,
+    `maskedPan`, counterparty.postalAddress, `merchantCategoryCode`,
+    `proprietaryBankTransactionCode`) is populated for card entries,
+    the `_sepa` family (`mandateId`, `creditorId`, `purposeCode`,
+    `endToEndId`, `remittanceInformation`) for credit-transfer /
+    direct-debit entries. Servers MAY omit any optional field; the
+    `_Bank2aiModel` base drops `None` keys on the wire so every
+    row stays lean for LLM consumption while a full audit view is
+    available via `get-transaction`.
     """
 
     id: str = Field(description="Unique transaction identifier (server-scoped).")
@@ -95,7 +105,12 @@ class Transaction(_Bank2aiModel):
         ),
     )
     bookingDate: date = Field(
-        description="Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD).",
+        description=(
+            "Date the transaction posted to the account, ISO 8601 "
+            "(YYYY-MM-DD). For card transactions this is the settlement "
+            "date; the date the user actually swiped the card lives in "
+            "`transactionDate`."
+        ),
     )
     status: Optional[TransactionStatus] = Field(
         default=None,
@@ -104,16 +119,31 @@ class Transaction(_Bank2aiModel):
             "as `Booked`."
         ),
     )
-    counterpartyName: Optional[str] = Field(
-        default=None,
-        description=(
-            "Best-effort merchant or counterparty display name. Distinct from "
-            "`description`, which is the bank's narrative as presented to the user."
-        ),
-    )
     categoryId: Optional[str] = Field(
         default=None,
         description="Category id (the `id` field from get-categories which also has category name).",
+    )
+    transactionDate: Optional[date] = Field(
+        default=None,
+        description=(
+            "Date the transaction actually took place at the point of "
+            "sale or originating system, ISO 8601 (YYYY-MM-DD). For "
+            "card transactions this is the swipe / authorisation date "
+            "(Open Finance `transactionDate`); `bookingDate` is when it "
+            "later posted. Servers SHOULD omit when equal to "
+            "`bookingDate`."
+        ),
+    )
+    maskedPan: Optional[str] = Field(
+        default=None,
+        description=(
+            "Masked Primary Account Number of the card used for the "
+            "transaction. Useful for distinguishing which physical / "
+            "virtual card a charge belongs to when the same account "
+            "has multiple cards attached. Servers MUST mask the middle "
+            "digits."
+        ),
+        examples=["411111xxxxxx1111", "525412******3241"],
     )
     originalCurrency: Optional[str] = Field(
         default=None,
@@ -132,6 +162,30 @@ class Transaction(_Bank2aiModel):
             "positive for income). Present only when `originalCurrency` is set."
         ),
     )
+    merchantCategoryCode: Optional[str] = Field(
+        default=None,
+        description=(
+            "ISO 18245 Merchant Category Code (4 digits). Card-payment "
+            "entries SHOULD carry this when the acquirer exposes it; "
+            "useful for spend analytics and merchant classification."
+        ),
+        pattern=r"^\d{4}$",
+        examples=["5411", "5812"],
+    )
+    counterparty: Optional[Party] = Field(
+        default=None,
+        description=(
+            "Typed counterparty record carrying the merchant or "
+            "counterparty name and any structured detail the bank "
+            "exposes (account identifier, BIC, national id, address). "
+            "At `minimal` verbosity this is suppressed and clients "
+            "fall back to `description`, which for most entries "
+            "already embeds the counterparty name. For card "
+            "transactions the merchant address (Open Finance "
+            "`cardAcceptorAddress` — `townName`, `country`, `postCode`, "
+            "`streetName`) goes on `counterparty.postalAddress`."
+        ),
+    )
     valueDate: Optional[date] = Field(
         default=None,
         description=(
@@ -146,17 +200,19 @@ class Transaction(_Bank2aiModel):
             "Useful when `categoryId` is mapped from something more specific."
         ),
     )
-    counterparty: Optional[Party] = Field(
-        default=None,
-        description=(
-            "Typed counterparty record. Servers SHOULD populate when more "
-            "than just `counterpartyName` is known (account identifier, BIC, "
-            "national id)."
-        ),
-    )
     transactionCode: Optional[TransactionCode] = Field(
         default=None,
         description="ISO 20022 BankTransactionCode classification of the entry.",
+    )
+    proprietaryBankTransactionCode: Optional[str] = Field(
+        default=None,
+        description=(
+            "Bank-proprietary transaction code (Open Finance "
+            "`proprietaryBankTransactionCode`). Free-form string the "
+            "bank uses to classify the entry when an ISO 20022 "
+            "`transactionCode` isn't exposed."
+        ),
+        examples=["PURCHASE", "ATM", "FEE", "REFUND"],
     )
     remittanceInformation: Optional[RemittanceInformation] = Field(
         default=None,
@@ -173,11 +229,51 @@ class Transaction(_Bank2aiModel):
             "the payment chain."
         ),
     )
-    merchantCategoryCode: Optional[str] = Field(
+    mandateId: Optional[str] = Field(
         default=None,
-        description="ISO 18245 Merchant Category Code (4 digits).",
-        pattern=r"^\d{4}$",
-        examples=["5411", "5812"],
+        description=(
+            "SEPA / direct-debit mandate identifier the bank associates "
+            "with this entry. Profile of: ISO 20022 `MandateIdentification`."
+        ),
+        examples=["Mandate-2018-04-20-1234"],
+    )
+    creditorId: Optional[str] = Field(
+        default=None,
+        description=(
+            "SEPA Creditor Identifier for direct-debit collections. "
+            "Profile of: ISO 20022 `CreditorSchemeIdentification`."
+        ),
+        examples=["DE98ZZZ09999999999"],
+    )
+    purposeCode: Optional[str] = Field(
+        default=None,
+        description=(
+            "ISO 20022 ExternalPurposeCode (4-letter) indicating the "
+            "purpose of the payment, when the bank exposes it. "
+            "Distinct from the BankTransactionCode taxonomy on "
+            "`transactionCode`."
+        ),
+        examples=["SALA", "RENT", "GDDS"],
+    )
+    entryReference: Optional[str] = Field(
+        default=None,
+        description=(
+            "Stable bank-side entry reference (Berlin Group "
+            "`entryReference`). Distinct from `id` in that some banks "
+            "expose an opaque server-scoped `id` but also carry the "
+            "raw entry reference from the booking system; useful for "
+            "delta-fetch / reconciliation."
+        ),
+    )
+    additionalInformation: Optional[str] = Field(
+        default=None,
+        description=(
+            "Free-form additional information the bank attaches to the "
+            "entry and which does not fit any of the typed fields above "
+            "(Berlin Group / Open Finance `additionalInformation`). "
+            "Servers SHOULD omit when it would duplicate `description` "
+            "or `remittanceInformation`."
+        ),
     )
 
 

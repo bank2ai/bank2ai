@@ -105,7 +105,6 @@ def generate_transactions():
         "id": "tx_001",
         "accountId": "acc_checking_001",
         "description": "Monthly Salary",
-        "counterpartyName": "Acme Corp",
         "amount": 4500.00,
         "bookingDate": (today - timedelta(days=5)).isoformat(),
         "categoryId": "Income",
@@ -259,8 +258,13 @@ def generate_transactions():
         },
     ])
 
-    # Foreign-currency transactions: amount is in the user's default currency
-    # (USD here); originalCurrency / originalAmount carry the original.
+    # Foreign-currency card transactions: amount is in the user's
+    # default currency (USD); originalCurrency / originalAmount carry
+    # the original. These rows also exercise the card-transaction
+    # fields (transactionDate distinct from bookingDate, maskedPan,
+    # merchantCategoryCode, counterparty.postalAddress with townName /
+    # country / postCode) added in spec 0.12 to align with Open Finance
+    # `cardTransactions`.
     transactions.extend([
         {
             "id": "tx_paris_dining_001",
@@ -270,7 +274,21 @@ def generate_transactions():
             "originalCurrency": "EUR",
             "originalAmount": -49.80,
             "bookingDate": (today - timedelta(days=17)).isoformat(),
+            "transactionDate": (today - timedelta(days=18)).isoformat(),
+            "maskedPan": "411111xxxxxx4242",
+            "merchantCategoryCode": "5812",
             "categoryId": "DiningAndEntertainment",
+            "proprietaryBankTransactionCode": "PURCHASE",
+            "counterparty": {
+                "name": "Le Petit Bistro",
+                "postalAddress": {
+                    "streetName": "Rue de Rivoli",
+                    "buildingNumber": "42",
+                    "postCode": "75001",
+                    "townName": "Paris",
+                    "country": "FR",
+                },
+            },
         },
         {
             "id": "tx_london_shopping_001",
@@ -280,9 +298,49 @@ def generate_transactions():
             "originalCurrency": "GBP",
             "originalAmount": -165.00,
             "bookingDate": (today - timedelta(days=24)).isoformat(),
+            "transactionDate": (today - timedelta(days=25)).isoformat(),
+            "maskedPan": "411111xxxxxx4242",
+            "merchantCategoryCode": "5311",
             "categoryId": "Shopping",
+            "proprietaryBankTransactionCode": "PURCHASE",
+            "counterparty": {
+                "name": "Selfridges & Co",
+                "postalAddress": {
+                    "streetName": "Oxford Street",
+                    "buildingNumber": "400",
+                    "postCode": "W1A 1AB",
+                    "townName": "London",
+                    "country": "GB",
+                },
+            },
         },
     ])
+
+    # SEPA direct debit: exercises mandateId / creditorId / purposeCode
+    # so the `full` verbosity path has a row that lights them up.
+    transactions.append({
+        "id": "tx_utility_dd_001",
+        "accountId": "acc_checking_001",
+        "description": "City Water — Direct Debit",
+        "amount": -42.30,
+        "bookingDate": (today - timedelta(days=6)).isoformat(),
+        "categoryId": "Utilities",
+        "transactionCode": {
+            "domain": "PMNT",
+            "family": "RDDT",
+            "subFamily": "ESDD",
+        },
+        "mandateId": "MNDT-CITY-WATER-2021-09-04-001",
+        "creditorId": "DE98ZZZ09999999999",
+        "purposeCode": "UBIL",
+        "counterparty": {
+            "name": "City Water Utilities",
+            "accountIdentifier": {
+                "type": "iban",
+                "iban": "DE89370400440532013000",
+            },
+        },
+    })
 
     # Sort by date (newest first)
     transactions.sort(key=lambda x: x["bookingDate"], reverse=True)

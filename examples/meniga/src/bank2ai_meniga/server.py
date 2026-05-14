@@ -264,7 +264,6 @@ async def get_transactions(
         count, order, verbosity, start_date, end_date, description, category_ids, account_ids, min_amount, max_amount, cursor,
     )
     params: dict[str, str] = {
-        "fields": "id,accountId,amount,amountInCurrency,currency,categoryId,text,date",
         "includeChildCategoriesForParentWhenUsingSearchText": "true",
     }
     if count is not None:
@@ -297,6 +296,7 @@ async def get_transactions(
     transactions: list[Transaction] = []
     response_json = response.json()
     for t in response_json["data"]:
+        logger.info(t)
         transactions.append(Transaction(
             id=str(t["id"]),
             accountId=str(t["accountId"]),
@@ -306,6 +306,7 @@ async def get_transactions(
             originalAmount=t.get("amountInCurrency"),
             originalCurrency=t.get("currency"),
             categoryId=str(t["categoryId"]) if t.get("categoryId") is not None else None,
+            merchantCategoryCode=str(t.get("mcc")) if t.get("mcc") is not None else None,
         ))
 
     next_cursor: Optional[str] = response_json["meta"]["pageToken"]

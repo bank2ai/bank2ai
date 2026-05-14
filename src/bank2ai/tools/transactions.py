@@ -51,15 +51,25 @@ def register_get_transactions(
             default="standard",
             description=(
                 "Upper bound on optional fields each Transaction may "
-                "carry. `minimal` keeps only the required fields plus "
-                "`counterpartyName`; `standard` adds `status`, "
-                "`categoryId`, `originalCurrency`, `originalAmount`; "
-                "`full` additionally allows every ISO 20022 optional "
-                "field (`valueDate`, `categoryRaw`, `counterparty`, "
-                "`transactionCode`, `remittanceInformation`, "
-                "`endToEndId`, `merchantCategoryCode`). Servers MAY "
-                "omit any optional field even at `full` if they don't "
-                "have it."
+                "carry. `minimal` keeps only the required fields "
+                "(`id`, `accountId`, `description`, `amount`, "
+                "`bookingDate`); the merchant / counterparty name "
+                "comes from `description`, which for most bank "
+                "entries already embeds it. `standard` adds the "
+                "fields an LLM typically needs to answer everyday "
+                "questions: `status`, `categoryId`, "
+                "`originalCurrency`, `originalAmount`, "
+                "`transactionDate`, `maskedPan`, "
+                "`merchantCategoryCode`, and the typed `counterparty` "
+                "(name plus merchant address — `townName`, `country`, "
+                "`postCode`, `streetName`). `full` additionally allows "
+                "every audit / reconciliation field: `valueDate`, "
+                "`categoryRaw`, `transactionCode`, "
+                "`proprietaryBankTransactionCode`, "
+                "`remittanceInformation`, `endToEndId`, `mandateId`, "
+                "`creditorId`, `purposeCode`, `entryReference`, "
+                "`additionalInformation`. Servers MAY omit any "
+                "optional field even at `full` if they don't have it."
             ),
         ),
         start_date: Optional[str] = Field(
@@ -141,11 +151,13 @@ def register_get_transaction(
         name="get-transaction",
         description=desc(
             "Look up a single transaction by id and return every "
-            "field the server can populate, including ISO 20022 "
+            "field the server can populate, including ISO 20022 / SEPA "
             "metadata (transactionCode, remittanceInformation, "
-            "endToEndId, merchantCategoryCode, etc.). Use this for "
-            "audit / reconciliation flows; for compact lists prefer "
-            "`get-transactions` with a `verbosity` cap."
+            "endToEndId, mandateId, creditorId, purposeCode, "
+            "entryReference) and card-side fields (transactionDate, "
+            "maskedPan, merchantCategoryCode, counterparty.postalAddress). "
+            "Use this for audit / reconciliation flows; for compact "
+            "lists prefer `get-transactions` with a `verbosity` cap."
         ),
         **out_kwarg,
     )

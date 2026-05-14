@@ -594,9 +594,137 @@
           ],
           "title": "NationalIdType",
           "type": "string"
+        },
+        "PostalAddress": {
+          "description": "Postal address of a party or card-acceptor merchant.\n\nProfile of: ISO 20022 `PostalAddress24` (subset). Aligns with the\nOpen Finance / Berlin Group `cardAcceptorAddress` structure so card\ntransactions can surface where the swipe happened. Servers SHOULD\npopulate whichever subfields the bank exposes and omit the rest;\n`townName` and `country` are the most commonly available and the\nmost useful for LLM context.",
+          "properties": {
+            "addressLine": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Free-form address lines, used when the bank exposes the address as unparsed text. Servers SHOULD prefer the typed fields above and fall back to `addressLine` only when they cannot decompose the address.",
+              "title": "Addressline"
+            },
+            "buildingNumber": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Building number on the street.",
+              "examples": [
+                "12",
+                "12B"
+              ],
+              "title": "Buildingnumber"
+            },
+            "country": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z]{2}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "FR",
+                "SE",
+                "IS",
+                "US"
+              ],
+              "title": "Country"
+            },
+            "countrySubDivision": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "State, province, region, or other top-level subdivision.",
+              "examples": [
+                "CA",
+                "\u00cele-de-France"
+              ],
+              "title": "Countrysubdivision"
+            },
+            "postCode": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Postal / ZIP code.",
+              "examples": [
+                "75001",
+                "SW1A 1AA"
+              ],
+              "title": "Postcode"
+            },
+            "streetName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Street name without the building number.",
+              "examples": [
+                "Rue de Rivoli"
+              ],
+              "title": "Streetname"
+            },
+            "townName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "City, town, or village name.",
+              "examples": [
+                "Paris",
+                "Stockholm",
+                "Reykjav\u00edk"
+              ],
+              "title": "Townname"
+            }
+          },
+          "title": "PostalAddress",
+          "type": "object"
         }
       },
-      "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset).",
+      "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset). For card\ntransactions the counterparty is the card-accepting merchant;\n`postalAddress` then carries the Open Finance `cardAcceptorAddress`.",
       "properties": {
         "accountIdentifier": {
           "anyOf": [
@@ -667,12 +795,152 @@
           ],
           "default": null,
           "description": "Party's national identifier when known."
+        },
+        "postalAddress": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PostalAddress"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Postal address of the party. For card transactions, this is the merchant / card-acceptor address (Open Finance `cardAcceptorAddress`). Servers SHOULD populate whatever subset they have, typically at least `townName` and `country`."
         }
       },
       "required": [
         "name"
       ],
       "title": "Party",
+      "type": "object"
+    },
+    "PostalAddress": {
+      "description": "Postal address of a party or card-acceptor merchant.\n\nProfile of: ISO 20022 `PostalAddress24` (subset). Aligns with the\nOpen Finance / Berlin Group `cardAcceptorAddress` structure so card\ntransactions can surface where the swipe happened. Servers SHOULD\npopulate whichever subfields the bank exposes and omit the rest;\n`townName` and `country` are the most commonly available and the\nmost useful for LLM context.",
+      "properties": {
+        "addressLine": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Free-form address lines, used when the bank exposes the address as unparsed text. Servers SHOULD prefer the typed fields above and fall back to `addressLine` only when they cannot decompose the address.",
+          "title": "Addressline"
+        },
+        "buildingNumber": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Building number on the street.",
+          "examples": [
+            "12",
+            "12B"
+          ],
+          "title": "Buildingnumber"
+        },
+        "country": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 3166-1 alpha-2 country code.",
+          "examples": [
+            "FR",
+            "SE",
+            "IS",
+            "US"
+          ],
+          "title": "Country"
+        },
+        "countrySubDivision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "State, province, region, or other top-level subdivision.",
+          "examples": [
+            "CA",
+            "\u00cele-de-France"
+          ],
+          "title": "Countrysubdivision"
+        },
+        "postCode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Postal / ZIP code.",
+          "examples": [
+            "75001",
+            "SW1A 1AA"
+          ],
+          "title": "Postcode"
+        },
+        "streetName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Street name without the building number.",
+          "examples": [
+            "Rue de Rivoli"
+          ],
+          "title": "Streetname"
+        },
+        "townName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "City, town, or village name.",
+          "examples": [
+            "Paris",
+            "Stockholm",
+            "Reykjav\u00edk"
+          ],
+          "title": "Townname"
+        }
+      },
+      "title": "PostalAddress",
       "type": "object"
     },
     "PreparedTransfer": {
@@ -1377,7 +1645,7 @@
           "type": "string"
         },
         "Party": {
-          "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset).",
+          "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset). For card\ntransactions the counterparty is the card-accepting merchant;\n`postalAddress` then carries the Open Finance `cardAcceptorAddress`.",
           "properties": {
             "accountIdentifier": {
               "anyOf": [
@@ -1448,12 +1716,152 @@
               ],
               "default": null,
               "description": "Party's national identifier when known."
+            },
+            "postalAddress": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/PostalAddress"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Postal address of the party. For card transactions, this is the merchant / card-acceptor address (Open Finance `cardAcceptorAddress`). Servers SHOULD populate whatever subset they have, typically at least `townName` and `country`."
             }
           },
           "required": [
             "name"
           ],
           "title": "Party",
+          "type": "object"
+        },
+        "PostalAddress": {
+          "description": "Postal address of a party or card-acceptor merchant.\n\nProfile of: ISO 20022 `PostalAddress24` (subset). Aligns with the\nOpen Finance / Berlin Group `cardAcceptorAddress` structure so card\ntransactions can surface where the swipe happened. Servers SHOULD\npopulate whichever subfields the bank exposes and omit the rest;\n`townName` and `country` are the most commonly available and the\nmost useful for LLM context.",
+          "properties": {
+            "addressLine": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Free-form address lines, used when the bank exposes the address as unparsed text. Servers SHOULD prefer the typed fields above and fall back to `addressLine` only when they cannot decompose the address.",
+              "title": "Addressline"
+            },
+            "buildingNumber": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Building number on the street.",
+              "examples": [
+                "12",
+                "12B"
+              ],
+              "title": "Buildingnumber"
+            },
+            "country": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z]{2}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "FR",
+                "SE",
+                "IS",
+                "US"
+              ],
+              "title": "Country"
+            },
+            "countrySubDivision": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "State, province, region, or other top-level subdivision.",
+              "examples": [
+                "CA",
+                "\u00cele-de-France"
+              ],
+              "title": "Countrysubdivision"
+            },
+            "postCode": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Postal / ZIP code.",
+              "examples": [
+                "75001",
+                "SW1A 1AA"
+              ],
+              "title": "Postcode"
+            },
+            "streetName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Street name without the building number.",
+              "examples": [
+                "Rue de Rivoli"
+              ],
+              "title": "Streetname"
+            },
+            "townName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "City, town, or village name.",
+              "examples": [
+                "Paris",
+                "Stockholm",
+                "Reykjav\u00edk"
+              ],
+              "title": "Townname"
+            }
+          },
+          "title": "PostalAddress",
           "type": "object"
         },
         "Rail": {
@@ -2785,7 +3193,7 @@
           "type": "string"
         },
         "Party": {
-          "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset).",
+          "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset). For card\ntransactions the counterparty is the card-accepting merchant;\n`postalAddress` then carries the Open Finance `cardAcceptorAddress`.",
           "properties": {
             "accountIdentifier": {
               "anyOf": [
@@ -2856,12 +3264,152 @@
               ],
               "default": null,
               "description": "Party's national identifier when known."
+            },
+            "postalAddress": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/PostalAddress"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Postal address of the party. For card transactions, this is the merchant / card-acceptor address (Open Finance `cardAcceptorAddress`). Servers SHOULD populate whatever subset they have, typically at least `townName` and `country`."
             }
           },
           "required": [
             "name"
           ],
           "title": "Party",
+          "type": "object"
+        },
+        "PostalAddress": {
+          "description": "Postal address of a party or card-acceptor merchant.\n\nProfile of: ISO 20022 `PostalAddress24` (subset). Aligns with the\nOpen Finance / Berlin Group `cardAcceptorAddress` structure so card\ntransactions can surface where the swipe happened. Servers SHOULD\npopulate whichever subfields the bank exposes and omit the rest;\n`townName` and `country` are the most commonly available and the\nmost useful for LLM context.",
+          "properties": {
+            "addressLine": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Free-form address lines, used when the bank exposes the address as unparsed text. Servers SHOULD prefer the typed fields above and fall back to `addressLine` only when they cannot decompose the address.",
+              "title": "Addressline"
+            },
+            "buildingNumber": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Building number on the street.",
+              "examples": [
+                "12",
+                "12B"
+              ],
+              "title": "Buildingnumber"
+            },
+            "country": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z]{2}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "FR",
+                "SE",
+                "IS",
+                "US"
+              ],
+              "title": "Country"
+            },
+            "countrySubDivision": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "State, province, region, or other top-level subdivision.",
+              "examples": [
+                "CA",
+                "\u00cele-de-France"
+              ],
+              "title": "Countrysubdivision"
+            },
+            "postCode": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Postal / ZIP code.",
+              "examples": [
+                "75001",
+                "SW1A 1AA"
+              ],
+              "title": "Postcode"
+            },
+            "streetName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Street name without the building number.",
+              "examples": [
+                "Rue de Rivoli"
+              ],
+              "title": "Streetname"
+            },
+            "townName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "City, town, or village name.",
+              "examples": [
+                "Paris",
+                "Stockholm",
+                "Reykjav\u00edk"
+              ],
+              "title": "Townname"
+            }
+          },
+          "title": "PostalAddress",
           "type": "object"
         },
         "Rail": {
@@ -4104,7 +4652,7 @@
           "type": "string"
         },
         "Party": {
-          "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset).",
+          "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset). For card\ntransactions the counterparty is the card-accepting merchant;\n`postalAddress` then carries the Open Finance `cardAcceptorAddress`.",
           "properties": {
             "accountIdentifier": {
               "anyOf": [
@@ -4175,12 +4723,152 @@
               ],
               "default": null,
               "description": "Party's national identifier when known."
+            },
+            "postalAddress": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/PostalAddress"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Postal address of the party. For card transactions, this is the merchant / card-acceptor address (Open Finance `cardAcceptorAddress`). Servers SHOULD populate whatever subset they have, typically at least `townName` and `country`."
             }
           },
           "required": [
             "name"
           ],
           "title": "Party",
+          "type": "object"
+        },
+        "PostalAddress": {
+          "description": "Postal address of a party or card-acceptor merchant.\n\nProfile of: ISO 20022 `PostalAddress24` (subset). Aligns with the\nOpen Finance / Berlin Group `cardAcceptorAddress` structure so card\ntransactions can surface where the swipe happened. Servers SHOULD\npopulate whichever subfields the bank exposes and omit the rest;\n`townName` and `country` are the most commonly available and the\nmost useful for LLM context.",
+          "properties": {
+            "addressLine": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Free-form address lines, used when the bank exposes the address as unparsed text. Servers SHOULD prefer the typed fields above and fall back to `addressLine` only when they cannot decompose the address.",
+              "title": "Addressline"
+            },
+            "buildingNumber": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Building number on the street.",
+              "examples": [
+                "12",
+                "12B"
+              ],
+              "title": "Buildingnumber"
+            },
+            "country": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z]{2}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "ISO 3166-1 alpha-2 country code.",
+              "examples": [
+                "FR",
+                "SE",
+                "IS",
+                "US"
+              ],
+              "title": "Country"
+            },
+            "countrySubDivision": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "State, province, region, or other top-level subdivision.",
+              "examples": [
+                "CA",
+                "\u00cele-de-France"
+              ],
+              "title": "Countrysubdivision"
+            },
+            "postCode": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Postal / ZIP code.",
+              "examples": [
+                "75001",
+                "SW1A 1AA"
+              ],
+              "title": "Postcode"
+            },
+            "streetName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Street name without the building number.",
+              "examples": [
+                "Rue de Rivoli"
+              ],
+              "title": "Streetname"
+            },
+            "townName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "City, town, or village name.",
+              "examples": [
+                "Paris",
+                "Stockholm",
+                "Reykjav\u00edk"
+              ],
+              "title": "Townname"
+            }
+          },
+          "title": "PostalAddress",
           "type": "object"
         },
         "RemittanceInformation": {
@@ -4285,12 +4973,25 @@
           "type": "string"
         }
       },
-      "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2` and Berlin Group PSD2\n`transactions` array element.",
+      "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2`, Berlin Group PSD2\n`transactions` array element, and Open Finance card transactions\n(`cardTransactions`). One shape covers both account and card\ntransactions: the `_card` family of fields (`transactionDate`,\n`maskedPan`, counterparty.postalAddress, `merchantCategoryCode`,\n`proprietaryBankTransactionCode`) is populated for card entries,\nthe `_sepa` family (`mandateId`, `creditorId`, `purposeCode`,\n`endToEndId`, `remittanceInformation`) for credit-transfer /\ndirect-debit entries. Servers MAY omit any optional field; the\n`_Bank2aiModel` base drops `None` keys on the wire so every\nrow stays lean for LLM consumption while a full audit view is\navailable via `get-transaction`.",
       "properties": {
         "accountId": {
           "description": "References the `id` of the `Account` this transaction belongs to.",
           "title": "Accountid",
           "type": "string"
+        },
+        "additionalInformation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Free-form additional information the bank attaches to the entry and which does not fit any of the typed fields above (Berlin Group / Open Finance `additionalInformation`). Servers SHOULD omit when it would duplicate `description` or `remittanceInformation`.",
+          "title": "Additionalinformation"
         },
         "amount": {
           "description": "Transaction amount in the user's default currency (negative for expenses, positive for income). Clients SHOULD render this without a currency symbol unless the user has explicitly asked which currency a transaction is in.",
@@ -4298,7 +4999,7 @@
           "type": "number"
         },
         "bookingDate": {
-          "description": "Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD).",
+          "description": "Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD). For card transactions this is the settlement date; the date the user actually swiped the card lives in `transactionDate`.",
           "format": "date",
           "title": "Bookingdate",
           "type": "string"
@@ -4339,9 +5040,9 @@
             }
           ],
           "default": null,
-          "description": "Typed counterparty record. Servers SHOULD populate when more than just `counterpartyName` is known (account identifier, BIC, national id)."
+          "description": "Typed counterparty record carrying the merchant or counterparty name and any structured detail the bank exposes (account identifier, BIC, national id, address). At `minimal` verbosity this is suppressed and clients fall back to `description`, which for most entries already embeds the counterparty name. For card transactions the merchant address (Open Finance `cardAcceptorAddress` \u2014 `townName`, `country`, `postCode`, `streetName`) goes on `counterparty.postalAddress`."
         },
-        "counterpartyName": {
+        "creditorId": {
           "anyOf": [
             {
               "type": "string"
@@ -4351,8 +5052,11 @@
             }
           ],
           "default": null,
-          "description": "Best-effort merchant or counterparty display name. Distinct from `description`, which is the bank's narrative as presented to the user.",
-          "title": "Counterpartyname"
+          "description": "SEPA Creditor Identifier for direct-debit collections. Profile of: ISO 20022 `CreditorSchemeIdentification`.",
+          "examples": [
+            "DE98ZZZ09999999999"
+          ],
+          "title": "Creditorid"
         },
         "description": {
           "description": "Transaction description, merchant name or recipient name",
@@ -4372,10 +5076,56 @@
           "description": "ISO 20022 cross-rail end-to-end identifier preserved across the payment chain.",
           "title": "Endtoendid"
         },
+        "entryReference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Stable bank-side entry reference (Berlin Group `entryReference`). Distinct from `id` in that some banks expose an opaque server-scoped `id` but also carry the raw entry reference from the booking system; useful for delta-fetch / reconciliation.",
+          "title": "Entryreference"
+        },
         "id": {
           "description": "Unique transaction identifier (server-scoped).",
           "title": "Id",
           "type": "string"
+        },
+        "mandateId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SEPA / direct-debit mandate identifier the bank associates with this entry. Profile of: ISO 20022 `MandateIdentification`.",
+          "examples": [
+            "Mandate-2018-04-20-1234"
+          ],
+          "title": "Mandateid"
+        },
+        "maskedPan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Masked Primary Account Number of the card used for the transaction. Useful for distinguishing which physical / virtual card a charge belongs to when the same account has multiple cards attached. Servers MUST mask the middle digits.",
+          "examples": [
+            "411111xxxxxx1111",
+            "525412******3241"
+          ],
+          "title": "Maskedpan"
         },
         "merchantCategoryCode": {
           "anyOf": [
@@ -4388,7 +5138,7 @@
             }
           ],
           "default": null,
-          "description": "ISO 18245 Merchant Category Code (4 digits).",
+          "description": "ISO 18245 Merchant Category Code (4 digits). Card-payment entries SHOULD carry this when the acquirer exposes it; useful for spend analytics and merchant classification.",
           "examples": [
             "5411",
             "5812"
@@ -4427,6 +5177,43 @@
           ],
           "title": "Originalcurrency"
         },
+        "proprietaryBankTransactionCode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Bank-proprietary transaction code (Open Finance `proprietaryBankTransactionCode`). Free-form string the bank uses to classify the entry when an ISO 20022 `transactionCode` isn't exposed.",
+          "examples": [
+            "PURCHASE",
+            "ATM",
+            "FEE",
+            "REFUND"
+          ],
+          "title": "Proprietarybanktransactioncode"
+        },
+        "purposeCode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 20022 ExternalPurposeCode (4-letter) indicating the purpose of the payment, when the bank exposes it. Distinct from the BankTransactionCode taxonomy on `transactionCode`.",
+          "examples": [
+            "SALA",
+            "RENT",
+            "GDDS"
+          ],
+          "title": "Purposecode"
+        },
         "remittanceInformation": {
           "anyOf": [
             {
@@ -4462,6 +5249,20 @@
           ],
           "default": null,
           "description": "ISO 20022 BankTransactionCode classification of the entry."
+        },
+        "transactionDate": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date the transaction actually took place at the point of sale or originating system, ISO 8601 (YYYY-MM-DD). For card transactions this is the swipe / authorisation date (Open Finance `transactionDate`); `bookingDate` is when it later posted. Servers SHOULD omit when equal to `bookingDate`.",
+          "title": "Transactiondate"
         },
         "valueDate": {
           "anyOf": [
@@ -6042,7 +6843,7 @@
       }
     },
     {
-      "description": "Look up a single transaction by id and return every field the server can populate, including ISO 20022 metadata (transactionCode, remittanceInformation, endToEndId, merchantCategoryCode, etc.). Use this for audit / reconciliation flows; for compact lists prefer `get-transactions` with a `verbosity` cap.",
+      "description": "Look up a single transaction by id and return every field the server can populate, including ISO 20022 / SEPA metadata (transactionCode, remittanceInformation, endToEndId, mandateId, creditorId, purposeCode, entryReference) and card-side fields (transactionDate, maskedPan, merchantCategoryCode, counterparty.postalAddress). Use this for audit / reconciliation flows; for compact lists prefer `get-transactions` with a `verbosity` cap.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
@@ -6079,18 +6880,30 @@
           "item": {
             "anyOf": [
               {
-                "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2` and Berlin Group PSD2\n`transactions` array element.",
+                "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2`, Berlin Group PSD2\n`transactions` array element, and Open Finance card transactions\n(`cardTransactions`). One shape covers both account and card\ntransactions: the `_card` family of fields (`transactionDate`,\n`maskedPan`, counterparty.postalAddress, `merchantCategoryCode`,\n`proprietaryBankTransactionCode`) is populated for card entries,\nthe `_sepa` family (`mandateId`, `creditorId`, `purposeCode`,\n`endToEndId`, `remittanceInformation`) for credit-transfer /\ndirect-debit entries. Servers MAY omit any optional field; the\n`_Bank2aiModel` base drops `None` keys on the wire so every\nrow stays lean for LLM consumption while a full audit view is\navailable via `get-transaction`.",
                 "properties": {
                   "accountId": {
                     "description": "References the `id` of the `Account` this transaction belongs to.",
                     "type": "string"
+                  },
+                  "additionalInformation": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Free-form additional information the bank attaches to the entry and which does not fit any of the typed fields above (Berlin Group / Open Finance `additionalInformation`). Servers SHOULD omit when it would duplicate `description` or `remittanceInformation`."
                   },
                   "amount": {
                     "description": "Transaction amount in the user's default currency (negative for expenses, positive for income). Clients SHOULD render this without a currency symbol unless the user has explicitly asked which currency a transaction is in.",
                     "type": "number"
                   },
                   "bookingDate": {
-                    "description": "Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD).",
+                    "description": "Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD). For card transactions this is the settlement date; the date the user actually swiped the card lives in `transactionDate`.",
                     "format": "date",
                     "type": "string"
                   },
@@ -6121,7 +6934,7 @@
                   "counterparty": {
                     "anyOf": [
                       {
-                        "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset).",
+                        "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset). For card\ntransactions the counterparty is the card-accepting merchant;\n`postalAddress` then carries the Open Finance `cardAcceptorAddress`.",
                         "properties": {
                           "accountIdentifier": {
                             "anyOf": [
@@ -6357,6 +7170,135 @@
                             ],
                             "default": null,
                             "description": "Party's national identifier when known."
+                          },
+                          "postalAddress": {
+                            "anyOf": [
+                              {
+                                "description": "Postal address of a party or card-acceptor merchant.\n\nProfile of: ISO 20022 `PostalAddress24` (subset). Aligns with the\nOpen Finance / Berlin Group `cardAcceptorAddress` structure so card\ntransactions can surface where the swipe happened. Servers SHOULD\npopulate whichever subfields the bank exposes and omit the rest;\n`townName` and `country` are the most commonly available and the\nmost useful for LLM context.",
+                                "properties": {
+                                  "addressLine": {
+                                    "anyOf": [
+                                      {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "Free-form address lines, used when the bank exposes the address as unparsed text. Servers SHOULD prefer the typed fields above and fall back to `addressLine` only when they cannot decompose the address."
+                                  },
+                                  "buildingNumber": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "Building number on the street.",
+                                    "examples": [
+                                      "12",
+                                      "12B"
+                                    ]
+                                  },
+                                  "country": {
+                                    "anyOf": [
+                                      {
+                                        "pattern": "^[A-Z]{2}$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "ISO 3166-1 alpha-2 country code.",
+                                    "examples": [
+                                      "FR",
+                                      "SE",
+                                      "IS",
+                                      "US"
+                                    ]
+                                  },
+                                  "countrySubDivision": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "State, province, region, or other top-level subdivision.",
+                                    "examples": [
+                                      "CA",
+                                      "\u00cele-de-France"
+                                    ]
+                                  },
+                                  "postCode": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "Postal / ZIP code.",
+                                    "examples": [
+                                      "75001",
+                                      "SW1A 1AA"
+                                    ]
+                                  },
+                                  "streetName": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "Street name without the building number.",
+                                    "examples": [
+                                      "Rue de Rivoli"
+                                    ]
+                                  },
+                                  "townName": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "City, town, or village name.",
+                                    "examples": [
+                                      "Paris",
+                                      "Stockholm",
+                                      "Reykjav\u00edk"
+                                    ]
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "description": "Postal address of the party. For card transactions, this is the merchant / card-acceptor address (Open Finance `cardAcceptorAddress`). Servers SHOULD populate whatever subset they have, typically at least `townName` and `country`."
                           }
                         },
                         "required": [
@@ -6369,9 +7311,9 @@
                       }
                     ],
                     "default": null,
-                    "description": "Typed counterparty record. Servers SHOULD populate when more than just `counterpartyName` is known (account identifier, BIC, national id)."
+                    "description": "Typed counterparty record carrying the merchant or counterparty name and any structured detail the bank exposes (account identifier, BIC, national id, address). At `minimal` verbosity this is suppressed and clients fall back to `description`, which for most entries already embeds the counterparty name. For card transactions the merchant address (Open Finance `cardAcceptorAddress` \u2014 `townName`, `country`, `postCode`, `streetName`) goes on `counterparty.postalAddress`."
                   },
-                  "counterpartyName": {
+                  "creditorId": {
                     "anyOf": [
                       {
                         "type": "string"
@@ -6381,7 +7323,10 @@
                       }
                     ],
                     "default": null,
-                    "description": "Best-effort merchant or counterparty display name. Distinct from `description`, which is the bank's narrative as presented to the user."
+                    "description": "SEPA Creditor Identifier for direct-debit collections. Profile of: ISO 20022 `CreditorSchemeIdentification`.",
+                    "examples": [
+                      "DE98ZZZ09999999999"
+                    ]
                   },
                   "description": {
                     "description": "Transaction description, merchant name or recipient name",
@@ -6399,9 +7344,52 @@
                     "default": null,
                     "description": "ISO 20022 cross-rail end-to-end identifier preserved across the payment chain."
                   },
+                  "entryReference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Stable bank-side entry reference (Berlin Group `entryReference`). Distinct from `id` in that some banks expose an opaque server-scoped `id` but also carry the raw entry reference from the booking system; useful for delta-fetch / reconciliation."
+                  },
                   "id": {
                     "description": "Unique transaction identifier (server-scoped).",
                     "type": "string"
+                  },
+                  "mandateId": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "SEPA / direct-debit mandate identifier the bank associates with this entry. Profile of: ISO 20022 `MandateIdentification`.",
+                    "examples": [
+                      "Mandate-2018-04-20-1234"
+                    ]
+                  },
+                  "maskedPan": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Masked Primary Account Number of the card used for the transaction. Useful for distinguishing which physical / virtual card a charge belongs to when the same account has multiple cards attached. Servers MUST mask the middle digits.",
+                    "examples": [
+                      "411111xxxxxx1111",
+                      "525412******3241"
+                    ]
                   },
                   "merchantCategoryCode": {
                     "anyOf": [
@@ -6414,7 +7402,7 @@
                       }
                     ],
                     "default": null,
-                    "description": "ISO 18245 Merchant Category Code (4 digits).",
+                    "description": "ISO 18245 Merchant Category Code (4 digits). Card-payment entries SHOULD carry this when the acquirer exposes it; useful for spend analytics and merchant classification.",
                     "examples": [
                       "5411",
                       "5812"
@@ -6448,6 +7436,41 @@
                       "EUR",
                       "GBP",
                       "JPY"
+                    ]
+                  },
+                  "proprietaryBankTransactionCode": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Bank-proprietary transaction code (Open Finance `proprietaryBankTransactionCode`). Free-form string the bank uses to classify the entry when an ISO 20022 `transactionCode` isn't exposed.",
+                    "examples": [
+                      "PURCHASE",
+                      "ATM",
+                      "FEE",
+                      "REFUND"
+                    ]
+                  },
+                  "purposeCode": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "ISO 20022 ExternalPurposeCode (4-letter) indicating the purpose of the payment, when the bank exposes it. Distinct from the BankTransactionCode taxonomy on `transactionCode`.",
+                    "examples": [
+                      "SALA",
+                      "RENT",
+                      "GDDS"
                     ]
                   },
                   "remittanceInformation": {
@@ -6569,6 +7592,19 @@
                     ],
                     "default": null,
                     "description": "ISO 20022 BankTransactionCode classification of the entry."
+                  },
+                  "transactionDate": {
+                    "anyOf": [
+                      {
+                        "format": "date",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Date the transaction actually took place at the point of sale or originating system, ISO 8601 (YYYY-MM-DD). For card transactions this is the swipe / authorisation date (Open Finance `transactionDate`); `bookingDate` is when it later posted. Servers SHOULD omit when equal to `bookingDate`."
                   },
                   "valueDate": {
                     "anyOf": [
@@ -6746,7 +7782,7 @@
           },
           "verbosity": {
             "default": "standard",
-            "description": "Upper bound on optional fields each Transaction may carry. `minimal` keeps only the required fields plus `counterpartyName`; `standard` adds `status`, `categoryId`, `originalCurrency`, `originalAmount`; `full` additionally allows every ISO 20022 optional field (`valueDate`, `categoryRaw`, `counterparty`, `transactionCode`, `remittanceInformation`, `endToEndId`, `merchantCategoryCode`). Servers MAY omit any optional field even at `full` if they don't have it.",
+            "description": "Upper bound on optional fields each Transaction may carry. `minimal` keeps only the required fields (`id`, `accountId`, `description`, `amount`, `bookingDate`); the merchant / counterparty name comes from `description`, which for most bank entries already embeds it. `standard` adds the fields an LLM typically needs to answer everyday questions: `status`, `categoryId`, `originalCurrency`, `originalAmount`, `transactionDate`, `maskedPan`, `merchantCategoryCode`, and the typed `counterparty` (name plus merchant address \u2014 `townName`, `country`, `postCode`, `streetName`). `full` additionally allows every audit / reconciliation field: `valueDate`, `categoryRaw`, `transactionCode`, `proprietaryBankTransactionCode`, `remittanceInformation`, `endToEndId`, `mandateId`, `creditorId`, `purposeCode`, `entryReference`, `additionalInformation`. Servers MAY omit any optional field even at `full` if they don't have it.",
             "enum": [
               "minimal",
               "standard",
@@ -6764,18 +7800,30 @@
           "items": {
             "description": "Transactions matching the request.",
             "items": {
-              "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2` and Berlin Group PSD2\n`transactions` array element.",
+              "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2`, Berlin Group PSD2\n`transactions` array element, and Open Finance card transactions\n(`cardTransactions`). One shape covers both account and card\ntransactions: the `_card` family of fields (`transactionDate`,\n`maskedPan`, counterparty.postalAddress, `merchantCategoryCode`,\n`proprietaryBankTransactionCode`) is populated for card entries,\nthe `_sepa` family (`mandateId`, `creditorId`, `purposeCode`,\n`endToEndId`, `remittanceInformation`) for credit-transfer /\ndirect-debit entries. Servers MAY omit any optional field; the\n`_Bank2aiModel` base drops `None` keys on the wire so every\nrow stays lean for LLM consumption while a full audit view is\navailable via `get-transaction`.",
               "properties": {
                 "accountId": {
                   "description": "References the `id` of the `Account` this transaction belongs to.",
                   "type": "string"
+                },
+                "additionalInformation": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Free-form additional information the bank attaches to the entry and which does not fit any of the typed fields above (Berlin Group / Open Finance `additionalInformation`). Servers SHOULD omit when it would duplicate `description` or `remittanceInformation`."
                 },
                 "amount": {
                   "description": "Transaction amount in the user's default currency (negative for expenses, positive for income). Clients SHOULD render this without a currency symbol unless the user has explicitly asked which currency a transaction is in.",
                   "type": "number"
                 },
                 "bookingDate": {
-                  "description": "Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD).",
+                  "description": "Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD). For card transactions this is the settlement date; the date the user actually swiped the card lives in `transactionDate`.",
                   "format": "date",
                   "type": "string"
                 },
@@ -6806,7 +7854,7 @@
                 "counterparty": {
                   "anyOf": [
                     {
-                      "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset).",
+                      "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset). For card\ntransactions the counterparty is the card-accepting merchant;\n`postalAddress` then carries the Open Finance `cardAcceptorAddress`.",
                       "properties": {
                         "accountIdentifier": {
                           "anyOf": [
@@ -7042,6 +8090,135 @@
                           ],
                           "default": null,
                           "description": "Party's national identifier when known."
+                        },
+                        "postalAddress": {
+                          "anyOf": [
+                            {
+                              "description": "Postal address of a party or card-acceptor merchant.\n\nProfile of: ISO 20022 `PostalAddress24` (subset). Aligns with the\nOpen Finance / Berlin Group `cardAcceptorAddress` structure so card\ntransactions can surface where the swipe happened. Servers SHOULD\npopulate whichever subfields the bank exposes and omit the rest;\n`townName` and `country` are the most commonly available and the\nmost useful for LLM context.",
+                              "properties": {
+                                "addressLine": {
+                                  "anyOf": [
+                                    {
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "type": "array"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "description": "Free-form address lines, used when the bank exposes the address as unparsed text. Servers SHOULD prefer the typed fields above and fall back to `addressLine` only when they cannot decompose the address."
+                                },
+                                "buildingNumber": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "description": "Building number on the street.",
+                                  "examples": [
+                                    "12",
+                                    "12B"
+                                  ]
+                                },
+                                "country": {
+                                  "anyOf": [
+                                    {
+                                      "pattern": "^[A-Z]{2}$",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "description": "ISO 3166-1 alpha-2 country code.",
+                                  "examples": [
+                                    "FR",
+                                    "SE",
+                                    "IS",
+                                    "US"
+                                  ]
+                                },
+                                "countrySubDivision": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "description": "State, province, region, or other top-level subdivision.",
+                                  "examples": [
+                                    "CA",
+                                    "\u00cele-de-France"
+                                  ]
+                                },
+                                "postCode": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "description": "Postal / ZIP code.",
+                                  "examples": [
+                                    "75001",
+                                    "SW1A 1AA"
+                                  ]
+                                },
+                                "streetName": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "description": "Street name without the building number.",
+                                  "examples": [
+                                    "Rue de Rivoli"
+                                  ]
+                                },
+                                "townName": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "description": "City, town, or village name.",
+                                  "examples": [
+                                    "Paris",
+                                    "Stockholm",
+                                    "Reykjav\u00edk"
+                                  ]
+                                }
+                              },
+                              "type": "object"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "description": "Postal address of the party. For card transactions, this is the merchant / card-acceptor address (Open Finance `cardAcceptorAddress`). Servers SHOULD populate whatever subset they have, typically at least `townName` and `country`."
                         }
                       },
                       "required": [
@@ -7054,9 +8231,9 @@
                     }
                   ],
                   "default": null,
-                  "description": "Typed counterparty record. Servers SHOULD populate when more than just `counterpartyName` is known (account identifier, BIC, national id)."
+                  "description": "Typed counterparty record carrying the merchant or counterparty name and any structured detail the bank exposes (account identifier, BIC, national id, address). At `minimal` verbosity this is suppressed and clients fall back to `description`, which for most entries already embeds the counterparty name. For card transactions the merchant address (Open Finance `cardAcceptorAddress` \u2014 `townName`, `country`, `postCode`, `streetName`) goes on `counterparty.postalAddress`."
                 },
-                "counterpartyName": {
+                "creditorId": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -7066,7 +8243,10 @@
                     }
                   ],
                   "default": null,
-                  "description": "Best-effort merchant or counterparty display name. Distinct from `description`, which is the bank's narrative as presented to the user."
+                  "description": "SEPA Creditor Identifier for direct-debit collections. Profile of: ISO 20022 `CreditorSchemeIdentification`.",
+                  "examples": [
+                    "DE98ZZZ09999999999"
+                  ]
                 },
                 "description": {
                   "description": "Transaction description, merchant name or recipient name",
@@ -7084,9 +8264,52 @@
                   "default": null,
                   "description": "ISO 20022 cross-rail end-to-end identifier preserved across the payment chain."
                 },
+                "entryReference": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Stable bank-side entry reference (Berlin Group `entryReference`). Distinct from `id` in that some banks expose an opaque server-scoped `id` but also carry the raw entry reference from the booking system; useful for delta-fetch / reconciliation."
+                },
                 "id": {
                   "description": "Unique transaction identifier (server-scoped).",
                   "type": "string"
+                },
+                "mandateId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "SEPA / direct-debit mandate identifier the bank associates with this entry. Profile of: ISO 20022 `MandateIdentification`.",
+                  "examples": [
+                    "Mandate-2018-04-20-1234"
+                  ]
+                },
+                "maskedPan": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Masked Primary Account Number of the card used for the transaction. Useful for distinguishing which physical / virtual card a charge belongs to when the same account has multiple cards attached. Servers MUST mask the middle digits.",
+                  "examples": [
+                    "411111xxxxxx1111",
+                    "525412******3241"
+                  ]
                 },
                 "merchantCategoryCode": {
                   "anyOf": [
@@ -7099,7 +8322,7 @@
                     }
                   ],
                   "default": null,
-                  "description": "ISO 18245 Merchant Category Code (4 digits).",
+                  "description": "ISO 18245 Merchant Category Code (4 digits). Card-payment entries SHOULD carry this when the acquirer exposes it; useful for spend analytics and merchant classification.",
                   "examples": [
                     "5411",
                     "5812"
@@ -7133,6 +8356,41 @@
                     "EUR",
                     "GBP",
                     "JPY"
+                  ]
+                },
+                "proprietaryBankTransactionCode": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Bank-proprietary transaction code (Open Finance `proprietaryBankTransactionCode`). Free-form string the bank uses to classify the entry when an ISO 20022 `transactionCode` isn't exposed.",
+                  "examples": [
+                    "PURCHASE",
+                    "ATM",
+                    "FEE",
+                    "REFUND"
+                  ]
+                },
+                "purposeCode": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "ISO 20022 ExternalPurposeCode (4-letter) indicating the purpose of the payment, when the bank exposes it. Distinct from the BankTransactionCode taxonomy on `transactionCode`.",
+                  "examples": [
+                    "SALA",
+                    "RENT",
+                    "GDDS"
                   ]
                 },
                 "remittanceInformation": {
@@ -7254,6 +8512,19 @@
                   ],
                   "default": null,
                   "description": "ISO 20022 BankTransactionCode classification of the entry."
+                },
+                "transactionDate": {
+                  "anyOf": [
+                    {
+                      "format": "date",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Date the transaction actually took place at the point of sale or originating system, ISO 8601 (YYYY-MM-DD). For card transactions this is the swipe / authorisation date (Open Finance `transactionDate`); `bookingDate` is when it later posted. Servers SHOULD omit when equal to `bookingDate`."
                 },
                 "valueDate": {
                   "anyOf": [
@@ -7758,6 +9029,135 @@
                 ],
                 "default": null,
                 "description": "Party's national identifier when known."
+              },
+              "postalAddress": {
+                "anyOf": [
+                  {
+                    "description": "Postal address of a party or card-acceptor merchant.\n\nProfile of: ISO 20022 `PostalAddress24` (subset). Aligns with the\nOpen Finance / Berlin Group `cardAcceptorAddress` structure so card\ntransactions can surface where the swipe happened. Servers SHOULD\npopulate whichever subfields the bank exposes and omit the rest;\n`townName` and `country` are the most commonly available and the\nmost useful for LLM context.",
+                    "properties": {
+                      "addressLine": {
+                        "anyOf": [
+                          {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Free-form address lines, used when the bank exposes the address as unparsed text. Servers SHOULD prefer the typed fields above and fall back to `addressLine` only when they cannot decompose the address."
+                      },
+                      "buildingNumber": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Building number on the street.",
+                        "examples": [
+                          "12",
+                          "12B"
+                        ]
+                      },
+                      "country": {
+                        "anyOf": [
+                          {
+                            "pattern": "^[A-Z]{2}$",
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "ISO 3166-1 alpha-2 country code.",
+                        "examples": [
+                          "FR",
+                          "SE",
+                          "IS",
+                          "US"
+                        ]
+                      },
+                      "countrySubDivision": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "State, province, region, or other top-level subdivision.",
+                        "examples": [
+                          "CA",
+                          "\u00cele-de-France"
+                        ]
+                      },
+                      "postCode": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Postal / ZIP code.",
+                        "examples": [
+                          "75001",
+                          "SW1A 1AA"
+                        ]
+                      },
+                      "streetName": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Street name without the building number.",
+                        "examples": [
+                          "Rue de Rivoli"
+                        ]
+                      },
+                      "townName": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "City, town, or village name.",
+                        "examples": [
+                          "Paris",
+                          "Stockholm",
+                          "Reykjav\u00edk"
+                        ]
+                      }
+                    },
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Postal address of the party. For card transactions, this is the merchant / card-acceptor address (Open Finance `cardAcceptorAddress`). Servers SHOULD populate whatever subset they have, typically at least `townName` and `country`."
               }
             },
             "required": [
@@ -8357,6 +9757,135 @@
                             ],
                             "default": null,
                             "description": "Party's national identifier when known."
+                          },
+                          "postalAddress": {
+                            "anyOf": [
+                              {
+                                "description": "Postal address of a party or card-acceptor merchant.\n\nProfile of: ISO 20022 `PostalAddress24` (subset). Aligns with the\nOpen Finance / Berlin Group `cardAcceptorAddress` structure so card\ntransactions can surface where the swipe happened. Servers SHOULD\npopulate whichever subfields the bank exposes and omit the rest;\n`townName` and `country` are the most commonly available and the\nmost useful for LLM context.",
+                                "properties": {
+                                  "addressLine": {
+                                    "anyOf": [
+                                      {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "Free-form address lines, used when the bank exposes the address as unparsed text. Servers SHOULD prefer the typed fields above and fall back to `addressLine` only when they cannot decompose the address."
+                                  },
+                                  "buildingNumber": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "Building number on the street.",
+                                    "examples": [
+                                      "12",
+                                      "12B"
+                                    ]
+                                  },
+                                  "country": {
+                                    "anyOf": [
+                                      {
+                                        "pattern": "^[A-Z]{2}$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "ISO 3166-1 alpha-2 country code.",
+                                    "examples": [
+                                      "FR",
+                                      "SE",
+                                      "IS",
+                                      "US"
+                                    ]
+                                  },
+                                  "countrySubDivision": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "State, province, region, or other top-level subdivision.",
+                                    "examples": [
+                                      "CA",
+                                      "\u00cele-de-France"
+                                    ]
+                                  },
+                                  "postCode": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "Postal / ZIP code.",
+                                    "examples": [
+                                      "75001",
+                                      "SW1A 1AA"
+                                    ]
+                                  },
+                                  "streetName": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "Street name without the building number.",
+                                    "examples": [
+                                      "Rue de Rivoli"
+                                    ]
+                                  },
+                                  "townName": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "default": null,
+                                    "description": "City, town, or village name.",
+                                    "examples": [
+                                      "Paris",
+                                      "Stockholm",
+                                      "Reykjav\u00edk"
+                                    ]
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "description": "Postal address of the party. For card transactions, this is the merchant / card-acceptor address (Open Finance `cardAcceptorAddress`). Servers SHOULD populate whatever subset they have, typically at least `townName` and `country`."
                           }
                         },
                         "required": [
@@ -8939,5 +10468,5 @@
       }
     }
   ],
-  "version": "0.11.0"
+  "version": "0.12.0"
 }

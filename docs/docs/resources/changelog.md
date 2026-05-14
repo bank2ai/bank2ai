@@ -12,6 +12,13 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Specification
 
+### 0.12.0, Draft
+
+- **Transaction overhauled to cover account *and* card transactions in one shape**, aligned with Open Finance / Berlin Group `cardTransactions`. New optional fields: `transactionDate` (when the swipe / authorisation happened, distinct from `bookingDate` posting), `maskedPan` (which card was used), `proprietaryBankTransactionCode` (bank-proprietary code when the ISO 20022 `transactionCode` isn't exposed). New SEPA / audit fields: `mandateId`, `creditorId`, `purposeCode` (ISO 20022 ExternalPurposeCode), `entryReference` (Berlin Group stable booking-system reference), `additionalInformation` (free-form bank text not fitting the typed fields).
+- **New `PostalAddress` component** (profile of ISO 20022 `PostalAddress24`): `streetName`, `buildingNumber`, `postCode`, `townName`, `countrySubDivision`, `country`, `addressLine`. Hung off `Party.postalAddress`, so for card transactions the Open Finance `cardAcceptorAddress` (`townName`, `country`, `postCode`, `streetName`) flows in on `Transaction.counterparty.postalAddress`.
+- **Verbosity ladder rebalanced** so the standard payload carries the fields an LLM typically needs to answer everyday questions — `transactionDate`, `maskedPan`, `merchantCategoryCode`, `originalCurrency` / `originalAmount`, and the typed `counterparty` (with merchant address) — without forcing a `full` follow-up call. Deep ISO 20022 / SEPA metadata (`valueDate`, `transactionCode`, `remittanceInformation`, `endToEndId`, `mandateId`, `creditorId`, `purposeCode`, `entryReference`, `additionalInformation`, `proprietaryBankTransactionCode`, `categoryRaw`) stays at `full`.
+- **Breaking, `Transaction.counterpartyName` removed.** The merchant / counterparty display name lives on `Transaction.counterparty.name` from `standard` verbosity onwards. At `minimal` verbosity the merchant name is read off `Transaction.description`, which for most bank entries already embeds it; servers that want to expose only the name keep using `description` and omit the typed counterparty.
+
 ### 0.11.0, Draft
 
 - **Breaking, vocabulary alignment.** The whole spec migrates to camelCase model field names, matching the PSD2 / ISO 20022 conventions the spec profiles. `Transaction.transaction_date` becomes `bookingDate`, `category_id` becomes `categoryId`, the `currency` / `amount_in_currency` FX pair becomes `originalCurrency` / `originalAmount`. The `TransactionsSummary*` models migrate in the same pass (`total_amount` → `totalAmount`, etc.). Tool input parameter names stay snake_case (Python kwargs; bridged to wire by `register_tools`). See [Migrating from 0.10](./migrating-from-0.10.md).

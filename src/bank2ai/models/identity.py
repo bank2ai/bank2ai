@@ -135,10 +135,65 @@ class NationalId(_Bank2aiModel):
     )
 
 
+class PostalAddress(_Bank2aiModel):
+    """Postal address of a party or card-acceptor merchant.
+
+    Profile of: ISO 20022 `PostalAddress24` (subset). Aligns with the
+    Open Finance / Berlin Group `cardAcceptorAddress` structure so card
+    transactions can surface where the swipe happened. Servers SHOULD
+    populate whichever subfields the bank exposes and omit the rest;
+    `townName` and `country` are the most commonly available and the
+    most useful for LLM context.
+    """
+
+    streetName: Optional[str] = Field(
+        default=None,
+        description="Street name without the building number.",
+        examples=["Rue de Rivoli"],
+    )
+    buildingNumber: Optional[str] = Field(
+        default=None,
+        description="Building number on the street.",
+        examples=["12", "12B"],
+    )
+    postCode: Optional[str] = Field(
+        default=None,
+        description="Postal / ZIP code.",
+        examples=["75001", "SW1A 1AA"],
+    )
+    townName: Optional[str] = Field(
+        default=None,
+        description="City, town, or village name.",
+        examples=["Paris", "Stockholm", "Reykjavík"],
+    )
+    countrySubDivision: Optional[str] = Field(
+        default=None,
+        description="State, province, region, or other top-level subdivision.",
+        examples=["CA", "Île-de-France"],
+    )
+    country: Optional[str] = Field(
+        default=None,
+        description="ISO 3166-1 alpha-2 country code.",
+        pattern=r"^[A-Z]{2}$",
+        examples=["FR", "SE", "IS", "US"],
+    )
+    addressLine: Optional[list[str]] = Field(
+        default=None,
+        description=(
+            "Free-form address lines, used when the bank exposes the "
+            "address as unparsed text. Servers SHOULD prefer the typed "
+            "fields above and fall back to `addressLine` only when "
+            "they cannot decompose the address."
+        ),
+    )
+
+
 class Party(_Bank2aiModel):
     """Counterparty in a transaction or transfer.
 
-    Profile of: ISO 20022 `PartyIdentification135` (subset).
+    Profile of: ISO 20022 `PartyIdentification135` (subset). For card
+    transactions the counterparty is the card-accepting merchant;
+    `postalAddress` then carries the Open Finance `cardAcceptorAddress`.
     """
 
     name: str = Field(description="Party's full name or business name.")
@@ -155,4 +210,14 @@ class Party(_Bank2aiModel):
     nationalId: Optional[NationalId] = Field(
         default=None,
         description="Party's national identifier when known.",
+    )
+    postalAddress: Optional[PostalAddress] = Field(
+        default=None,
+        description=(
+            "Postal address of the party. For card transactions, this "
+            "is the merchant / card-acceptor address (Open Finance "
+            "`cardAcceptorAddress`). Servers SHOULD populate whatever "
+            "subset they have, typically at least `townName` and "
+            "`country`."
+        ),
     )

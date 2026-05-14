@@ -35,6 +35,7 @@ from bank2ai.models import (
     IbanIdentifier,
     NationalId,
     Party,
+    PostalAddress,
     PreparedTransfer,
     Recipient,
     RemittanceInformation,
@@ -52,7 +53,7 @@ from bank2ai.models import (
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SPEC_PATH = REPO_ROOT / "specs" / "bank2ai.json"
-SPEC_VERSION = "0.11.0"
+SPEC_VERSION = "0.12.0"
 
 DOCUMENTED_MODELS = {
     "Account": Account,
@@ -77,6 +78,7 @@ COMPONENT_MODELS = {
     "IbanIdentifier": IbanIdentifier,
     "NationalId": NationalId,
     "Party": Party,
+    "PostalAddress": PostalAddress,
     "PreparedTransfer": PreparedTransfer,
     "RemittanceInformation": RemittanceInformation,
     "TransactionCode": TransactionCode,
