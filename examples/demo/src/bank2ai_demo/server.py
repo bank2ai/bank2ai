@@ -145,9 +145,9 @@ async def get_transactions(
         transactions = [t for t in transactions if t.get("accountId") in wanted]
 
     if start_date:
-        transactions = [t for t in transactions if t["bookingDate"] >= start_date]
+        transactions = [t for t in transactions if t["date"] >= start_date]
     if end_date:
-        transactions = [t for t in transactions if t["bookingDate"] <= end_date]
+        transactions = [t for t in transactions if t["date"] <= end_date]
 
     if min_amount is not None:
         transactions = [t for t in transactions if t["amount"] >= min_amount]
@@ -165,7 +165,7 @@ async def get_transactions(
         transactions = [t for t in transactions if search in t["description"].lower()]
 
     transactions.sort(
-        key=lambda t: t["bookingDate"],
+        key=lambda t: t["date"],
         reverse=(order == "NewestFirst"),
     )
 
@@ -249,9 +249,9 @@ async def get_transactions_summary(
         transactions = [t for t in transactions if t["amount"] <= max_amount]
 
     if start_date:
-        transactions = [t for t in transactions if t["bookingDate"] >= start_date]
+        transactions = [t for t in transactions if t["date"] >= start_date]
     if end_date:
-        transactions = [t for t in transactions if t["bookingDate"] <= end_date]
+        transactions = [t for t in transactions if t["date"] <= end_date]
     if category_ids:
         wanted_cats = set(category_ids)
         transactions = [
@@ -260,7 +260,7 @@ async def get_transactions_summary(
 
     def grouping_key(t: dict) -> tuple[Optional[str], Optional[str]]:
         cat = t.get("categoryId")
-        month = str(t["bookingDate"])[:7]
+        month = str(t["date"])[:7]
         if group_by == "category":
             return (cat, None)
         if group_by == "month":

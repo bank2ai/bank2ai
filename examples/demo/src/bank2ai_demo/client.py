@@ -55,7 +55,7 @@ async def main():
             data = json.loads(result.content[0].text)
             print(f"Last {len(data['items'])} transactions:")
             for tx in data["items"]:
-                print(f"  {tx['bookingDate']}: {tx['description'][:30]:30s} {tx['amount']:>10,.2f}")
+                print(f"  {tx['date']}: {tx['description'][:30]:30s} {tx['amount']:>10,.2f}")
             print()
 
             # Test 3: Get categories

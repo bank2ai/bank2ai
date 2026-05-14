@@ -251,7 +251,7 @@ def _map_transaction(t: dict) -> Transaction:
     # in the transaction's original currency; they're equal for domestic
     # transactions. Per the bank2ai spec, originalAmount/originalCurrency are
     # populated only when the transaction was in a foreign currency.
-    booking_date = t["date"]
+    primary_date = t["date"]
     original_date = t.get("originalDate")
     is_foreign = (
         t.get("amountInCurrency") is not None
@@ -278,9 +278,9 @@ def _map_transaction(t: dict) -> Transaction:
         accountId=str(t["accountId"]),
         description=text,
         amount=t["amount"],
-        bookingDate=booking_date,
+        date=primary_date,
         transactionDate=(
-            original_date if original_date and original_date != booking_date else None
+            original_date if original_date and original_date != primary_date else None
         ),
         originalAmount=t["amountInCurrency"] if is_foreign else None,
         originalCurrency=t["currency"] if is_foreign else None,
@@ -413,7 +413,7 @@ async def get_transactions_summary(
 
     def grouping_key(t: Transaction) -> tuple[Optional[str], Optional[str]]:
         cat = t.categoryId
-        month = t.bookingDate.strftime("%Y-%m")
+        month = t.date.strftime("%Y-%m")
         if group_by == "category":
             return (cat, None)
         if group_by == "month":

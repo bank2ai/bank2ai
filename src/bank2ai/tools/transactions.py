@@ -53,7 +53,7 @@ def register_get_transactions(
                 "Upper bound on optional fields each Transaction may "
                 "carry. `minimal` keeps only the required fields "
                 "(`id`, `accountId`, `description`, `amount`, "
-                "`bookingDate`); the merchant / counterparty name "
+                "`date`); the merchant / counterparty name "
                 "comes from `description`, which for most bank "
                 "entries already embeds it. `standard` adds the "
                 "fields an LLM typically needs to answer everyday "

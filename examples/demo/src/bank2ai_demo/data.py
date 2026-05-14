@@ -106,7 +106,7 @@ def generate_transactions():
         "accountId": "acc_checking_001",
         "description": "Monthly Salary",
         "amount": 4500.00,
-        "bookingDate": (today - timedelta(days=5)).isoformat(),
+        "date": (today - timedelta(days=5)).isoformat(),
         "categoryId": "Income",
         "counterparty": {
             "name": "Acme Corp",
@@ -132,7 +132,7 @@ def generate_transactions():
         "accountId": "acc_checking_001",
         "description": "Rent Payment",
         "amount": -1200.00,
-        "bookingDate": (today - timedelta(days=3)).isoformat(),
+        "date": (today - timedelta(days=3)).isoformat(),
         "categoryId": "Housing",
     })
 
@@ -144,7 +144,7 @@ def generate_transactions():
             "accountId": "acc_checking_001",
             "description": grocery_stores[i % len(grocery_stores)],
             "amount": -85.50 - (i * 5),
-            "bookingDate": (today - timedelta(days=days_ago)).isoformat(),
+            "date": (today - timedelta(days=days_ago)).isoformat(),
             "categoryId": "Groceries",
         })
 
@@ -155,7 +155,7 @@ def generate_transactions():
             "accountId": "acc_checking_001",
             "description": "Shell Gas Station",
             "amount": -45.00,
-            "bookingDate": (today - timedelta(days=4)).isoformat(),
+            "date": (today - timedelta(days=4)).isoformat(),
             "categoryId": "Transport",
         },
         {
@@ -163,7 +163,7 @@ def generate_transactions():
             "accountId": "acc_checking_001",
             "description": "Monthly Metro Pass",
             "amount": -120.00,
-            "bookingDate": (today - timedelta(days=1)).isoformat(),
+            "date": (today - timedelta(days=1)).isoformat(),
             "categoryId": "Transport",
         },
     ])
@@ -175,7 +175,7 @@ def generate_transactions():
             "accountId": "acc_credit_001",
             "description": "Netflix Subscription",
             "amount": -15.99,
-            "bookingDate": (today - timedelta(days=10)).isoformat(),
+            "date": (today - timedelta(days=10)).isoformat(),
             "categoryId": "DiningAndEntertainment",
         },
         {
@@ -183,7 +183,7 @@ def generate_transactions():
             "accountId": "acc_credit_001",
             "description": "Cinema Tickets",
             "amount": -32.00,
-            "bookingDate": (today - timedelta(days=12)).isoformat(),
+            "date": (today - timedelta(days=12)).isoformat(),
             "categoryId": "DiningAndEntertainment",
         },
         {
@@ -191,7 +191,7 @@ def generate_transactions():
             "accountId": "acc_credit_001",
             "description": "Spotify Premium",
             "amount": -9.99,
-            "bookingDate": (today - timedelta(days=8)).isoformat(),
+            "date": (today - timedelta(days=8)).isoformat(),
             "categoryId": "DiningAndEntertainment",
         },
     ])
@@ -203,7 +203,7 @@ def generate_transactions():
             "accountId": "acc_checking_001",
             "description": "Electric Company",
             "amount": -85.00,
-            "bookingDate": (today - timedelta(days=15)).isoformat(),
+            "date": (today - timedelta(days=15)).isoformat(),
             "categoryId": "Utilities",
         },
         {
@@ -211,7 +211,7 @@ def generate_transactions():
             "accountId": "acc_checking_001",
             "description": "Internet Service Provider",
             "amount": -60.00,
-            "bookingDate": (today - timedelta(days=18)).isoformat(),
+            "date": (today - timedelta(days=18)).isoformat(),
             "categoryId": "Utilities",
         },
     ])
@@ -224,7 +224,7 @@ def generate_transactions():
             "accountId": "acc_credit_001",
             "description": restaurants[i % len(restaurants)],
             "amount": -25.00 - (i * 3),
-            "bookingDate": (today - timedelta(days=days_ago)).isoformat(),
+            "date": (today - timedelta(days=days_ago)).isoformat(),
             "categoryId": "DiningAndEntertainment",
         })
 
@@ -234,7 +234,7 @@ def generate_transactions():
         "accountId": "acc_checking_001",
         "description": "Pharmacy Co-pay",
         "amount": -20.00,
-        "bookingDate": (today - timedelta(days=22)).isoformat(),
+        "date": (today - timedelta(days=22)).isoformat(),
         "categoryId": "Health",
     })
 
@@ -245,7 +245,7 @@ def generate_transactions():
             "accountId": "acc_credit_001",
             "description": "Amazon.com",
             "amount": -78.50,
-            "bookingDate": (today - timedelta(days=11)).isoformat(),
+            "date": (today - timedelta(days=11)).isoformat(),
             "categoryId": "Shopping",
         },
         {
@@ -253,7 +253,7 @@ def generate_transactions():
             "accountId": "acc_credit_001",
             "description": "Clothing Store",
             "amount": -125.00,
-            "bookingDate": (today - timedelta(days=16)).isoformat(),
+            "date": (today - timedelta(days=16)).isoformat(),
             "categoryId": "Shopping",
         },
     ])
@@ -261,7 +261,7 @@ def generate_transactions():
     # Foreign-currency card transactions: amount is in the user's
     # default currency (USD); originalCurrency / originalAmount carry
     # the original. These rows also exercise the card-transaction
-    # fields (transactionDate distinct from bookingDate, maskedPan,
+    # fields (transactionDate distinct from `date`, maskedPan,
     # merchantCategoryCode, counterparty.postalAddress with townName /
     # country / postCode) added in spec 0.12 to align with Open Finance
     # `cardTransactions`.
@@ -273,7 +273,7 @@ def generate_transactions():
             "amount": -54.20,
             "originalCurrency": "EUR",
             "originalAmount": -49.80,
-            "bookingDate": (today - timedelta(days=17)).isoformat(),
+            "date": (today - timedelta(days=17)).isoformat(),
             "transactionDate": (today - timedelta(days=18)).isoformat(),
             "maskedPan": "411111xxxxxx4242",
             "merchantCategoryCode": "5812",
@@ -297,7 +297,7 @@ def generate_transactions():
             "amount": -210.45,
             "originalCurrency": "GBP",
             "originalAmount": -165.00,
-            "bookingDate": (today - timedelta(days=24)).isoformat(),
+            "date": (today - timedelta(days=24)).isoformat(),
             "transactionDate": (today - timedelta(days=25)).isoformat(),
             "maskedPan": "411111xxxxxx4242",
             "merchantCategoryCode": "5311",
@@ -323,7 +323,7 @@ def generate_transactions():
         "accountId": "acc_checking_001",
         "description": "City Water — Direct Debit",
         "amount": -42.30,
-        "bookingDate": (today - timedelta(days=6)).isoformat(),
+        "date": (today - timedelta(days=6)).isoformat(),
         "categoryId": "Utilities",
         "transactionCode": {
             "domain": "PMNT",
@@ -343,7 +343,7 @@ def generate_transactions():
     })
 
     # Sort by date (newest first)
-    transactions.sort(key=lambda x: x["bookingDate"], reverse=True)
+    transactions.sort(key=lambda x: x["date"], reverse=True)
 
     return transactions
 

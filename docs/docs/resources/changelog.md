@@ -12,6 +12,12 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Specification
 
+### 0.13.0, Draft
+
+- **Breaking, `Transaction.bookingDate` renamed to `Transaction.date`.** The field carries the booking date when `status` is `Booked` (formerly `bookingDate`; profile of ISO 20022 / Berlin Group `bookingDate`) and the authorisation / point-of-sale date when `status` is `Pending`. Previously, pending entries had to either fabricate a `bookingDate` or be dropped — neither is correct. `date` is always populated, so clients can sort and chart by it without branching on `status`. The spec narrative documents the deliberate divergence from ISO 20022 naming.
+- **`transactionDate` semantics tightened.** Still optional, still the Open Finance `transactionDate` (card swipe / authorisation date), but populated only on `Booked` card entries where it differs from the posting `date`. On `Pending` entries the authorisation date lives on `date` itself, so `transactionDate` MUST be omitted there. Servers MUST also omit it when equal to `date`, as before.
+- **Migration.** Rename every wire-level `bookingDate` to `date` (request handlers, fixtures, sort keys, filters); rename every reference in handler code that constructs `Transaction(...)` from `bookingDate=` to `date=`. The drift test catches anything missed on the server side; clients reading `tx['bookingDate']` need a one-line rename.
+
 ### 0.12.0, Draft
 
 - **Transaction overhauled to cover account *and* card transactions in one shape**, aligned with Open Finance / Berlin Group `cardTransactions`. New optional fields: `transactionDate` (when the swipe / authorisation happened, distinct from `bookingDate` posting), `maskedPan` (which card was used), `proprietaryBankTransactionCode` (bank-proprietary code when the ISO 20022 `transactionCode` isn't exposed). New SEPA / audit fields: `mandateId`, `creditorId`, `purposeCode` (ISO 20022 ExternalPurposeCode), `entryReference` (Berlin Group stable booking-system reference), `additionalInformation` (free-form bank text not fitting the typed fields).

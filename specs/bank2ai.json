@@ -4973,7 +4973,7 @@
           "type": "string"
         }
       },
-      "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2`, Berlin Group PSD2\n`transactions` array element, and Open Finance card transactions\n(`cardTransactions`). One shape covers both account and card\ntransactions: the `_card` family of fields (`transactionDate`,\n`maskedPan`, counterparty.postalAddress, `merchantCategoryCode`,\n`proprietaryBankTransactionCode`) is populated for card entries,\nthe `_sepa` family (`mandateId`, `creditorId`, `purposeCode`,\n`endToEndId`, `remittanceInformation`) for credit-transfer /\ndirect-debit entries. Servers MAY omit any optional field; the\n`_Bank2aiModel` base drops `None` keys on the wire so every\nrow stays lean for LLM consumption while a full audit view is\navailable via `get-transaction`.",
+      "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2`, Berlin Group PSD2\n`transactions` array element, and Open Finance card transactions\n(`cardTransactions`). One shape covers both account and card\ntransactions: the `_card` family of fields (`transactionDate`,\n`maskedPan`, counterparty.postalAddress, `merchantCategoryCode`,\n`proprietaryBankTransactionCode`) is populated for card entries,\nthe `_sepa` family (`mandateId`, `creditorId`, `purposeCode`,\n`endToEndId`, `remittanceInformation`) for credit-transfer /\ndirect-debit entries. Servers MAY omit any optional field; the\n`_Bank2aiModel` base drops `None` keys on the wire so every\nrow stays lean for LLM consumption while a full audit view is\navailable via `get-transaction`.\n\n`date` carries the most relevant time-anchor for the entry: the\nbooking date when posted, the authorisation date for pending\ncard authorisations. This diverges from ISO 20022 / Berlin Group\nfield naming (`bookingDate`) on purpose \u2014 keeping a single,\nalways-populated date field is friendlier for LLM consumption and\nmeans pending entries don't need a fabricated booking date.",
       "properties": {
         "accountId": {
           "description": "References the `id` of the `Account` this transaction belongs to.",
@@ -4997,12 +4997,6 @@
           "description": "Transaction amount in the user's default currency (negative for expenses, positive for income). Clients SHOULD render this without a currency symbol unless the user has explicitly asked which currency a transaction is in.",
           "title": "Amount",
           "type": "number"
-        },
-        "bookingDate": {
-          "description": "Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD). For card transactions this is the settlement date; the date the user actually swiped the card lives in `transactionDate`.",
-          "format": "date",
-          "title": "Bookingdate",
-          "type": "string"
         },
         "categoryId": {
           "anyOf": [
@@ -5057,6 +5051,12 @@
             "DE98ZZZ09999999999"
           ],
           "title": "Creditorid"
+        },
+        "date": {
+          "description": "Primary date for this transaction, ISO 8601 (YYYY-MM-DD). For `Booked` entries this is the date the transaction posted to the account (formerly `bookingDate`; profile of ISO 20022 / Berlin Group `bookingDate`). For `Pending` authorisations \u2014 where no booking date exists yet \u2014 this is the authorisation / point-of-sale date (Open Finance `transactionDate`). Always populated so clients can sort and chart by `date` without branching on `status`.",
+          "format": "date",
+          "title": "Date",
+          "type": "string"
         },
         "description": {
           "description": "Transaction description, merchant name or recipient name",
@@ -5261,7 +5261,7 @@
             }
           ],
           "default": null,
-          "description": "Date the transaction actually took place at the point of sale or originating system, ISO 8601 (YYYY-MM-DD). For card transactions this is the swipe / authorisation date (Open Finance `transactionDate`); `bookingDate` is when it later posted. Servers SHOULD omit when equal to `bookingDate`.",
+          "description": "Card swipe / authorisation date for `Booked` card entries where it differs from the posting `date` (Open Finance `transactionDate`). Servers SHOULD omit when equal to `date`, and MUST omit on `Pending` entries \u2014 for those, the authorisation date is carried by `date` itself.",
           "title": "Transactiondate"
         },
         "valueDate": {
@@ -5275,7 +5275,7 @@
             }
           ],
           "default": null,
-          "description": "Date the funds become available, ISO 8601. Servers SHOULD omit when equal to `bookingDate`. Profile of: ISO 20022 `ValueDate`.",
+          "description": "Date the funds become available, ISO 8601. Servers SHOULD omit when equal to `date`. Profile of: ISO 20022 `ValueDate`.",
           "title": "Valuedate"
         }
       },
@@ -5284,7 +5284,7 @@
         "accountId",
         "description",
         "amount",
-        "bookingDate"
+        "date"
       ],
       "title": "Transaction",
       "type": "object"
@@ -6880,7 +6880,7 @@
           "item": {
             "anyOf": [
               {
-                "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2`, Berlin Group PSD2\n`transactions` array element, and Open Finance card transactions\n(`cardTransactions`). One shape covers both account and card\ntransactions: the `_card` family of fields (`transactionDate`,\n`maskedPan`, counterparty.postalAddress, `merchantCategoryCode`,\n`proprietaryBankTransactionCode`) is populated for card entries,\nthe `_sepa` family (`mandateId`, `creditorId`, `purposeCode`,\n`endToEndId`, `remittanceInformation`) for credit-transfer /\ndirect-debit entries. Servers MAY omit any optional field; the\n`_Bank2aiModel` base drops `None` keys on the wire so every\nrow stays lean for LLM consumption while a full audit view is\navailable via `get-transaction`.",
+                "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2`, Berlin Group PSD2\n`transactions` array element, and Open Finance card transactions\n(`cardTransactions`). One shape covers both account and card\ntransactions: the `_card` family of fields (`transactionDate`,\n`maskedPan`, counterparty.postalAddress, `merchantCategoryCode`,\n`proprietaryBankTransactionCode`) is populated for card entries,\nthe `_sepa` family (`mandateId`, `creditorId`, `purposeCode`,\n`endToEndId`, `remittanceInformation`) for credit-transfer /\ndirect-debit entries. Servers MAY omit any optional field; the\n`_Bank2aiModel` base drops `None` keys on the wire so every\nrow stays lean for LLM consumption while a full audit view is\navailable via `get-transaction`.\n\n`date` carries the most relevant time-anchor for the entry: the\nbooking date when posted, the authorisation date for pending\ncard authorisations. This diverges from ISO 20022 / Berlin Group\nfield naming (`bookingDate`) on purpose \u2014 keeping a single,\nalways-populated date field is friendlier for LLM consumption and\nmeans pending entries don't need a fabricated booking date.",
                 "properties": {
                   "accountId": {
                     "description": "References the `id` of the `Account` this transaction belongs to.",
@@ -6901,11 +6901,6 @@
                   "amount": {
                     "description": "Transaction amount in the user's default currency (negative for expenses, positive for income). Clients SHOULD render this without a currency symbol unless the user has explicitly asked which currency a transaction is in.",
                     "type": "number"
-                  },
-                  "bookingDate": {
-                    "description": "Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD). For card transactions this is the settlement date; the date the user actually swiped the card lives in `transactionDate`.",
-                    "format": "date",
-                    "type": "string"
                   },
                   "categoryId": {
                     "anyOf": [
@@ -7328,6 +7323,11 @@
                       "DE98ZZZ09999999999"
                     ]
                   },
+                  "date": {
+                    "description": "Primary date for this transaction, ISO 8601 (YYYY-MM-DD). For `Booked` entries this is the date the transaction posted to the account (formerly `bookingDate`; profile of ISO 20022 / Berlin Group `bookingDate`). For `Pending` authorisations \u2014 where no booking date exists yet \u2014 this is the authorisation / point-of-sale date (Open Finance `transactionDate`). Always populated so clients can sort and chart by `date` without branching on `status`.",
+                    "format": "date",
+                    "type": "string"
+                  },
                   "description": {
                     "description": "Transaction description, merchant name or recipient name",
                     "type": "string"
@@ -7604,7 +7604,7 @@
                       }
                     ],
                     "default": null,
-                    "description": "Date the transaction actually took place at the point of sale or originating system, ISO 8601 (YYYY-MM-DD). For card transactions this is the swipe / authorisation date (Open Finance `transactionDate`); `bookingDate` is when it later posted. Servers SHOULD omit when equal to `bookingDate`."
+                    "description": "Card swipe / authorisation date for `Booked` card entries where it differs from the posting `date` (Open Finance `transactionDate`). Servers SHOULD omit when equal to `date`, and MUST omit on `Pending` entries \u2014 for those, the authorisation date is carried by `date` itself."
                   },
                   "valueDate": {
                     "anyOf": [
@@ -7617,7 +7617,7 @@
                       }
                     ],
                     "default": null,
-                    "description": "Date the funds become available, ISO 8601. Servers SHOULD omit when equal to `bookingDate`. Profile of: ISO 20022 `ValueDate`."
+                    "description": "Date the funds become available, ISO 8601. Servers SHOULD omit when equal to `date`. Profile of: ISO 20022 `ValueDate`."
                   }
                 },
                 "required": [
@@ -7625,7 +7625,7 @@
                   "accountId",
                   "description",
                   "amount",
-                  "bookingDate"
+                  "date"
                 ],
                 "type": "object"
               },
@@ -7782,7 +7782,7 @@
           },
           "verbosity": {
             "default": "standard",
-            "description": "Upper bound on optional fields each Transaction may carry. `minimal` keeps only the required fields (`id`, `accountId`, `description`, `amount`, `bookingDate`); the merchant / counterparty name comes from `description`, which for most bank entries already embeds it. `standard` adds the fields an LLM typically needs to answer everyday questions: `status`, `categoryId`, `originalCurrency`, `originalAmount`, `transactionDate`, `maskedPan`, `merchantCategoryCode`, and the typed `counterparty` (name plus merchant address \u2014 `townName`, `country`, `postCode`, `streetName`). `full` additionally allows every audit / reconciliation field: `valueDate`, `categoryRaw`, `transactionCode`, `proprietaryBankTransactionCode`, `remittanceInformation`, `endToEndId`, `mandateId`, `creditorId`, `purposeCode`, `entryReference`, `additionalInformation`. Servers MAY omit any optional field even at `full` if they don't have it.",
+            "description": "Upper bound on optional fields each Transaction may carry. `minimal` keeps only the required fields (`id`, `accountId`, `description`, `amount`, `date`); the merchant / counterparty name comes from `description`, which for most bank entries already embeds it. `standard` adds the fields an LLM typically needs to answer everyday questions: `status`, `categoryId`, `originalCurrency`, `originalAmount`, `transactionDate`, `maskedPan`, `merchantCategoryCode`, and the typed `counterparty` (name plus merchant address \u2014 `townName`, `country`, `postCode`, `streetName`). `full` additionally allows every audit / reconciliation field: `valueDate`, `categoryRaw`, `transactionCode`, `proprietaryBankTransactionCode`, `remittanceInformation`, `endToEndId`, `mandateId`, `creditorId`, `purposeCode`, `entryReference`, `additionalInformation`. Servers MAY omit any optional field even at `full` if they don't have it.",
             "enum": [
               "minimal",
               "standard",
@@ -7800,7 +7800,7 @@
           "items": {
             "description": "Transactions matching the request.",
             "items": {
-              "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2`, Berlin Group PSD2\n`transactions` array element, and Open Finance card transactions\n(`cardTransactions`). One shape covers both account and card\ntransactions: the `_card` family of fields (`transactionDate`,\n`maskedPan`, counterparty.postalAddress, `merchantCategoryCode`,\n`proprietaryBankTransactionCode`) is populated for card entries,\nthe `_sepa` family (`mandateId`, `creditorId`, `purposeCode`,\n`endToEndId`, `remittanceInformation`) for credit-transfer /\ndirect-debit entries. Servers MAY omit any optional field; the\n`_Bank2aiModel` base drops `None` keys on the wire so every\nrow stays lean for LLM consumption while a full audit view is\navailable via `get-transaction`.",
+              "description": "Financial transaction with date, amount and metadata.\n\nProfile of: ISO 20022 `EntryDetails2`, Berlin Group PSD2\n`transactions` array element, and Open Finance card transactions\n(`cardTransactions`). One shape covers both account and card\ntransactions: the `_card` family of fields (`transactionDate`,\n`maskedPan`, counterparty.postalAddress, `merchantCategoryCode`,\n`proprietaryBankTransactionCode`) is populated for card entries,\nthe `_sepa` family (`mandateId`, `creditorId`, `purposeCode`,\n`endToEndId`, `remittanceInformation`) for credit-transfer /\ndirect-debit entries. Servers MAY omit any optional field; the\n`_Bank2aiModel` base drops `None` keys on the wire so every\nrow stays lean for LLM consumption while a full audit view is\navailable via `get-transaction`.\n\n`date` carries the most relevant time-anchor for the entry: the\nbooking date when posted, the authorisation date for pending\ncard authorisations. This diverges from ISO 20022 / Berlin Group\nfield naming (`bookingDate`) on purpose \u2014 keeping a single,\nalways-populated date field is friendlier for LLM consumption and\nmeans pending entries don't need a fabricated booking date.",
               "properties": {
                 "accountId": {
                   "description": "References the `id` of the `Account` this transaction belongs to.",
@@ -7821,11 +7821,6 @@
                 "amount": {
                   "description": "Transaction amount in the user's default currency (negative for expenses, positive for income). Clients SHOULD render this without a currency symbol unless the user has explicitly asked which currency a transaction is in.",
                   "type": "number"
-                },
-                "bookingDate": {
-                  "description": "Date the transaction posted to the account, ISO 8601 (YYYY-MM-DD). For card transactions this is the settlement date; the date the user actually swiped the card lives in `transactionDate`.",
-                  "format": "date",
-                  "type": "string"
                 },
                 "categoryId": {
                   "anyOf": [
@@ -8248,6 +8243,11 @@
                     "DE98ZZZ09999999999"
                   ]
                 },
+                "date": {
+                  "description": "Primary date for this transaction, ISO 8601 (YYYY-MM-DD). For `Booked` entries this is the date the transaction posted to the account (formerly `bookingDate`; profile of ISO 20022 / Berlin Group `bookingDate`). For `Pending` authorisations \u2014 where no booking date exists yet \u2014 this is the authorisation / point-of-sale date (Open Finance `transactionDate`). Always populated so clients can sort and chart by `date` without branching on `status`.",
+                  "format": "date",
+                  "type": "string"
+                },
                 "description": {
                   "description": "Transaction description, merchant name or recipient name",
                   "type": "string"
@@ -8524,7 +8524,7 @@
                     }
                   ],
                   "default": null,
-                  "description": "Date the transaction actually took place at the point of sale or originating system, ISO 8601 (YYYY-MM-DD). For card transactions this is the swipe / authorisation date (Open Finance `transactionDate`); `bookingDate` is when it later posted. Servers SHOULD omit when equal to `bookingDate`."
+                  "description": "Card swipe / authorisation date for `Booked` card entries where it differs from the posting `date` (Open Finance `transactionDate`). Servers SHOULD omit when equal to `date`, and MUST omit on `Pending` entries \u2014 for those, the authorisation date is carried by `date` itself."
                 },
                 "valueDate": {
                   "anyOf": [
@@ -8537,7 +8537,7 @@
                     }
                   ],
                   "default": null,
-                  "description": "Date the funds become available, ISO 8601. Servers SHOULD omit when equal to `bookingDate`. Profile of: ISO 20022 `ValueDate`."
+                  "description": "Date the funds become available, ISO 8601. Servers SHOULD omit when equal to `date`. Profile of: ISO 20022 `ValueDate`."
                 }
               },
               "required": [
@@ -8545,7 +8545,7 @@
                 "accountId",
                 "description",
                 "amount",
-                "bookingDate"
+                "date"
               ],
               "type": "object"
             },
@@ -10468,5 +10468,5 @@
       }
     }
   ],
-  "version": "0.12.0"
+  "version": "0.13.0"
 }

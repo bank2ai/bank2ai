@@ -3,7 +3,7 @@
 Categories live here because they exist only to classify transactions.
 """
 
-from datetime import date
+import datetime as _dt
 from enum import Enum
 from typing import Optional
 
@@ -87,6 +87,13 @@ class Transaction(_Bank2aiModel):
     `_Bank2aiModel` base drops `None` keys on the wire so every
     row stays lean for LLM consumption while a full audit view is
     available via `get-transaction`.
+
+    `date` carries the most relevant time-anchor for the entry: the
+    booking date when posted, the authorisation date for pending
+    card authorisations. This diverges from ISO 20022 / Berlin Group
+    field naming (`bookingDate`) on purpose — keeping a single,
+    always-populated date field is friendlier for LLM consumption and
+    means pending entries don't need a fabricated booking date.
     """
 
     id: str = Field(description="Unique transaction identifier (server-scoped).")
@@ -104,12 +111,16 @@ class Transaction(_Bank2aiModel):
             "the user has explicitly asked which currency a transaction is in."
         ),
     )
-    bookingDate: date = Field(
+    date: _dt.date = Field(
         description=(
-            "Date the transaction posted to the account, ISO 8601 "
-            "(YYYY-MM-DD). For card transactions this is the settlement "
-            "date; the date the user actually swiped the card lives in "
-            "`transactionDate`."
+            "Primary date for this transaction, ISO 8601 (YYYY-MM-DD). "
+            "For `Booked` entries this is the date the transaction "
+            "posted to the account (formerly `bookingDate`; profile of "
+            "ISO 20022 / Berlin Group `bookingDate`). For `Pending` "
+            "authorisations — where no booking date exists yet — this "
+            "is the authorisation / point-of-sale date (Open Finance "
+            "`transactionDate`). Always populated so clients can sort "
+            "and chart by `date` without branching on `status`."
         ),
     )
     status: Optional[TransactionStatus] = Field(
@@ -123,15 +134,14 @@ class Transaction(_Bank2aiModel):
         default=None,
         description="Category id (the `id` field from get-categories which also has category name).",
     )
-    transactionDate: Optional[date] = Field(
+    transactionDate: Optional[_dt.date] = Field(
         default=None,
         description=(
-            "Date the transaction actually took place at the point of "
-            "sale or originating system, ISO 8601 (YYYY-MM-DD). For "
-            "card transactions this is the swipe / authorisation date "
-            "(Open Finance `transactionDate`); `bookingDate` is when it "
-            "later posted. Servers SHOULD omit when equal to "
-            "`bookingDate`."
+            "Card swipe / authorisation date for `Booked` card "
+            "entries where it differs from the posting `date` (Open "
+            "Finance `transactionDate`). Servers SHOULD omit when "
+            "equal to `date`, and MUST omit on `Pending` entries — for "
+            "those, the authorisation date is carried by `date` itself."
         ),
     )
     maskedPan: Optional[str] = Field(
@@ -186,11 +196,11 @@ class Transaction(_Bank2aiModel):
             "`streetName`) goes on `counterparty.postalAddress`."
         ),
     )
-    valueDate: Optional[date] = Field(
+    valueDate: Optional[_dt.date] = Field(
         default=None,
         description=(
             "Date the funds become available, ISO 8601. Servers SHOULD omit "
-            "when equal to `bookingDate`. Profile of: ISO 20022 `ValueDate`."
+            "when equal to `date`. Profile of: ISO 20022 `ValueDate`."
         ),
     )
     categoryRaw: Optional[str] = Field(
