@@ -13,6 +13,7 @@ Optional environment variables:
 import asyncio
 import logging
 import os
+import re
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
@@ -37,6 +38,7 @@ from bank2ai import (
     ExecutedTransfer,
     GetTransactionResponse,
     Party,
+    PostalAddress,
     PrepareTransferResponse,
     PreparedTransfer,
     Rail,
@@ -241,6 +243,54 @@ async def get_categories() -> CategoryList:
     return CategoryList(items=_categories_cache)
 
 
+_ISO_ALPHA2_RE = re.compile(r"^[A-Z]{2}$")
+
+
+def _map_transaction(t: dict) -> Transaction:
+    # Meniga's `amount` is in the account currency and `amountInCurrency` is
+    # in the transaction's original currency; they're equal for domestic
+    # transactions. Per the bank2ai spec, originalAmount/originalCurrency are
+    # populated only when the transaction was in a foreign currency.
+    booking_date = t["date"]
+    original_date = t.get("originalDate")
+    is_foreign = (
+        t.get("amountInCurrency") is not None
+        and t["amountInCurrency"] != t["amount"]
+    )
+    text = t["text"]
+    original_text = t.get("originalText")
+
+    counterparty: Optional[Party] = None
+    if t.get("isMerchant"):
+        parsed = {
+            entry["key"].lower(): entry.get("value")
+            for entry in (t.get("parsedData") or [])
+            if entry.get("key")
+        }
+        town = (parsed.get("city") or "").strip() or None
+        country_raw = (parsed.get("country") or "").strip() or None
+        country = country_raw if country_raw and _ISO_ALPHA2_RE.match(country_raw) else None
+        postal = PostalAddress(townName=town, country=country) if (town or country) else None
+        counterparty = Party(name=original_text or text, postalAddress=postal)
+
+    return Transaction(
+        id=str(t["id"]),
+        accountId=str(t["accountId"]),
+        description=text,
+        amount=t["amount"],
+        bookingDate=booking_date,
+        transactionDate=(
+            original_date if original_date and original_date != booking_date else None
+        ),
+        originalAmount=t["amountInCurrency"] if is_foreign else None,
+        originalCurrency=t["currency"] if is_foreign else None,
+        categoryId=str(t["categoryId"]) if t.get("categoryId") is not None else None,
+        merchantCategoryCode=str(t["mcc"]) if t.get("mcc") is not None else None,
+        counterparty=counterparty,
+        entryReference=t.get("parentIdentifier"),
+    )
+
+
 async def get_transactions(
     *,
     count: Optional[int] = None,
@@ -297,17 +347,7 @@ async def get_transactions(
     response_json = response.json()
     for t in response_json["data"]:
         logger.info(t)
-        transactions.append(Transaction(
-            id=str(t["id"]),
-            accountId=str(t["accountId"]),
-            description=t["text"],
-            amount=t["amount"],
-            bookingDate=t["date"],
-            originalAmount=t.get("amountInCurrency"),
-            originalCurrency=t.get("currency"),
-            categoryId=str(t["categoryId"]) if t.get("categoryId") is not None else None,
-            merchantCategoryCode=str(t.get("mcc")) if t.get("mcc") is not None else None,
-        ))
+        transactions.append(_map_transaction(t))
 
     next_cursor: Optional[str] = response_json["meta"]["pageToken"]
 
@@ -335,16 +375,7 @@ async def get_transaction(
         )
     return GetTransactionResponse(
         content="Transaction found.",
-        item=Transaction(
-            id=str(t["id"]),
-            accountId=str(t["accountId"]),
-            description=t["text"],
-            amount=t["amount"],
-            bookingDate=t["date"],
-            originalAmount=t.get("amountInCurrency"),
-            originalCurrency=t.get("currency"),
-            categoryId=str(t["categoryId"]) if t.get("categoryId") is not None else None,
-        ),
+        item=_map_transaction(t),
     )
 
 
