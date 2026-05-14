@@ -617,6 +617,7 @@ register_tools(
     create_recipient=create_recipient,
     prepare_transfer=prepare_transfer,
     execute_transfer=execute_transfer,
+    output_schemas="inline",
 )
 
 

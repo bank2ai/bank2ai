@@ -5,8 +5,11 @@ parameter signatures, and Pydantic response models, so multiple MCP
 servers can expose the same surface without duplicating it. Each server
 provides async handler callables and calls `register_tools(app, ...)`.
 
-Output schemas are inferred by FastMCP from the Pydantic response-model
-annotations on the registered tool functions.
+By default, output schemas are inferred by FastMCP from the Pydantic
+response-model annotations on the registered tool functions. Servers
+can opt into progressive disclosure (lean `list_tools` payloads, full
+output schemas fetched on demand via a `describe-tools` meta tool) by
+passing ``output_schemas="discovery"`` to ``register_tools``.
 
 """
 
@@ -15,7 +18,7 @@ from __future__ import annotations
 from typing import Any, Awaitable, Callable, Literal, Optional
 
 from fastmcp import FastMCP
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from .models import (
     AccountIdentifier,
@@ -41,6 +44,25 @@ from .models import (
 
 Handler = Callable[..., Awaitable[Any]]
 
+OutputSchemaMode = Literal["inline", "discovery", "off"]
+
+
+# Canonical response model for each bank2ai tool. Used both as the
+# return-type annotation that FastMCP introspects in `inline` mode and
+# as the source of schemas served by `describe-tools` in `discovery`
+# mode, so the two paths cannot diverge.
+_TOOL_RESPONSE_MODELS: dict[str, type[BaseModel]] = {
+    "get-accounts": AccountList,
+    "get-transactions": TransactionList,
+    "get-transaction": GetTransactionResponse,
+    "get-categories": CategoryList,
+    "get-transactions-summary": TransactionsSummary,
+    "get-recipients": RecipientList,
+    "create-recipient": CreateRecipientResponse,
+    "prepare-transfer": PrepareTransferResponse,
+    "execute-transfer": ExecuteTransferResponse,
+}
+
 
 # ---- Tool registration ----
 
@@ -57,6 +79,7 @@ def register_tools(
     create_recipient: Optional[Handler] = None,
     prepare_transfer: Optional[Handler] = None,
     execute_transfer: Optional[Handler] = None,
+    output_schemas: OutputSchemaMode = "inline",
 ) -> None:
     """Register bank2ai MCP tools on `app`, dispatching to the handlers
     that were passed in. Tools whose handler is omitted are not
@@ -66,20 +89,46 @@ def register_tools(
     input schema (using the snake_case names declared below). Handlers
     may return either dicts shaped like the response model or model
     instances directly, FastMCP serializes both via Pydantic.
+
+    ``output_schemas`` controls how output JSON Schemas are exposed:
+
+    * ``"inline"`` (default): FastMCP inlines each tool's output schema
+      in ``list_tools``, inferred from its Pydantic return annotation.
+    * ``"discovery"``: ``list_tools`` returns no output schemas. A
+      companion ``describe-tools`` tool is registered so clients can
+      pull the schemas they need on demand (progressive disclosure).
+    * ``"off"``: output schemas are suppressed and no meta tool is
+      registered. Use when clients have the schemas out of band.
     """
 
+    _out_kwarg: dict[str, Any] = (
+        {} if output_schemas == "inline" else {"output_schema": None}
+    )
+    _registered_names: list[str] = []
+
+    _discovery_suffix = (
+        " Output JSON Schema available on demand via `describe-tools`."
+        if output_schemas == "discovery"
+        else ""
+    )
+
+    def _desc(text: str) -> str:
+        return text + _discovery_suffix
+
     if get_accounts is not None:
+        _registered_names.append("get-accounts")
         _get_accounts_handler = get_accounts
 
         @app.tool(
             name="get-accounts",
-            description=(
+            description=_desc(
                 "Get the user's bank accounts and cards. Returns each account "
                 "with balances, identifiers (account number, plus IBAN/BBAN/BIC "
                 "or masked PAN where the bank has them), holder, product, type, "
                 "lifecycle status, and usage. Field shapes follow the Berlin "
                 "Group PSD2 `accountDetails` model where they overlap."
             ),
+            **_out_kwarg,
         )
         async def _get_accounts(
             only_withdrawal_accounts: bool = Field(
@@ -125,11 +174,12 @@ def register_tools(
             )
 
     if get_transactions is not None:
+        _registered_names.append("get-transactions")
         _get_transactions_handler = get_transactions
 
         @app.tool(
             name="get-transactions",
-            description=(
+            description=_desc(
                 "Get bank transactions. Returns a list of transactions "
                 "with amounts, dates, descriptions, and categories. The "
                 "`verbosity` parameter caps how many optional fields the "
@@ -138,6 +188,7 @@ def register_tools(
                 "audit / reconciliation view including ISO 20022 "
                 "metadata when the server can populate it."
             ),
+            **_out_kwarg,
         )
         async def _get_transactions(
             count: Optional[int] = Field(
@@ -229,11 +280,12 @@ def register_tools(
             )
 
     if get_transaction is not None:
+        _registered_names.append("get-transaction")
         _get_transaction_handler = get_transaction
 
         @app.tool(
             name="get-transaction",
-            description=(
+            description=_desc(
                 "Look up a single transaction by id and return every "
                 "field the server can populate, including ISO 20022 "
                 "metadata (transactionCode, remittanceInformation, "
@@ -241,6 +293,7 @@ def register_tools(
                 "audit / reconciliation flows; for compact lists prefer "
                 "`get-transactions` with a `verbosity` cap."
             ),
+            **_out_kwarg,
         )
         async def _get_transaction(
             transaction_id: str = Field(
@@ -261,29 +314,33 @@ def register_tools(
             )
 
     if get_categories is not None:
+        _registered_names.append("get-categories")
         _get_categories_handler = get_categories
 
         @app.tool(
             name="get-categories",
-            description=(
+            description=_desc(
                 "Get transaction categories. Returns a list of categories "
                 "that transactions can be classified into."
             ),
+            **_out_kwarg,
         )
         async def _get_categories() -> CategoryList:
             return await _get_categories_handler()
 
     if get_transactions_summary is not None:
+        _registered_names.append("get-transactions-summary")
         _get_transactions_summary_handler = get_transactions_summary
 
         @app.tool(
             name="get-transactions-summary",
-            description=(
+            description=_desc(
                 "Get an aggregated summary of transactions, scoped to either income or "
                 "expenses. Returns totals, counts, and averages, optionally grouped by "
                 "category, month, or both. Filters mirror get-transactions: account, "
                 "date, amount range, category ids."
             ),
+            **_out_kwarg,
         )
         async def _transactions_summary(
             direction: Literal["Income", "Expenses"] = Field(
@@ -350,14 +407,16 @@ def register_tools(
             )
 
     if get_recipients is not None:
+        _registered_names.append("get-recipients")
         _get_recipients_handler = get_recipients
 
         @app.tool(
             name="get-recipients",
-            description=(
+            description=_desc(
                 "Get saved payment recipients filtered by name. "
                 "Returns matching recipients with their account details."
             ),
+            **_out_kwarg,
         )
         async def _get_recipients(
             name: str = Field(
@@ -367,11 +426,12 @@ def register_tools(
             return await _get_recipients_handler(name=name)
 
     if create_recipient is not None:
+        _registered_names.append("create-recipient")
         _create_recipient_handler = create_recipient
 
         @app.tool(
             name="create-recipient",
-            description=(
+            description=_desc(
                 "Create a new payment recipient. Account routing goes "
                 "through the typed `account_identifier` discriminated "
                 "union (IBAN, BBAN with country, country-specific account "
@@ -379,6 +439,7 @@ def register_tools(
                 "uses the typed `national_id` sub-object. The recipient "
                 "can then be used for transfers."
             ),
+            **_out_kwarg,
         )
         async def _create_recipient(
             name: str = Field(description="Recipient's full name or business name."),
@@ -435,11 +496,12 @@ def register_tools(
             )
 
     if prepare_transfer is not None:
+        _registered_names.append("prepare-transfer")
         _prepare_transfer_handler = prepare_transfer
 
         @app.tool(
             name="prepare-transfer",
-            description=(
+            description=_desc(
                 "Prepare a money transfer on any supported rail (SEPA, "
                 "SEPA Instant, SWIFT, domestic-IS, etc.). Validates the "
                 "creditor, computes fees / FX / payee verification when "
@@ -447,6 +509,7 @@ def register_tools(
                 "summary the user confirms. Does NOT execute; pass the "
                 "intent id to `execute-transfer`."
             ),
+            **_out_kwarg,
         )
         async def _prepare_transfer(
             debtor_account_id: str = Field(
@@ -539,17 +602,19 @@ def register_tools(
             )
 
     if execute_transfer is not None:
+        _registered_names.append("execute-transfer")
         _execute_transfer_handler = execute_transfer
 
         @app.tool(
             name="execute-transfer",
-            description=(
+            description=_desc(
                 "Execute a transfer the user has confirmed. Takes only "
                 "the `transfer_intent_id` returned by `prepare-transfer`. "
                 "The intent's amount, creditor, debtor, and rail are "
                 "immutable: any change requires a new prepare call. "
                 "Servers reject expired intents with a structured error."
             ),
+            **_out_kwarg,
         )
         async def _execute_transfer(
             transfer_intent_id: str = Field(
@@ -571,4 +636,42 @@ def register_tools(
                 idempotency_key=idempotency_key,
             )
 
+    if output_schemas == "discovery":
 
+        @app.tool(
+            name="describe-tools",
+            description=(
+                "Return the output JSON Schema for one or more bank2ai "
+                "tools registered on this server. Use this when you need "
+                "to validate or parse a tool's response: the server omits "
+                "`outputSchema` from `tools/list` to keep the listing "
+                "compact, and serves the schemas here on demand. Pass "
+                "`tool_names` to fetch a subset, or omit it for every "
+                "registered tool. Unknown names yield an `outputSchema` "
+                "of `null` rather than an error."
+            ),
+            output_schema=None,
+        )
+        async def _describe_tools(
+            tool_names: Optional[list[str]] = Field(
+                default=None,
+                description=(
+                    "Tool names to describe (e.g. `[\"get-accounts\", "
+                    "\"prepare-transfer\"]`). Omit to receive every "
+                    "bank2ai tool registered on this server."
+                ),
+            ),
+        ) -> dict[str, Any]:
+            target = tool_names if tool_names else list(_registered_names)
+            schemas: dict[str, dict[str, Any]] = {}
+            for name in target:
+                if name in _registered_names:
+                    model = _TOOL_RESPONSE_MODELS.get(name)
+                    schemas[name] = {
+                        "outputSchema": (
+                            model.model_json_schema() if model is not None else None
+                        ),
+                    }
+                else:
+                    schemas[name] = {"outputSchema": None}
+            return {"schemas": schemas}
