@@ -40,11 +40,34 @@ Servers MAY also register additional, vendor-specific tools, but they MUST NOT a
 
 > **Why "prepare → execute"?** Splitting transfers into two tools keeps the AI agent on a safe rail: the agent gathers details, the user confirms in their UI, and only then is `execute-transfer` called. Servers SHOULD reject `execute-transfer` calls that don't correspond to a recently prepared transfer.
 
+### 1a. Output-schema disclosure
+
+The bank2ai tools defined above have stable output JSON Schemas, captured under `tools[].outputSchema` in [`bank2ai.json`](./bank2ai.json). Inlining every one of these schemas in `tools/list` adds tens of kilobytes to every cold connection, even though a typical agent only needs an output schema *after* it has chosen which tool to call. Servers therefore MAY follow one of two disclosure modes, which differ only in how the schemas reach the client:
+
+* **Inline** *(default)*: the server returns each tool's full `outputSchema` in `tools/list`, as MCP normally does. Best for clients that cache tool definitions once and prefer a single round-trip.
+* **Discovery (progressive disclosure)**: the server omits `outputSchema` from `tools/list` and instead registers a `describe-tools` meta tool, defined below. Clients fetch the schemas they need on demand. Best for bandwidth-sensitive deployments and for agents that only ever invoke a small subset of the surface.
+
+A server MUST pick exactly one mode per connection, and a server in discovery mode MUST register `describe-tools`. The shape of every tool's output is the same under both modes — only the transport differs.
+
+The `describe-tools` tool, when registered, MUST accept an optional `tool_names: string[]` input and MUST return:
+
+```json
+{
+  "schemas": {
+    "<tool-name>": { "outputSchema": { ... } | null }
+  }
+}
+```
+
+When `tool_names` is omitted, the server MUST return an entry for every bank2ai tool it has registered. When `tool_names` is provided, the server MUST return one entry per requested name, using `null` for names it does not recognise (rather than raising an error). `describe-tools` is itself excluded from progressive disclosure: its own `outputSchema` is intentionally absent so it stays self-bootstrapping.
+
+The canonical JSON Schemas in [`bank2ai.json`](./bank2ai.json) remain fully inlined regardless of which runtime mode a server picks — the spec file is the contract for humans and code generators, and discovery is purely a runtime optimisation.
+
 ## 2. Lifecycle
 
 A typical bank2ai session looks like this:
 
-1. The MCP client connects and calls `tools/list`. The server returns the bank2ai tools it has registered (any subset of those listed in §1).
+1. The MCP client connects and calls `tools/list`. The server returns the bank2ai tools it has registered (any subset of those listed in §1). If the server is in discovery mode (§1a), tool entries omit `outputSchema` and the client MAY call `describe-tools` to fetch them.
 2. The client calls bank2ai tools as the user requests them. The server resolves credentials internally (see §4) and rejects calls it cannot authenticate.
 3. On a transfer, the client calls `prepare-transfer` first to validate, surfaces the prepared details to the user, and only invokes `execute-transfer` after explicit confirmation.
 
