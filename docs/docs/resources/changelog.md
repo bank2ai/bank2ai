@@ -91,6 +91,14 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Python library (`bank2ai`)
 
+### 0.5.0
+
+- **Breaking:** tracks spec 0.12.0–0.14.0. `Transaction.bookingDate` is renamed to `Transaction.date` and always populated (booking date when `Booked`, authorisation date when `Pending`). `Transaction.counterpartyName` is removed — read the merchant / counterparty name off `Transaction.description` at `minimal` verbosity, or `Transaction.counterparty.name` from `full`.
+- **Breaking:** `get-transactions` `verbosity` is now `Literal["minimal", "full"]` with `minimal` as the default. The previous `standard` tier is gone; callers relying on the standard payload should pass `verbosity="full"` when they actually need ISO 20022 / SEPA / card metadata.
+- Transaction expanded to cover card transactions in one shape: new optional fields `transactionDate`, `maskedPan`, `proprietaryBankTransactionCode`, `mandateId`, `creditorId`, `purposeCode`, `entryReference`, `additionalInformation`. New `PostalAddress` component hung off `Party.postalAddress`, so card-transaction `cardAcceptorAddress` flows in on `Transaction.counterparty.postalAddress`.
+- `register_tools` gains an `output_schemas: Literal["inline", "discovery", "off"]` keyword (default `"inline"`). In `"discovery"` mode the bank2ai tools omit `outputSchema` from `tools/list` and a companion `describe-tools` tool is registered so clients can fetch schemas on demand. In `"off"` mode schemas are suppressed without the companion tool.
+- Internal: `bank2ai.models` and `bank2ai.tools` are reorganized into domain submodules (`accounts`, `transactions`, `recipients`, `transfers`, `identity`). Public imports (`from bank2ai import …` and `from bank2ai.models import …`) are unchanged.
+
 ### 0.4.0
 
 - **Breaking:** tracks spec 0.11.0. Tool handler kwargs change shape on the mutating tools: `create-recipient` takes `account_identifier` and `national_id` (replacing `account_number` and `kennitala`), `prepare-transfer` is new with a typed `creditor` Party, `execute-transfer` takes only `transfer_intent_id` (replacing `withdrawal_account_id`, `recipient_account_number`, `amount`, `description`). Every mutating tool also accepts an optional `idempotency_key`.
