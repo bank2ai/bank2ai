@@ -153,13 +153,9 @@ async function writeOverview(spec) {
   ].join('\n');
   // Strip the H1 (frontmatter title becomes the page heading) and rewrite repo-relative links.
   const body = rewriteSpecLinks(spec.replace(/^#\s+.*\n+/, ''));
-  const intro =
-    ':::info Source of truth\n' +
-    'This page is generated from [`specs/bank2ai.spec.md`](https://github.com/bank2ai/bank2ai/blob/main/specs/bank2ai.spec.md). Edit there.\n' +
-    ':::\n\n';
   await writeFile(
     resolve(OUT_DIR, 'overview.md'),
-    frontmatter + BANNER('specs/bank2ai.spec.md') + intro + body,
+    frontmatter + BANNER('specs/bank2ai.spec.md') + body,
   );
 }
 

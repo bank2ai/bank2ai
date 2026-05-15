@@ -1,8 +1,5 @@
 # Bank2ai MCP Specification
 
-> **Version:** 0.1.0, draft, derived from the Python reference implementation.
-> **Companion artifact:** [`bank2ai.json`](./bank2ai.json), canonical input/output JSON Schemas.
-
 Bank2ai connects digital banking data and operations with AI agents. The language of banking (accounts, transactions, transfers, bill payments, recipients, loans, savings) is universally identical, and bank2ai is the open standard that lets banks, fintechs, and AI builders collaborate on a single shared vocabulary instead of each reinventing one.
 
 This document defines that vocabulary as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface that any bank can expose so AI agents (and through them, end customers) can read accounts and transactions, look up recipients, run spending summaries, and prepare/execute transfers, using the same tool surface across every bank.
