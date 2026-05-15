@@ -32,22 +32,30 @@ def _load_generator():
 # ---------------------------------------------------------------------------
 
 EXPECTED_TOOL_INPUTS = {
-    "get-accounts": {"only_withdrawal_accounts", "account_type"},
+    "get-accounts": {"only_withdrawal_accounts", "account_type", "status", "usage"},
     "get-transactions": {
-        "count", "type", "order", "start_date", "end_date",
-        "description", "categories", "account_ids", "cursor",
+        "count", "order", "verbosity", "start_date", "end_date",
+        "description", "category_ids", "account_ids",
+        "min_amount", "max_amount", "cursor",
     },
+    "get-transaction": {"transaction_id", "account_id"},
     "get-categories": set(),
-    "spending-summary": {"group_by", "start_date", "end_date", "categories"},
-    "recipients-by-name": {"name"},
-    "create-recipient": {"name", "account_number", "kennitala"},
-    "transfer-money-icelandic": {
-        "amount", "recipient_ssn", "recipient_account_number",
-        "description", "withdrawal_account_number", "currency",
+    "get-transactions-summary": {
+        "direction", "group_by", "start_date", "end_date",
+        "category_ids", "account_ids", "min_amount", "max_amount",
     },
-    "execute-transfer": {
-        "withdrawal_account_id", "recipient_account_number", "amount", "description",
+    "get-recipients": {"name"},
+    "create-recipient": {
+        "name", "account_identifier", "national_id",
+        "nickname", "bic", "default_description", "idempotency_key",
     },
+    "prepare-transfer": {
+        "debtor_account_id", "creditor", "amount", "currency", "rail",
+        "local_instrument", "requested_execution_date",
+        "remittance_information", "end_to_end_id", "description",
+        "idempotency_key",
+    },
+    "execute-transfer": {"transfer_intent_id", "idempotency_key"},
 }
 
 

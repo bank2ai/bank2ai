@@ -1,49 +1,40 @@
-"""bank2ai, helpers for banks building MCP servers.
+"""Data models for bank integrations.
 
-The library exposes:
-
-* a Pydantic data model layer (`bank2ai.models`) shared by every bank2ai
-  MCP server, and
-* a reusable MCP tool surface (`bank2ai.tools`) (`register_tools`) so each
-  bank only has to supply async handlers backed by their own APIs.
+Organized by domain across this package's submodules; this re-export
+surface is the supported import path for everything in `bank2ai.models`.
 """
 
-from .tools import (
-    Handler,
-    register_tools,
-)
-from .models import (
+from .accounts import (
     Account,
-    AccountIdentifier,
     AccountList,
-    AccountNumberIdentifier,
     AccountStatus,
     AccountType,
     AccountUsage,
-    AliasIdentifier,
-    AliasType,
     Balance,
     BalanceType,
+)
+from .identity import (
+    AccountIdentifier,
+    AccountNumberIdentifier,
+    AliasIdentifier,
+    AliasType,
     BbanIdentifier,
-    CANONICAL_CATEGORY_IDS,
-    Category,
-    CategoryList,
-    ConfirmationOfPayee,
-    ConfirmationOfPayeeStatus,
-    CreateRecipientResponse,
-    ExecuteTransferResponse,
-    ExecutedTransfer,
-    GetTransactionResponse,
     IbanIdentifier,
     NationalId,
     NationalIdType,
     Party,
     PostalAddress,
-    PrepareTransferResponse,
-    PreparedTransfer,
-    Rail,
+)
+from .recipients import (
+    CreateRecipientResponse,
     Recipient,
     RecipientList,
+)
+from .transactions import (
+    CANONICAL_CATEGORY_IDS,
+    Category,
+    CategoryList,
+    GetTransactionResponse,
     RemittanceInformation,
     Transaction,
     TransactionCode,
@@ -54,6 +45,15 @@ from .models import (
     TransactionsSummary,
     TransactionsSummaryGroup,
     TransactionsSummaryPeriod,
+)
+from .transfers import (
+    ConfirmationOfPayee,
+    ConfirmationOfPayeeStatus,
+    ExecuteTransferResponse,
+    ExecutedTransfer,
+    PrepareTransferResponse,
+    PreparedTransfer,
+    Rail,
     TransferAction,
     TransferExecutionStatus,
     TransferFee,
@@ -85,7 +85,6 @@ __all__ = [
     "ExecuteTransferResponse",
     "ExecutedTransfer",
     "GetTransactionResponse",
-    "Handler",
     "IbanIdentifier",
     "NationalId",
     "NationalIdType",
@@ -113,5 +112,4 @@ __all__ = [
     "TransferSummary",
     "TransferWarning",
     "TransferWarningSeverity",
-    "register_tools",
 ]

@@ -12,37 +12,83 @@ ACCOUNTS = [
         "id": "acc_checking_001",
         "name": "Main Checking",
         "accountNumber": "1234-56-789012",
+        "bban": "1234-56-789012",
+        "bic": "DEMOUS33XXX",
         "currency": "USD",
         "balance": 5420.50,
         "availableBalance": 5420.50,
         "overdraftLimit": 0.0,
+        # Typed balances exercise the optional `balances` array; the
+        # top-level `balance` / `availableBalance` scalars stay as
+        # derived shortcuts that clients on the lean payload path can
+        # use without parsing the array.
+        "balances": [
+            {
+                "type": "ClosingBooked",
+                "amount": 5420.50,
+                "currency": "USD",
+                "asOf": "2024-03-15T08:30:00Z",
+            },
+            {
+                "type": "InterimAvailable",
+                "amount": 5420.50,
+                "currency": "USD",
+                "asOf": "2024-03-15T08:30:00Z",
+            },
+        ],
+        "ownerName": "Alex Demo",
+        "product": "Demo Everyday Checking",
+        "status": "Enabled",
+        "usage": "Private",
+        "accountType": "Current",
         "isWithdrawalAccount": True,
         "isDefaultAccount": True,
-        "accountType": "Current",
+        "openedDate": "2018-04-12",
+        "balanceUpdatedAt": "2024-03-15T08:30:00Z",
     },
     {
         "id": "acc_savings_001",
         "name": "Emergency Fund",
         "accountNumber": "1234-56-789013",
+        "bban": "1234-56-789013",
+        "bic": "DEMOUS33XXX",
         "currency": "USD",
         "balance": 15000.00,
         "availableBalance": 15000.00,
         "overdraftLimit": 0.0,
+        "ownerName": "Alex Demo",
+        "product": "Demo High-Yield Savings",
+        "status": "Enabled",
+        "usage": "Private",
+        "accountType": "Savings",
         "isWithdrawalAccount": True,
         "isDefaultAccount": False,
-        "accountType": "Savings",
+        "openedDate": "2020-09-03",
+        "balanceUpdatedAt": "2024-03-15T08:30:00Z",
     },
     {
         "id": "acc_credit_001",
         "name": "Visa Credit Card",
         "accountNumber": "1234-56-789014",
+        "maskedPan": "411111xxxxxx4242",
+        "bic": "DEMOUS33XXX",
         "currency": "USD",
         "balance": -850.25,
         "availableBalance": 4149.75,
         "overdraftLimit": 5000.0,
+        "ownerName": "Alex Demo",
+        "product": "Demo Visa Signature",
+        "status": "Enabled",
+        "usage": "Private",
+        "accountType": "Credit",
         "isWithdrawalAccount": False,
         "isDefaultAccount": False,
-        "accountType": "Credit",
+        "openedDate": "2021-06-18",
+        "balanceUpdatedAt": "2024-03-15T08:30:00Z",
+        "statementBalance": 1240.75,
+        "minimumPaymentDue": 35.00,
+        "paymentDueDate": "2024-04-05",
+        "statementClosingDate": "2024-04-12",
     },
 ]
 
@@ -52,23 +98,42 @@ def generate_transactions():
     transactions = []
     today = date.today()
 
-    # Recurring monthly transactions
+    # Recurring monthly transactions. The salary entry is richly populated
+    # to exercise the optional ISO 20022 fields (counterparty, transactionCode,
+    # remittanceInformation, endToEndId).
     transactions.append({
         "id": "tx_001",
-        "account_id": "acc_checking_001",
+        "accountId": "acc_checking_001",
         "description": "Monthly Salary",
         "amount": 4500.00,
-        "transaction_date": (today - timedelta(days=5)).isoformat(),
-        "category": "Income",
+        "date": (today - timedelta(days=5)).isoformat(),
+        "categoryId": "Income",
+        "counterparty": {
+            "name": "Acme Corp",
+            "accountIdentifier": {
+                "type": "accountNumber",
+                "accountNumber": "9999-99-999999",
+                "country": "US",
+            },
+        },
+        "transactionCode": {
+            "domain": "PMNT",
+            "family": "RCDT",
+            "subFamily": "SALA",
+        },
+        "remittanceInformation": {
+            "unstructured": "Payroll, March 2024",
+        },
+        "endToEndId": "ACME-PAY-2024-03-15",
     })
 
     transactions.append({
         "id": "tx_002",
-        "account_id": "acc_checking_001",
+        "accountId": "acc_checking_001",
         "description": "Rent Payment",
         "amount": -1200.00,
-        "transaction_date": (today - timedelta(days=3)).isoformat(),
-        "category": "Housing",
+        "date": (today - timedelta(days=3)).isoformat(),
+        "categoryId": "Housing",
     })
 
     # Groceries
@@ -76,30 +141,30 @@ def generate_transactions():
     for i, days_ago in enumerate([2, 7, 14, 21, 28, 35]):
         transactions.append({
             "id": f"tx_grocery_{i:03d}",
-            "account_id": "acc_checking_001",
+            "accountId": "acc_checking_001",
             "description": grocery_stores[i % len(grocery_stores)],
             "amount": -85.50 - (i * 5),
-            "transaction_date": (today - timedelta(days=days_ago)).isoformat(),
-            "category": "Groceries",
+            "date": (today - timedelta(days=days_ago)).isoformat(),
+            "categoryId": "Groceries",
         })
 
     # Transportation
     transactions.extend([
         {
             "id": "tx_gas_001",
-            "account_id": "acc_checking_001",
+            "accountId": "acc_checking_001",
             "description": "Shell Gas Station",
             "amount": -45.00,
-            "transaction_date": (today - timedelta(days=4)).isoformat(),
-            "category": "Transportation",
+            "date": (today - timedelta(days=4)).isoformat(),
+            "categoryId": "Transport",
         },
         {
             "id": "tx_transit_001",
-            "account_id": "acc_checking_001",
+            "accountId": "acc_checking_001",
             "description": "Monthly Metro Pass",
             "amount": -120.00,
-            "transaction_date": (today - timedelta(days=1)).isoformat(),
-            "category": "Transportation",
+            "date": (today - timedelta(days=1)).isoformat(),
+            "categoryId": "Transport",
         },
     ])
 
@@ -107,27 +172,27 @@ def generate_transactions():
     transactions.extend([
         {
             "id": "tx_netflix_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Netflix Subscription",
             "amount": -15.99,
-            "transaction_date": (today - timedelta(days=10)).isoformat(),
-            "category": "Entertainment",
+            "date": (today - timedelta(days=10)).isoformat(),
+            "categoryId": "DiningAndEntertainment",
         },
         {
             "id": "tx_movie_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Cinema Tickets",
             "amount": -32.00,
-            "transaction_date": (today - timedelta(days=12)).isoformat(),
-            "category": "Entertainment",
+            "date": (today - timedelta(days=12)).isoformat(),
+            "categoryId": "DiningAndEntertainment",
         },
         {
             "id": "tx_spotify_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Spotify Premium",
             "amount": -9.99,
-            "transaction_date": (today - timedelta(days=8)).isoformat(),
-            "category": "Entertainment",
+            "date": (today - timedelta(days=8)).isoformat(),
+            "categoryId": "DiningAndEntertainment",
         },
     ])
 
@@ -135,19 +200,19 @@ def generate_transactions():
     transactions.extend([
         {
             "id": "tx_electric_001",
-            "account_id": "acc_checking_001",
+            "accountId": "acc_checking_001",
             "description": "Electric Company",
             "amount": -85.00,
-            "transaction_date": (today - timedelta(days=15)).isoformat(),
-            "category": "Utilities",
+            "date": (today - timedelta(days=15)).isoformat(),
+            "categoryId": "Utilities",
         },
         {
             "id": "tx_internet_001",
-            "account_id": "acc_checking_001",
+            "accountId": "acc_checking_001",
             "description": "Internet Service Provider",
             "amount": -60.00,
-            "transaction_date": (today - timedelta(days=18)).isoformat(),
-            "category": "Utilities",
+            "date": (today - timedelta(days=18)).isoformat(),
+            "categoryId": "Utilities",
         },
     ])
 
@@ -156,111 +221,205 @@ def generate_transactions():
     for i, days_ago in enumerate([1, 6, 9, 13, 20, 25, 30]):
         transactions.append({
             "id": f"tx_dining_{i:03d}",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": restaurants[i % len(restaurants)],
             "amount": -25.00 - (i * 3),
-            "transaction_date": (today - timedelta(days=days_ago)).isoformat(),
-            "category": "Dining",
+            "date": (today - timedelta(days=days_ago)).isoformat(),
+            "categoryId": "DiningAndEntertainment",
         })
 
     # Healthcare
     transactions.append({
         "id": "tx_pharmacy_001",
-        "account_id": "acc_checking_001",
+        "accountId": "acc_checking_001",
         "description": "Pharmacy Co-pay",
         "amount": -20.00,
-        "transaction_date": (today - timedelta(days=22)).isoformat(),
-        "category": "Healthcare",
+        "date": (today - timedelta(days=22)).isoformat(),
+        "categoryId": "Health",
     })
 
     # Shopping (charged to credit card)
     transactions.extend([
         {
             "id": "tx_amazon_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Amazon.com",
             "amount": -78.50,
-            "transaction_date": (today - timedelta(days=11)).isoformat(),
-            "category": "Shopping",
+            "date": (today - timedelta(days=11)).isoformat(),
+            "categoryId": "Shopping",
         },
         {
             "id": "tx_clothing_001",
-            "account_id": "acc_credit_001",
+            "accountId": "acc_credit_001",
             "description": "Clothing Store",
             "amount": -125.00,
-            "transaction_date": (today - timedelta(days=16)).isoformat(),
-            "category": "Shopping",
+            "date": (today - timedelta(days=16)).isoformat(),
+            "categoryId": "Shopping",
         },
     ])
 
+    # Foreign-currency card transactions: amount is in the user's
+    # default currency (USD); originalCurrency / originalAmount carry
+    # the original. These rows also exercise the card-transaction
+    # fields (transactionDate distinct from `date`, maskedPan,
+    # merchantCategoryCode, counterparty.postalAddress with townName /
+    # country / postCode) added in spec 0.12 to align with Open Finance
+    # `cardTransactions`.
+    transactions.extend([
+        {
+            "id": "tx_paris_dining_001",
+            "accountId": "acc_credit_001",
+            "description": "Le Petit Bistro, Paris",
+            "amount": -54.20,
+            "originalCurrency": "EUR",
+            "originalAmount": -49.80,
+            "date": (today - timedelta(days=17)).isoformat(),
+            "transactionDate": (today - timedelta(days=18)).isoformat(),
+            "maskedPan": "411111xxxxxx4242",
+            "merchantCategoryCode": "5812",
+            "categoryId": "DiningAndEntertainment",
+            "proprietaryBankTransactionCode": "PURCHASE",
+            "counterparty": {
+                "name": "Le Petit Bistro",
+                "postalAddress": {
+                    "streetName": "Rue de Rivoli",
+                    "buildingNumber": "42",
+                    "postCode": "75001",
+                    "townName": "Paris",
+                    "country": "FR",
+                },
+            },
+        },
+        {
+            "id": "tx_london_shopping_001",
+            "accountId": "acc_credit_001",
+            "description": "Selfridges, London",
+            "amount": -210.45,
+            "originalCurrency": "GBP",
+            "originalAmount": -165.00,
+            "date": (today - timedelta(days=24)).isoformat(),
+            "transactionDate": (today - timedelta(days=25)).isoformat(),
+            "maskedPan": "411111xxxxxx4242",
+            "merchantCategoryCode": "5311",
+            "categoryId": "Shopping",
+            "proprietaryBankTransactionCode": "PURCHASE",
+            "counterparty": {
+                "name": "Selfridges & Co",
+                "postalAddress": {
+                    "streetName": "Oxford Street",
+                    "buildingNumber": "400",
+                    "postCode": "W1A 1AB",
+                    "townName": "London",
+                    "country": "GB",
+                },
+            },
+        },
+    ])
+
+    # SEPA direct debit: exercises mandateId / creditorId / purposeCode
+    # so the `full` verbosity path has a row that lights them up.
+    transactions.append({
+        "id": "tx_utility_dd_001",
+        "accountId": "acc_checking_001",
+        "description": "City Water — Direct Debit",
+        "amount": -42.30,
+        "date": (today - timedelta(days=6)).isoformat(),
+        "categoryId": "Utilities",
+        "transactionCode": {
+            "domain": "PMNT",
+            "family": "RDDT",
+            "subFamily": "ESDD",
+        },
+        "mandateId": "MNDT-CITY-WATER-2021-09-04-001",
+        "creditorId": "DE98ZZZ09999999999",
+        "purposeCode": "UBIL",
+        "counterparty": {
+            "name": "City Water Utilities",
+            "accountIdentifier": {
+                "type": "iban",
+                "iban": "DE89370400440532013000",
+            },
+        },
+    })
+
     # Sort by date (newest first)
-    transactions.sort(key=lambda x: x["transaction_date"], reverse=True)
+    transactions.sort(key=lambda x: x["date"], reverse=True)
 
     return transactions
 
 TRANSACTIONS = generate_transactions()
 
-# Categories
+# Categories. Demo uses canonical bank2ai category ids
+# (`bank2ai.CANONICAL_CATEGORY_IDS`) so client-side taxonomies built
+# against the demo work unchanged against any conformant server.
 CATEGORIES = [
-    {"id": "cat_income", "name": "Income"},
-    {"id": "cat_housing", "name": "Housing"},
-    {"id": "cat_groceries", "name": "Groceries"},
-    {"id": "cat_transportation", "name": "Transportation"},
-    {"id": "cat_entertainment", "name": "Entertainment"},
-    {"id": "cat_utilities", "name": "Utilities"},
-    {"id": "cat_dining", "name": "Dining"},
-    {"id": "cat_healthcare", "name": "Healthcare"},
-    {"id": "cat_shopping", "name": "Shopping"},
+    {"id": "Income", "name": "Income"},
+    {"id": "Housing", "name": "Housing"},
+    {"id": "Groceries", "name": "Groceries"},
+    {"id": "Transport", "name": "Transport"},
+    {"id": "DiningAndEntertainment", "name": "Dining & Entertainment"},
+    {"id": "Utilities", "name": "Utilities"},
+    {"id": "Health", "name": "Health"},
+    {"id": "Shopping", "name": "Shopping"},
 ]
 
-# Recipients
+# Recipients. Demo carries one Icelandic-style recipient (BBAN + kennitala)
+# so the Icelandic transfer flow runs end-to-end against the spec, plus US
+# (accountNumber + routing) and UK (IBAN) flavours to exercise every variant
+# of the AccountIdentifier discriminated union.
 RECIPIENTS = [
     {
         "id": "rcpt_001",
-        "name": "Jane Smith",
-        "accountNumber": "5678-90-123456",
-        "accountNumberType": "Domestic",
-        "bankInfo": "Demo Bank",
-        "paymentType": "Domestic",
-        "socialSecurityNumber": "123-45-6789",
-        "address": "456 Oak Ave, City, State 12345",
+        "name": "Jón Jónsson",
+        "accountIdentifier": {
+            "type": "bban",
+            "bban": "0133-26-007890",
+            "country": "IS",
+        },
+        "nationalId": {
+            "value": "010190-1234",
+            "country": "IS",
+            "type": "kennitala",
+        },
         "isFavorite": True,
-        "description": "Friend",
+        "nickname": "Friend",
     },
     {
         "id": "rcpt_002",
         "name": "John Doe",
-        "accountNumber": "5678-90-123457",
-        "accountNumberType": "Domestic",
-        "bankInfo": "Demo Bank",
-        "paymentType": "Domestic",
-        "socialSecurityNumber": "234-56-7890",
-        "address": "789 Elm St, City, State 12345",
+        "accountIdentifier": {
+            "type": "accountNumber",
+            "accountNumber": "5678-90-123457",
+            "country": "US",
+            "routing": "021000021",
+        },
+        "nationalId": {
+            "value": "234-56-7890",
+            "country": "US",
+            "type": "ssn",
+        },
         "isFavorite": False,
-        "description": "Contractor",
+        "nickname": "Contractor",
     },
     {
         "id": "rcpt_003",
         "name": "Alice Johnson",
-        "accountNumber": "5678-90-123458",
-        "accountNumberType": "Domestic",
-        "bankInfo": "Demo Bank",
-        "paymentType": "Domestic",
-        "socialSecurityNumber": "345-67-8901",
-        "address": "321 Pine Rd, City, State 12345",
+        "accountIdentifier": {
+            "type": "iban",
+            "iban": "GB29NWBK60161331926819",
+        },
         "isFavorite": True,
-        "description": "Family",
+        "nickname": "Family",
     },
     {
         "id": "rcpt_004",
         "name": "Bob Williams",
-        "accountNumber": "5678-90-123459",
-        "accountNumberType": "Domestic",
-        "bankInfo": "Demo Bank",
-        "paymentType": "Domestic",
-        "socialSecurityNumber": "456-78-9012",
-        "address": "654 Maple Dr, City, State 12345",
+        "accountIdentifier": {
+            "type": "accountNumber",
+            "accountNumber": "5678-90-123459",
+            "country": "US",
+        },
         "isFavorite": False,
-        "description": "Landlord",
+        "nickname": "Landlord",
     },
 ]

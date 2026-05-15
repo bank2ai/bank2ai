@@ -19,12 +19,16 @@ from fastmcp import FastMCP
 def make_app(api: AcmeBankClient) -> FastMCP:
     app = FastMCP("acme-bank")
 
-    async def get_accounts(*, only_withdrawal_accounts, account_type):
+    async def get_accounts(*, only_withdrawal_accounts, account_type, status, usage):
         rows = await api.list_accounts()
         if only_withdrawal_accounts:
             rows = [r for r in rows if r.can_withdraw]
         if account_type:
             rows = [r for r in rows if r.type == account_type]
+        if status:
+            rows = [r for r in rows if r.status == status]
+        if usage:
+            rows = [r for r in rows if r.usage == usage]
         return [_to_bank2ai_account(r) for r in rows]
 
     # … other handlers (all optional) …
@@ -42,10 +46,10 @@ Handlers can read MCP context to forward an inbound bearer token, or call into a
 ```python
 from fastmcp import Context
 
-async def get_accounts(ctx: Context, *, only_withdrawal_accounts, account_type):
+async def get_accounts(ctx: Context, *, only_withdrawal_accounts, account_type, status, usage):
     token = ctx.request_context.access_token  # forwarded MCP access token
     api = AcmeBankClient(token=token)
-    return await _list_accounts(api, only_withdrawal_accounts, account_type)
+    return await _list_accounts(api, only_withdrawal_accounts, account_type, status, usage)
 ```
 
 If your backend requires an exchange (e.g. email/password → session token), do the exchange once at server startup and refresh as needed. See the [real-bank guide](/docs/guides/wrap-a-real-bank) for a worked example.
@@ -60,33 +64,44 @@ def _to_bank2ai_account(row: AcmeAccountRow) -> Account:
         id=row.id,
         name=row.display_name,
         accountNumber=row.formatted_number,
+        iban=row.iban,                   # optional, omit if your bank has no IBAN
+        bic=row.bic,
+        ownerName=row.holder_name,
+        product=row.product_name,
         currency=row.currency,
         balance=row.balance,
         availableBalance=row.available_balance,
         overdraftLimit=row.overdraft or 0,
+        status=row.is_closed and "Deleted" or row.is_blocked and "Blocked" or "Enabled",
+        usage="Business" if row.is_business else "Private",
         isWithdrawalAccount=row.kind in {"checking", "savings"},
         isDefaultAccount=row.is_primary,
         accountType={"checking": "Current", "savings": "Savings", "credit": "Credit"}[row.kind],
+        # Credit-only fields. Omit on non-credit accounts.
+        statementBalance=row.statement_balance,
+        minimumPaymentDue=row.minimum_payment_due,
+        paymentDueDate=row.payment_due_date,
+        statementClosingDate=row.statement_closing_date,
     )
 ```
 
 ## Pattern: prepare → execute for transfers
 
-The two-step transfer flow exists so the user can confirm a structured preview before money moves. A reasonable implementation:
+The two-step transfer flow exists so the user can confirm a structured preview before money moves. The contract:
 
-1. `prepare_transfer`, validate everything (amount, recipient, source account), then return a `TransferPreparedResponse` with a populated `item` and a short, idempotent token (e.g. a UUID) embedded somewhere your `execute_transfer` can recognize. Cache the prepared transfer server-side keyed by that token.
-2. `execute_transfer`, look up the prepared transfer by `(withdrawal_account_id, recipient_account_number, amount)` (or by the token if your client surfaces it) and call your backend's transfer API. Return an `ExecuteTransferResponse` with the bank-issued receipt.
+1. `prepare_transfer`, validate everything (debtor account, creditor identifier, amount, rail), then return a `PrepareTransferResponse` with a populated `item` containing a server-generated `transferIntentId` and an `expiresAt` 5 minutes ahead. Cache the prepared transfer server-side keyed by the intent id.
+2. `execute_transfer`, look up the intent by `transfer_intent_id`. Reject unknown or expired intents with the structured `code: "intent_not_found"` or `code: "intent_expired"` so the client can branch without parsing `content`. On a fresh intent, call your backend's transfer API and return an `ExecuteTransferResponse` with the bank-issued receipt.
 
-Reject `execute_transfer` calls with no matching preparation. This is the single most important safety property of the surface, don't shortcut it.
+The intent's amount, creditor, debtor, and rail are immutable — any change requires a fresh `prepare_transfer` call. This is the single most important safety property of the surface; don't shortcut it.
 
 ## Pattern: returning user-facing errors
 
-For *unrecoverable* failures, raise `ToolError` (or let your client raise an MCP error). For *user-facing* conditions ("Insufficient funds", "Invalid recipient"), return a successful response with a `content` field that explains the situation:
+For *unrecoverable* failures, raise `ToolError` (or let your client raise an MCP error). For *user-facing* conditions ("Insufficient funds", "Invalid recipient"), return a successful response with a `content` field that explains the situation, plus a `code` field with a structured value:
 
 ```python
-return TransferPreparedResponse(
+return PrepareTransferResponse(
     content="Insufficient funds in your default account.",
-    actions=[],  # no preview surfaced
+    code="insufficient_funds",
 )
 ```
 
@@ -94,6 +109,6 @@ This keeps the AI client conversational instead of forcing it to interpret proto
 
 ## What not to do
 
-- **Don't reshape responses.** If the spec says `accountNumber`, your output must say `accountNumber`, not `account_number`, not `iban`. The library and FastMCP enforce this; don't fight it.
+- **Don't reshape responses.** If the spec says `accountNumber`, your output must say `accountNumber`, not `account_number`. The Account model has separate typed identifier fields (`iban`, `bban`, `bic`, `maskedPan`); pick the one that matches what your bank holds rather than overloading `accountNumber`. The library and FastMCP enforce field names; don't fight them.
 - **Don't add a bank2ai-defined `authenticate` tool.** Earlier drafts of the spec described one; it has been removed. Authentication is a server concern.
 - **Don't trust client-supplied `withdrawal_account_id` blindly.** Re-resolve the account on the server side and check it belongs to the authenticated user.

@@ -11,7 +11,7 @@ The bank2ai roadmap is intentionally narrow: keep the spec small, deepen the con
 ## Specification
 
 - **Flip the source-of-truth relationship.** Today the spec is *derived from* the Python reference implementation; a drift test prevents desync. Long-term, the spec should be hand-authored and implementations validated against it. Tracked in the repo under [`specs/README.md`](https://github.com/bank2ai/bank2ai/blob/main/specs/README.md#status).
-- **International transfers.** `transfer-money-icelandic` is the current domestic-transfer tool. We expect to add SEPA / SWIFT / domestic equivalents in other markets as additive minor versions.
+- **More transfer rails.** `prepare-transfer` ships with `domestic-IS`, `sepa`, `sepa-instant`, and `swift` in the `Rail` enum. Adding more (Faster Payments, ACH, FedNow, Pix, UPI, Interac, …) is additive and continues without breaking existing clients.
 - **Loans, savings products, cards-as-objects.** bank2ai today covers accounts, transactions, and transfers. Loans and dedicated savings products are the most-requested next domains.
 
 ## Library

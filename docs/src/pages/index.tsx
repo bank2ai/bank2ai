@@ -18,8 +18,8 @@ register_tools(
     app,
     get_accounts=...,
     get_categories=...,
-    # get_transactions=..., get_spending_summary=...,
-    # search_recipients=..., create_recipient=...,
+    # get_transactions=..., get_transaction=..., get_transactions_summary=...,
+    # get_recipients=..., create_recipient=...,
     # prepare_transfer=..., execute_transfer=...,
 )
 `;

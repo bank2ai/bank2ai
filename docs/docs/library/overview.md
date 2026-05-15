@@ -14,7 +14,7 @@ description: The bank2ai Python package, what's in it and when to use it.
 from bank2ai import (
     # Models
     Account, Transaction, Category, Recipient,
-    SpendingSummary, TransferPreparedResponse, ExecuteTransferResponse,
+    TransactionsSummary, TransferPreparedResponse, ExecuteTransferResponse,
     CreateRecipientResponse,
     # MCP wiring
     register_tools, Handler,

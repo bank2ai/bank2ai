@@ -18,20 +18,25 @@ from bank2ai import Account, Transaction, Category, Recipient
 
 These are the types most handlers return. Each is a `BaseModel`:
 
-- `Account`, id, accountNumber, currency, balance, optional availableBalance/overdraftLimit/isWithdrawalAccount/isDefaultAccount/accountType.
-- `Transaction`, id, description, amount (negative = expense), transaction_date, optional category.
+- `Account`, id, accountNumber, currency, balance; optional typed identifiers `iban` / `bban` / `bic` / `maskedPan`; optional `availableBalance` / `overdraftLimit` / `ownerName` / `product` / `openedDate` / `balanceUpdatedAt`; optional `accountType`, `status`, `usage`, `isWithdrawalAccount`, `isDefaultAccount`. Credit accounts may also carry `statementBalance` / `minimumPaymentDue` / `paymentDueDate` / `statementClosingDate`. Field names follow [Berlin Group PSD2 `accountDetails`](https://www.berlin-group.org/openfinance-downloads) where they overlap.
+- `Transaction`, id, description, amount (negative = expense), transaction_date, optional category_id (resolves via `get-categories`).
 - `Category`, id, name (localized).
 - `Recipient`, id, name, accountNumber, accountNumberType, socialSecurityNumber, optional bankInfo/paymentType/address/isFavorite/description.
 
 ## Enums
 
 ```python
-from bank2ai import AccountType, TransactionType, TransactionOrder
+from bank2ai import (
+    AccountType, AccountStatus, AccountUsage,
+    TransactionOrder, TransactionDirection,
+)
 ```
 
-- `AccountType`, `Current`, `Savings`, `Credit`.
-- `TransactionType`, `Any`, `Income`, `Expenses`, `Savings` (filter on `get-transactions`).
+- `AccountType`, `Current`, `Savings`, `Credit`, `Loan`, `Other`. Debit and prepaid cards live under `Current`; their attached card is signalled by `Account.maskedPan`.
+- `AccountStatus`, `Enabled`, `Blocked`, `Deleted`.
+- `AccountUsage`, `Private`, `Business`.
 - `TransactionOrder`, `NewestFirst`, `OldestFirst`.
+- `TransactionDirection`, `Income`, `Expenses` (required filter on `get-transactions-summary`).
 
 ## Tool-response shapes
 
@@ -39,7 +44,7 @@ Some tools return wrapped responses with a `content` field for human-readable st
 
 ```python
 from bank2ai import (
-    SpendingSummary, SpendingSummaryGroup, SpendingSummaryPeriod,
+    TransactionsSummary, TransactionsSummaryGroup, TransactionsSummaryPeriod,
     CreateRecipientResponse,
     TransferPreparedResponse, TransferPreparedItem, TransferAction,
     ExecuteTransferResponse, ExecuteTransferDetail,
@@ -77,4 +82,4 @@ Pydantic / FastMCP validates either against the output schema before sending.
 
 ## Tolerating unknown fields
 
-Per the [spec](/docs/specification/overview), clients MUST tolerate unknown fields on `Account`, `Transaction`, `Category`, and `Recipient`. If your bank exposes useful extras (e.g. an `iban` on `Account`), feel free to include them, old clients ignore unknowns; future clients can adopt them.
+Per the [spec](/docs/specification/overview), clients MUST tolerate unknown fields on `Account`, `Transaction`, `Category`, and `Recipient`. If your bank exposes useful extras beyond what the spec defines, feel free to include them, old clients ignore unknowns; future clients can adopt them.

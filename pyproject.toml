@@ -1,6 +1,6 @@
 [project]
 name = "bank2ai"
-version = "0.3.0"
+version = "0.5.0"
 description = "Helpers for banks building MCP servers, shared bank2ai tool surface, models, and auth middleware"
 readme = "README.md"
 license = { file = "LICENSE" }

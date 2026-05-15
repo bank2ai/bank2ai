@@ -25,21 +25,70 @@ from typing import Any
 from bank2ai_demo.server import app
 from bank2ai.models import (
     Account,
+    AccountNumberIdentifier,
+    AliasIdentifier,
+    Balance,
+    BbanIdentifier,
     Category,
+    ConfirmationOfPayee,
+    ExecutedTransfer,
+    IbanIdentifier,
+    NationalId,
+    Party,
+    PostalAddress,
+    PreparedTransfer,
     Recipient,
+    RemittanceInformation,
     Transaction,
+    TransactionCode,
+    TransactionsSummaryGroup,
+    TransactionsSummaryPeriod,
+    TransferAction,
+    TransferFee,
+    TransferFx,
+    TransferSummary,
+    TransferWarning,
 )
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SPEC_PATH = REPO_ROOT / "specs" / "bank2ai.json"
-SPEC_VERSION = "0.1.0"
+SPEC_VERSION = "0.14.0"
 
 DOCUMENTED_MODELS = {
     "Account": Account,
     "Transaction": Transaction,
     "Category": Category,
     "Recipient": Recipient,
+}
+
+# Auxiliary Pydantic shapes that aren't part of the four documented
+# models but appear inlined inside tool input / output schemas
+# (FastMCP flattens response models, dropping titles, so this registry
+# is what lets the docs tooling label inlined occurrences by name).
+# Not part of the user-facing model surface; the spec narrative still
+# documents only the four entries in `models`.
+COMPONENT_MODELS = {
+    "AccountNumberIdentifier": AccountNumberIdentifier,
+    "AliasIdentifier": AliasIdentifier,
+    "Balance": Balance,
+    "BbanIdentifier": BbanIdentifier,
+    "ConfirmationOfPayee": ConfirmationOfPayee,
+    "ExecutedTransfer": ExecutedTransfer,
+    "IbanIdentifier": IbanIdentifier,
+    "NationalId": NationalId,
+    "Party": Party,
+    "PostalAddress": PostalAddress,
+    "PreparedTransfer": PreparedTransfer,
+    "RemittanceInformation": RemittanceInformation,
+    "TransactionCode": TransactionCode,
+    "TransactionsSummaryGroup": TransactionsSummaryGroup,
+    "TransactionsSummaryPeriod": TransactionsSummaryPeriod,
+    "TransferAction": TransferAction,
+    "TransferFee": TransferFee,
+    "TransferFx": TransferFx,
+    "TransferSummary": TransferSummary,
+    "TransferWarning": TransferWarning,
 }
 
 VENDOR_PREFIXES = ("x-fastmcp-",)
@@ -78,6 +127,13 @@ def _collect_models() -> dict[str, Any]:
     }
 
 
+def _collect_component_schemas() -> dict[str, Any]:
+    return {
+        name: model.model_json_schema()
+        for name, model in sorted(COMPONENT_MODELS.items())
+    }
+
+
 def build_spec() -> dict[str, Any]:
     """Build the full spec dict. Pure function, no I/O."""
     tools = asyncio.run(_collect_tools())
@@ -86,6 +142,7 @@ def build_spec() -> dict[str, Any]:
         "version": SPEC_VERSION,
         "tools": tools,
         "models": _collect_models(),
+        "componentSchemas": _collect_component_schemas(),
     }
 
 
@@ -98,7 +155,11 @@ def write_spec(spec: dict[str, Any]) -> None:
 def main() -> int:
     spec = build_spec()
     write_spec(spec)
-    print(f"Wrote {SPEC_PATH.relative_to(REPO_ROOT)} ({len(spec['tools'])} tools, {len(spec['models'])} models)")
+    print(
+        f"Wrote {SPEC_PATH.relative_to(REPO_ROOT)} "
+        f"({len(spec['tools'])} tools, {len(spec['models'])} models, "
+        f"{len(spec['componentSchemas'])} component schemas)"
+    )
     return 0
 
 

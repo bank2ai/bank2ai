@@ -33,7 +33,7 @@ Example `plugin.json`:
   "requires": [
     "bank2ai/0.1",
     "bank2ai:transactions",
-    "bank2ai:spending-summary",
+    "bank2ai:get-transactions-summary",
     "bank2ai:get-categories"
   ],
   "homepage": "https://github.com/your-org/bank2ai-budgeting-helper"
@@ -50,7 +50,7 @@ Same flow as servers, fork [`bank2ai/marketplace`](https://github.com/bank2ai/ma
 
 - **Tool-only dependencies.** The skill works against any compliant bank2ai server, not just one bank.
 - **Honest in `requires`.** It declares every tool it actually uses, no more.
-- **Confirms before executing.** If the skill triggers transfers, it always goes through `transfer-money-icelandic` first and surfaces the prepared item to the user.
+- **Confirms before executing.** If the skill triggers transfers, it always goes through `prepare-transfer` first and surfaces the prepared item to the user.
 - **Tolerates unknown fields.** Doesn't break when a server returns extras on `Account` / `Transaction` / `Recipient`.
 - **Localized prompts.** If the skill assumes a locale, it says so up front (and ideally is structured so other locales can be added).
 

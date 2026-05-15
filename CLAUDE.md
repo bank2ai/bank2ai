@@ -49,7 +49,7 @@ cd docs && yarn && yarn start
 
 **Spec versioning is independent of the package.** `SPEC_VERSION` lives in `scripts/generate_spec.py` and follows SemVer per the rules in `specs/README.md` (major = breaking tool/field changes, minor = additive, patch = description-only). The `bank2ai` package version in `pyproject.toml` is separate.
 
-**Tool naming.** Wire-level tool names are kebab-case (`get-accounts`, `transfer-money-icelandic`, `recipients-by-name`); handler kwargs and Python-side field names are snake_case. The mismatch is intentional — the `register_tools` adapter bridges them.
+**Tool naming.** Wire-level tool names are kebab-case (`get-accounts`, `prepare-transfer`, `get-recipients`); handler kwargs are snake_case, and Pydantic model field names on the wire are camelCase. The `register_tools` adapter bridges kwargs to the wire.
 
 ## Conventions
 
