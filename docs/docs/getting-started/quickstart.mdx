@@ -1,0 +1,204 @@
+---
+title: Quickstart
+sidebar_position: 3
+description: Stand up a bank2ai MCP server in under five minutes. Works on macOS, Windows, and Linux.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import Admonition from '@theme/Admonition';
+
+# Quickstart
+
+Stand up a bank2ai MCP server and ask Claude: *"What did I spend on groceries last month?"*
+
+## 1. Install uv
+
+<Tabs groupId="os">
+  <TabItem value="mac-linux" label="macOS / Linux / WSL2">
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
+```
+
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+
+Run in PowerShell, then restart it:
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+  </TabItem>
+</Tabs>
+
+## 2. Create a project
+
+```bash
+uv init my-bank
+cd my-bank
+uv add bank2ai fastmcp
+```
+
+## 3. Write a server
+
+Create `server.py` in your project:
+
+```python
+from fastmcp import FastMCP
+from bank2ai import (
+    Account, AccountList,
+    Category, CategoryList,
+    SpendingSummary, SpendingSummaryGroup, SpendingSummaryPeriod,
+    register_tools,
+)
+
+app = FastMCP("my-bank")
+
+ACCOUNTS = [
+    Account(
+        id="acc-1", accountNumber="1234-56-789012", currency="USD",
+        balance=4250.00, accountType="Current",
+        isWithdrawalAccount=True, isDefaultAccount=True,
+    ),
+]
+
+CATEGORIES = [
+    Category(id="cat-groceries", name="Groceries"),
+    Category(id="cat-transport", name="Transportation"),
+    Category(id="cat-dining", name="Dining"),
+]
+
+SPENDING = SpendingSummary(
+    summary=[
+        SpendingSummaryGroup(group="Groceries", total_amount=-588.00, transaction_count=6, average_amount=-98.00),
+        SpendingSummaryGroup(group="Transportation", total_amount=-165.00, transaction_count=4, average_amount=-41.25),
+        SpendingSummaryGroup(group="Dining", total_amount=-342.50, transaction_count=8, average_amount=-42.81),
+    ],
+    period=SpendingSummaryPeriod(start_date="2025-04-01", end_date="2025-04-30"),
+    total=-1095.50,
+)
+
+async def get_accounts(*, only_withdrawal_accounts, account_type):
+    return AccountList(items=ACCOUNTS)
+
+async def get_categories():
+    return CategoryList(items=CATEGORIES)
+
+async def get_spending_summary(*, group_by="category", start_date=None, end_date=None, categories=None):
+    return SPENDING
+
+register_tools(
+    app,
+    get_accounts=get_accounts,
+    get_categories=get_categories,
+    get_spending_summary=get_spending_summary,
+)
+
+if __name__ == "__main__":
+    app.run()
+```
+
+Tools whose handler is omitted are simply not registered — add more as you implement them.
+
+## 4. Run it
+
+```bash
+uv run python server.py
+```
+
+## 5. Connect to Claude
+
+### Claude Code
+
+Works on any platform, including Linux and WSL2.
+
+From your `my-bank` directory:
+
+```bash
+claude mcp add my-bank -- uv run --directory "$PWD" python server.py
+claude
+```
+
+<Admonition type="tip" title="Windows">
+In PowerShell, <code>"$PWD"</code> expands to the current directory — the command works as-is. Or replace it with the full path, e.g. <code>C:\Users\YOU\my-bank</code>.
+</Admonition>
+
+Type `/mcp` in the new session — `my-bank` should appear. Then ask:
+
+> What did I spend on groceries last month?
+
+---
+
+### Claude Desktop
+
+<Admonition type="info">
+Claude Desktop is not available on Linux. Linux users should use Claude Code above.
+</Admonition>
+
+Open **Claude Desktop → Settings → Developer → Edit Config**. This opens the correct config file for your install regardless of how Claude Desktop was installed. Add `mcpServers` alongside any existing keys in that file:
+
+<Tabs groupId="desktop-os">
+  <TabItem value="macos" label="macOS">
+
+```json
+{
+  "mcpServers": {
+    "my-bank": {
+      "command": "uv",
+      "args": ["run", "--directory", "/absolute/path/to/my-bank", "python", "server.py"]
+    }
+  }
+}
+```
+
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+
+```json
+{
+  "mcpServers": {
+    "my-bank": {
+      "command": "uv",
+      "args": ["run", "--directory", "C:\\Users\\YOU\\my-bank", "python", "server.py"]
+    }
+  }
+}
+```
+
+  </TabItem>
+  <TabItem value="windows-wsl" label="Windows + WSL2">
+
+Your project lives inside WSL; Claude Desktop runs on Windows. Use `wsl.exe` to bridge them.
+
+Replace `/home/YOU/my-bank` with your Linux project path, and verify the `uv` path with `which uv` in WSL:
+
+```json
+{
+  "mcpServers": {
+    "my-bank": {
+      "command": "wsl.exe",
+      "args": ["--", "bash", "-lc", "cd /home/YOU/my-bank && /home/YOU/.local/bin/uv run python server.py"]
+    }
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+Fully quit Claude Desktop (hamburger menu in the top-left → File → Exit) and reopen it.
+
+Then ask Claude anything — for example:
+
+> What did I spend on groceries last month?
+
+Claude will call your server and return the data. You can ask follow-up questions, request a chart, or try something completely different.
+
+## Next steps
+
+- Add more handlers — see [Writing handlers](/docs/library/writing-handlers).
+- Read the [Specification](/docs/specification/overview) to understand the full contract.
+- Wire up a real bank in the [real-bank guide](/docs/guides/wrap-a-real-bank).
