@@ -10,7 +10,7 @@ description: register_tools wires bank2ai tools onto a FastMCP app, pass handler
 from bank2ai import register_tools
 ```
 
-`register_tools(app, *, get_accounts=None, get_transactions=None, get_transaction=None, get_categories=None, get_transactions_summary=None, get_recipients=None, create_recipient=None, prepare_transfer=None, execute_transfer=None)` registers bank2ai MCP tools on a [FastMCP](https://github.com/jlowin/fastmcp) `app`, dispatching each call to the handler you provide. Tools whose handler is omitted are not registered, so a server can expose only the subset of the spec it implements.
+`register_tools(app, *, get_accounts=None, get_transactions=None, get_transaction=None, get_categories=None, get_transactions_summary=None, get_recipients=None, create_recipient=None, prepare_transfer=None, execute_transfer=None, output_schemas="inline")` registers bank2ai MCP tools on a [FastMCP](https://github.com/jlowin/fastmcp) `app`, dispatching each call to the handler you provide. Tools whose handler is omitted are not registered, so a server can expose only the subset of the spec it implements.
 
 ## Signature
 
@@ -27,6 +27,7 @@ def register_tools(
     create_recipient:         Handler | None = None,  # → CreateRecipientResponse
     prepare_transfer:         Handler | None = None,  # → PrepareTransferResponse
     execute_transfer:         Handler | None = None,  # → ExecuteTransferResponse
+    output_schemas: Literal["inline", "discovery", "off"] = "inline",
 ) -> None
 ```
 
@@ -109,6 +110,51 @@ Mutating tools and single-object reads wrap their result under an `item` field a
 | Tool | Response model | Wire shape |
 | --- | --- | --- |
 | `get-transactions-summary` | `TransactionsSummary` | `{ "summary": TransactionsSummaryGroup[], "period": { "startDate": string, "endDate": string }, "total": number }` |
+
+## Output schemas: `inline`, `discovery`, `off`
+
+Every tool has a fixed Pydantic response model (see [Response envelopes](#response-envelopes)). What `register_tools` lets you control is **how that schema is exposed to clients** in `tools/list`. The `output_schemas` keyword argument has three modes:
+
+| Mode | `tools/list` payload | Companion tool | When to use |
+| --- | --- | --- | --- |
+| `"inline"` (default) | Each tool entry carries its full `outputSchema`, inferred by FastMCP from the response-model annotation. | _(none)_ | Default. Simplest contract, clients see schemas without an extra round-trip. |
+| `"discovery"` | `outputSchema` is omitted from every bank2ai tool. Each tool description is suffixed with *"Output JSON Schema available on demand via `describe-tools`."* | `describe-tools` is registered automatically. | Progressive disclosure. Keeps `tools/list` payloads compact for LLM-driven clients that don't need every schema up front. |
+| `"off"` | `outputSchema` is omitted; descriptions are not modified. | _(none)_ | Out-of-band schema delivery. Use when clients already have `specs/bank2ai.json` and don't need the server to advertise schemas at all. |
+
+The response models themselves are identical in all three modes; only the `tools/list` advertisement changes. Servers stay spec-compliant in every mode, the canonical schemas live in [`specs/bank2ai.json`](https://github.com/bank2ai/bank2ai/blob/main/specs/bank2ai.json).
+
+### `describe-tools` (discovery mode only)
+
+When `output_schemas="discovery"`, `register_tools` registers one extra tool alongside your handlers:
+
+```text
+describe-tools(tool_names: list[str] | None = None) -> { "schemas": { <tool>: { "outputSchema": <JSON Schema> | null } } }
+```
+
+- Pass `tool_names` (e.g. `["get-accounts", "prepare-transfer"]`) to fetch a subset.
+- Omit `tool_names` to receive every bank2ai tool registered on this server.
+- Unknown names yield an `outputSchema` of `null` rather than an error, so clients can probe optimistically.
+
+The schemas served by `describe-tools` are drawn from the same Pydantic models FastMCP would inline in `"inline"` mode, so the two paths can't diverge.
+
+### Example: enabling discovery mode
+
+```python
+from fastmcp import FastMCP
+from bank2ai import register_tools
+
+app = FastMCP("acme-bank")
+
+register_tools(
+    app,
+    get_accounts=get_accounts,
+    get_transactions=get_transactions,
+    # …
+    output_schemas="discovery",
+)
+```
+
+Clients then call `tools/list` to discover the surface, and `describe-tools` to pull schemas for the tools they actually plan to invoke.
 
 ## What `register_tools` does *not* do
 
