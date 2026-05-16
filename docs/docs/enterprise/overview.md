@@ -1,26 +1,28 @@
 ---
-title: Overview
+title: Commercial implementations
 sidebar_position: 1
-description: Bancony stewards bank2ai and offers enterprise-ready products on top of the standard.
+description: bank2ai is an open standard, freely usable by any organization. Commercial implementations exist alongside the reference implementation.
 ---
 
-# Bancony, enterprise products on bank2ai
+# Commercial implementations
 
-Bank2ai is an open standard, freely usable by any bank or fintech. Its development is **stewarded by [Bancony](https://bancony.com)**, which builds enterprise-ready products on top of the standard for banks that want a supported path rather than rolling their own.
+bank2ai is an open standard, freely usable by any bank, fintech, system integrator, or commercial vendor. Anyone can implement the tool surface against their own banking data; the spec and reference implementation are Apache 2.0-licensed and live on [GitHub](https://github.com/bank2ai/bank2ai).
 
-## What Bancony offers
+Implementations are typically built by:
 
-| Product | What it is | Read more |
-| --- | --- | --- |
-| **Enterprise MCP server** | A production-grade bank2ai MCP server for banks, with hardening, observability, and SLAs. | [Enterprise MCP server](./mcp-server) |
-| **Bancony SDK** | A higher-level SDK that simplifies implementing bank2ai MCP servers, handlers, mappers, auth, and testing scaffolding. | [Bancony SDK](./sdk) |
-| **Chat Agent** | An AI chat agent that runs **inside Digital Banking Channels** (web, mobile, branch) with Generative UI, RAG over the bank's knowledgebase, and tight integration with the bank's UX. | [Chat Agent](./chat-agent) |
-| **Advisory Agents** | A suite of advisory agents (budgeting, savings, retirement, mortgage, …) that rely on the bank2ai surface to read banking data and act on the user's behalf. | [Advisory Agents](./advisory-agents) |
+- **Banks** wiring the standard onto their own core systems.
+- **Fintechs** exposing their products to AI clients through a shared vocabulary.
+- **System integrators** delivering bank2ai-compliant servers to their customers.
+- **Commercial vendors** offering hosted or packaged implementations.
 
-## Where the line sits
+The standard's development is stewarded by [Bancony](https://bancony.com), the company that originated bank2ai. Bancony also builds and sells commercial products on top of the standard, including Bancony Server and Bancony Assistant. This is a factual disclosure: the standard itself remains vendor-neutral, and Bancony's commercial work is one of several possible implementations.
 
-The **standard** lives at [bank2ai.com](https://bank2ai.com) and on [GitHub](https://github.com/bank2ai/bank2ai), open, vendor-neutral, Apache 2.0-licensed, and free to implement.
+Other commercial implementations are welcome and encouraged. If you operate one, open a PR to be listed below.
 
-The **products** above are commercial. They are *not* required to use bank2ai; they exist for banks that want enterprise support, an integrated chat experience, or pre-built advisory agents instead of building them in-house.
+## Known implementations
 
-If your team wants help, [get in touch](./contact).
+{/* New entries require evidence of spec compliance (passing drift tests against the canonical spec in specs/bank2ai.json). Open a PR with a link to your implementation and proof of compliance. */}
+
+| Implementation | Maintainer |
+| --- | --- |
+| [Bancony Server](https://bancony.com) | [Bancony](https://bancony.com) |

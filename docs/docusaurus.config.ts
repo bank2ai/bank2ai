@@ -4,6 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const GITHUB_URL = 'https://github.com/bank2ai/bank2ai';
 const EDIT_URL = `${GITHUB_URL}/edit/main/docs/`;
+const LIST_IMPLEMENTATION_URL = `${GITHUB_URL}/issues/new?title=List+commercial+implementation&body=Implementation+name%3A%0AMaintainer%3A%0AURL%3A%0AEvidence+of+spec+compliance+%28e.g.+passing+drift+tests%29%3A`;
 
 const config: Config = {
   title: 'bank2ai',
@@ -28,6 +29,21 @@ const config: Config = {
     locales: ['en'],
   },
 
+  plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          {from: '/docs/enterprise/mcp-server', to: 'https://bancony.com/server'},
+          {from: '/docs/enterprise/sdk', to: 'https://bancony.com/server'},
+          {from: '/docs/enterprise/chat-agent', to: 'https://bancony.com/assistant'},
+          {from: '/docs/enterprise/advisory-agents', to: 'https://bancony.com'},
+          {from: '/docs/enterprise/contact', to: 'https://bancony.com/contact'},
+        ],
+      },
+    ],
+  ],
+
   presets: [
     [
       'classic',
@@ -47,6 +63,13 @@ const config: Config = {
   ],
 
   themeConfig: {
+    metadata: [
+      {
+        name: 'description',
+        content:
+          'bank2ai is the open standard for AI-driven banking: a shared tool surface, Pydantic models, and a Python library for exposing bank APIs over the Model Context Protocol.',
+      },
+    ],
     colorMode: {
       respectPrefersColorScheme: true,
     },
@@ -76,11 +99,6 @@ const config: Config = {
           position: 'left',
         },
         {
-          to: '/docs/enterprise/overview',
-          label: 'Enterprise',
-          position: 'left',
-        },
-        {
           href: GITHUB_URL,
           label: 'GitHub',
           position: 'right',
@@ -100,11 +118,10 @@ const config: Config = {
           ],
         },
         {
-          title: 'Bancony',
+          title: 'Commercial',
           items: [
-            {label: 'Bancony', href: 'https://bancony.com'},
-            {label: 'Enterprise overview', to: '/docs/enterprise/overview'},
-            {label: 'Get in touch', to: '/docs/enterprise/contact'},
+            {label: 'Bancony →', href: 'https://bancony.com'},
+            {label: 'List your implementation', href: LIST_IMPLEMENTATION_URL},
           ],
         },
         {
@@ -116,7 +133,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Bank2ai is an open standard stewarded by Bancony. © ${new Date().getFullYear()} Bancony.`,
+      copyright: `bank2ai is an open standard stewarded by Bancony. © ${new Date().getFullYear()} Bancony.`,
     },
     prism: {
       theme: prismThemes.github,

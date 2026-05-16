@@ -1,4 +1,4 @@
-# Bank2ai
+# bank2ai
 
 **The open standard for AI driven banking.**
 
@@ -10,7 +10,7 @@ The language of banking is universal (accounts, transactions, transfers, bill pa
 
 ## Stewarded by Bancony
 
-Bank2ai is freely usable by any bank or fintech. Its development is stewarded by **[Bancony](https://bancony.com)**, which builds enterprise-ready MCP servers, an SDK, an in-channel chat agent (with Generative UI and RAG), and advisory agents on top of the standard. See the [enterprise overview](https://bank2ai.com/docs/enterprise/overview) for details.
+bank2ai is freely usable by any bank or fintech. Its development is stewarded by **[Bancony](https://bancony.com)**, which also builds commercial implementations on top of the standard alongside other vendors and in-house teams. See [Commercial implementations](https://bank2ai.com/docs/enterprise/overview) for the current list.
 
 ## Install
 

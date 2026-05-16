@@ -72,7 +72,7 @@ function Hero() {
         />
         <p className={styles.heroSubtitle}>{siteConfig.tagline}</p>
         <p className={styles.heroLede}>
-          Bank2ai is the open standard that lets banks, fintechs, and AI builders share a single
+          bank2ai is the open standard that lets banks, fintechs, and AI builders share a single
           banking vocabulary instead of reinventing one, exposed over the{' '}
           <a href="https://modelcontextprotocol.io">Model Context Protocol</a>.
         </p>
@@ -143,21 +143,13 @@ function BanconyStrip() {
       <div className="container">
         <Heading as="h2">Stewarded by Bancony</Heading>
         <p>
-          Bank2ai is an open standard, freely usable by any bank or fintech. Its development is
-          stewarded by <a href="https://bancony.com">Bancony</a>, which builds enterprise-ready MCP
-          servers, an SDK, an in-channel chat agent (with Generative UI and RAG), and advisory
-          agents on top of the bank2ai surface.
+          bank2ai is an open standard, freely usable by any bank or fintech. Its development is
+          stewarded by <a href="https://bancony.com">Bancony</a>, which builds commercial
+          implementations on top of the standard alongside other vendors and in-house teams.
         </p>
-        <div className={styles.heroButtons}>
-          <Link className="button button--primary" to="/docs/enterprise/overview">
-            Enterprise offerings
-          </Link>
-          <Link
-            className="button button--secondary"
-            href="https://bancony.com">
-            Visit bancony.com
-          </Link>
-        </div>
+        <p className={styles.banconyLink}>
+          <a href="https://bancony.com">Visit bancony.com →</a>
+        </p>
       </div>
     </section>
   );

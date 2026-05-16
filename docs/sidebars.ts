@@ -66,16 +66,9 @@ const sidebars: SidebarsConfig = {
       ],
     },
     {
-      type: 'category',
-      label: 'Enterprise',
-      items: [
-        'enterprise/overview',
-        'enterprise/mcp-server',
-        'enterprise/sdk',
-        'enterprise/chat-agent',
-        'enterprise/advisory-agents',
-        'enterprise/contact',
-      ],
+      type: 'doc',
+      id: 'enterprise/overview',
+      label: 'Commercial implementations',
     },
     {
       type: 'category',

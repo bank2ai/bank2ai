@@ -112,3 +112,8 @@ html:not([data-theme='dark']) .heroLogoDark {
   font-size: 1.05rem;
   color: var(--ifm-color-emphasis-800);
 }
+
+.banconyLink {
+  font-size: 0.95rem;
+  margin-top: 0;
+}
