@@ -43,3 +43,5 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+yarn.lock

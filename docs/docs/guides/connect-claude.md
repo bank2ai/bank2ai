@@ -6,61 +6,85 @@ description: Point Claude Desktop or Claude Code at a bank2ai server.
 
 # Connect from Claude
 
-Bank2ai servers speak MCP, so any MCP-aware client can use them. Below are the minimal configurations for the two most common Claude clients.
+## Claude Code
+
+From your project directory:
+
+```bash
+claude mcp add my-server -- uv run --directory "$PWD" python server.py
+claude
+```
+
+Type `/mcp` to confirm the server is connected.
 
 ## Claude Desktop
 
-Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or the equivalent on your platform:
+:::info
+Claude Desktop is not available on Linux. Linux users should use Claude Code.
+:::
+
+Open **Claude Desktop → Settings → Developer → Edit Config** — this opens the correct config file for your install. Add `mcpServers` alongside any existing keys:
+
+**macOS:**
 
 ```json
 {
   "mcpServers": {
-    "bank2ai-demo": {
+    "my-server": {
       "command": "uv",
-      "args": [
-        "--directory", "/path/to/bank2ai/examples/demo",
-        "run", "bank2ai-demo"
-      ]
+      "args": ["run", "--directory", "/absolute/path/to/your/server", "python", "server.py"]
     }
   }
 }
 ```
 
-Restart Claude Desktop. The bank2ai tools should appear in the tool picker, try asking *"What did I spend on groceries last month?"*.
-
-## Claude Code
-
-Add the server to your Claude Code MCP config (project- or user-scoped, see [Claude Code docs](https://docs.claude.com/en/docs/claude-code/mcp)):
+**Windows (native):**
 
 ```json
 {
   "mcpServers": {
-    "bank2ai-demo": {
+    "my-server": {
       "command": "uv",
-      "args": [
-        "--directory", "/path/to/bank2ai/examples/demo",
-        "run", "bank2ai-demo"
-      ]
+      "args": ["run", "--directory", "C:\\Users\\YOU\\your-server", "python", "server.py"]
     }
   }
 }
 ```
+
+**Windows + WSL2** (project inside WSL, Desktop on Windows):
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "wsl.exe",
+      "args": ["--", "bash", "-lc", "cd /home/YOU/your-server && /home/YOU/.local/bin/uv run python server.py"]
+    }
+  }
+}
+```
+
+Fully quit Claude Desktop (hamburger menu in the top-left → File → Exit) and reopen it.
+
+:::note
+Do not use the **Settings → Connectors** UI for a local stdio server — that UI is for remote HTTP servers only. JSON config is the only way to register a local server.
+:::
 
 ## Connecting to a real bank server
 
-Same config, different command, point at whatever entry point your server exposes:
+Same config, different command — point at your server's entry point:
 
 ```json
 {
   "mcpServers": {
-    "bank2ai-yourbank": {
+    "my-bank": {
       "command": "uv",
       "args": [
-        "--directory", "/path/to/bank2ai/examples/yourbank",
-        "run", "bank2ai-yourbank"
+        "run", "--directory", "/path/to/your/bank-server",
+        "run", "your-bank-server"
       ],
       "env": {
-        "BANK2AI_YOURBANK_BASE_URL": "https://api.yourbank.example/v1"
+        "BANK_API_BASE_URL": "https://api.yourbank.example/v1"
       }
     }
   }
