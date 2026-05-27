@@ -4,7 +4,6 @@
     "exclude": [
       "/assets/*",
       "/img/*",
-      "/docs/**/*.md",
       "/llms.txt",
       "/llms-full.txt",
       "/robots.txt",
