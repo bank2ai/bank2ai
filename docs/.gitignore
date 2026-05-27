@@ -11,6 +11,9 @@
 # Spec mirror, regenerated from ../specs by scripts/sync-spec.mjs
 /docs/specification
 
+# Changelog mirror, regenerated from ../CHANGELOG.md by scripts/sync-changelog.mjs
+/docs/resources/changelog.md
+
 # Misc
 .DS_Store
 .env.local

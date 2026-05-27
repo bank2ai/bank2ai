@@ -1,9 +1,3 @@
----
-title: Changelog
-sidebar_position: 2
-description: Notable changes to the bank2ai specification and library.
----
-
 # Changelog
 
 The spec and the Python library version independently. This page tracks notable changes for each.
@@ -32,7 +26,7 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ### 0.11.0, Draft
 
-- **Breaking, vocabulary alignment.** The whole spec migrates to camelCase model field names, matching the PSD2 / ISO 20022 conventions the spec profiles. `Transaction.transaction_date` becomes `bookingDate`, `category_id` becomes `categoryId`, the `currency` / `amount_in_currency` FX pair becomes `originalCurrency` / `originalAmount`. The `TransactionsSummary*` models migrate in the same pass (`total_amount` → `totalAmount`, etc.). Tool input parameter names stay snake_case (Python kwargs; bridged to wire by `register_tools`). See [Migrating from 0.10](./migrating-from-0.10.md).
+- **Breaking, vocabulary alignment.** The whole spec migrates to camelCase model field names, matching the PSD2 / ISO 20022 conventions the spec profiles. `Transaction.transaction_date` becomes `bookingDate`, `category_id` becomes `categoryId`, the `currency` / `amount_in_currency` FX pair becomes `originalCurrency` / `originalAmount`. The `TransactionsSummary*` models migrate in the same pass (`total_amount` → `totalAmount`, etc.). Tool input parameter names stay snake_case (Python kwargs; bridged to wire by `register_tools`). See [Migrating from 0.10](https://bank2ai.com/docs/resources/migrating-from-0.10).
 - **Breaking, Transaction shape.** `id` is now required (previously optional). New required `accountId` links each transaction to its `Account`. New optional `status` (`Booked` | `Pending` | `Information`; defaults to `Booked` when omitted) profiles Berlin Group `bookingStatus`. New optional `counterpartyName`. Seven new optional ISO 20022 metadata fields: `valueDate`, `categoryRaw`, `counterparty` (typed `Party`), `transactionCode` (ISO 20022 `BankTransactionCode`), `remittanceInformation`, `endToEndId`, `merchantCategoryCode`. Servers populate what they have; the None-omitting serializer drops the rest.
 - **`get-transactions` gains a `verbosity` parameter** (`minimal` | `standard` | `full`, default `standard`) capping how many optional fields each Transaction may carry. Servers MAY omit any optional field even at `full` if they don't have it.
 - **New `get-transaction` (singular) tool** for the audit / reconciliation entry point: returns a single Transaction at full verbosity, including all ISO 20022 metadata the server can populate.
