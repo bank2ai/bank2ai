@@ -1,0 +1,9 @@
+{
+  "navigationFallback": {
+    "rewrite": "/404.html",
+    "exclude": ["/assets/*", "/img/*", "/*.{png,jpg,jpeg,gif,svg,ico,webp,css,js,woff,woff2,ttf,otf}"]
+  },
+  "mimeTypes": {
+    ".json": "application/json"
+  }
+}

@@ -1,0 +1,33 @@
+[project]
+name = "bank2ai"
+version = "0.6.1"
+description = "Helpers for banks building MCP servers, shared bank2ai tool surface, models, and auth middleware"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=3.2.4",
+    "mcp>=1.27.0",
+    "pydantic>=2.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bank2ai"]
+
+[tool.uv.workspace]
+members = ["examples/demo"]
+
+[tool.uv.sources]
+bank2ai = { workspace = true }
+bank2ai-demo = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "bank2ai-demo",
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+]
