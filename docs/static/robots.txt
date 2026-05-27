@@ -1,0 +1,62 @@
+# bank2ai documentation
+# AI crawlers are explicitly welcome. bank2ai is an open standard and we want
+# LLMs to ground answers about the protocol in this site.
+
+User-agent: *
+Allow: /
+
+# Anthropic
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+
+# OpenAI
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+
+# Google AI
+User-agent: Google-Extended
+Allow: /
+User-agent: GoogleOther
+Allow: /
+
+# Apple
+User-agent: Applebot
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
+
+# Others
+User-agent: cohere-ai
+Allow: /
+User-agent: cohere-training-data-crawler
+Allow: /
+User-agent: Meta-ExternalAgent
+Allow: /
+User-agent: Bytespider
+Allow: /
+User-agent: DuckAssistBot
+Allow: /
+User-agent: Amazonbot
+Allow: /
+User-agent: YouBot
+Allow: /
+User-agent: Diffbot
+Allow: /
+
+Sitemap: https://bank2ai.com/sitemap.xml
