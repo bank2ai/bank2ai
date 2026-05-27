@@ -1,9 +1,19 @@
 {
   "navigationFallback": {
     "rewrite": "/404.html",
-    "exclude": ["/assets/*", "/img/*", "/*.{png,jpg,jpeg,gif,svg,ico,webp,css,js,woff,woff2,ttf,otf}"]
+    "exclude": [
+      "/assets/*",
+      "/img/*",
+      "/llms.txt",
+      "/llms-full.txt",
+      "/robots.txt",
+      "/sitemap.xml",
+      "/*.{png,jpg,jpeg,gif,svg,ico,webp,css,js,woff,woff2,ttf,otf,md,txt}"
+    ]
   },
   "mimeTypes": {
-    ".json": "application/json"
+    ".json": "application/json",
+    ".md": "text/markdown; charset=utf-8",
+    ".txt": "text/plain; charset=utf-8"
   }
 }

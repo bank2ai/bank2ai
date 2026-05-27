@@ -42,6 +42,27 @@ const config: Config = {
         ],
       },
     ],
+    [
+      'docusaurus-plugin-llms',
+      {
+        generateLLMsTxt: true,
+        generateLLMsFullTxt: true,
+        generateMarkdownFiles: true,
+        docsDir: 'docs',
+        excludeImports: true,
+        removeDuplicateHeadings: true,
+        includeOrder: [
+          'getting-started/*',
+          'specification/*',
+          'specification/tools/*',
+          'specification/models/*',
+          'library/*',
+          'guides/*',
+          'marketplace/*',
+          'resources/*',
+        ],
+      },
+    ],
   ],
 
   presets: [
