@@ -8,7 +8,7 @@ description: bank2ai is the open standard for AI driven banking.
 
 **bank2ai is the open standard for AI driven banking.**
 
-The language of banking is universal (accounts, transactions, transfers, bill payments, recipients, loans, savings) and bank2ai codifies that language as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface. Once a bank speaks bank2ai, any compliant AI client can read accounts, look up recipients, run spending summaries, and prepare/execute transfers, using the same vocabulary across every bank.
+The language of banking is universal (accounts, transactions, transfers, bill payments, recipients, loans, savings) and bank2ai codifies that language as a [Model Context Protocol](https://modelcontextprotocol.io) tool surface. Once a bank speaks bank2ai, any compliant AI client can read accounts and transactions, ask for transaction summaries, look up recipients, and prepare/execute transfers, using the same vocabulary across every bank.
 
 ## What bank2ai gives you
 
