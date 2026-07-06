@@ -41,7 +41,7 @@ EXPECTED_TOOL_INPUTS = {
     "get-transaction": {"transaction_id", "account_id"},
     "get-categories": set(),
     "get-transactions-summary": {
-        "direction", "group_by", "start_date", "end_date",
+        "direction", "group_by", "start_date", "end_date", "search_text",
         "category_ids", "account_ids", "min_amount", "max_amount",
     },
     "get-recipients": {"name"},

@@ -212,6 +212,7 @@ async def get_transactions_summary(
     group_by: str = "category",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
+    search_text: Optional[str] = None,
     category_ids: Optional[list[str]] = None,
     account_ids: Optional[list[str]] = None,
     min_amount: Optional[float] = None,
@@ -245,6 +246,12 @@ async def get_transactions_summary(
         wanted_cats = set(category_ids)
         transactions = [
             t for t in transactions if t.get("categoryId") in wanted_cats
+        ]
+    if search_text:
+        needle = search_text.lower()
+        transactions = [
+            t for t in transactions
+            if needle in str(t.get("description") or "").lower()
         ]
 
     def grouping_key(t: dict) -> tuple[Optional[str], Optional[str]]:

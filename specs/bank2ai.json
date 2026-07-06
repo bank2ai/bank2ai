@@ -8141,7 +8141,7 @@
       }
     },
     {
-      "description": "Get an aggregated summary of transactions, scoped to either income or expenses. Returns totals, counts, and averages, optionally grouped by category, month, or both. Filters mirror get-transactions: account, date, amount range, category ids.",
+      "description": "Get an aggregated summary of transactions, scoped to either income or expenses. Returns totals, counts, and averages, optionally grouped by category, month, or both. Filters mirror get-transactions: account, date, amount range, category ids, free-text search (e.g. a merchant name).",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
@@ -8233,6 +8233,18 @@
             ],
             "default": null,
             "description": "Inclusive lower bound on the transaction amount. Amounts are signed: expenses are negative, income is positive. Combined with `direction`, both filters are applied."
+          },
+          "search_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Free-text search across merchant/recipient/reference/description (same matching as get-transactions' `description` filter). Use it to aggregate spending at one merchant, e.g. search_text='B\u00f3nus'."
           },
           "start_date": {
             "anyOf": [
@@ -10142,5 +10154,5 @@
       }
     }
   ],
-  "version": "0.19.0"
+  "version": "0.20.0"
 }

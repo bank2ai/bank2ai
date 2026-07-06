@@ -193,7 +193,8 @@ def register_get_transactions_summary(
             "Get an aggregated summary of transactions, scoped to either income or "
             "expenses. Returns totals, counts, and averages, optionally grouped by "
             "category, month, or both. Filters mirror get-transactions: account, "
-            "date, amount range, category ids."
+            "date, amount range, category ids, free-text search (e.g. a merchant "
+            "name)."
         ),
         **out_kwarg,
     )
@@ -225,6 +226,14 @@ def register_get_transactions_summary(
             pattern=r"^\d{4}-\d{2}-\d{2}$",
             examples=["2024-03-15"],
         ),
+        search_text: Optional[str] = Field(
+            default=None,
+            description=(
+                "Free-text search across merchant/recipient/reference/description "
+                "(same matching as get-transactions' `description` filter). Use it "
+                "to aggregate spending at one merchant, e.g. search_text='Bónus'."
+            ),
+        ),
         category_ids: Optional[list[str]] = Field(
             default=None,
             description="Restrict to these category ids (the `id` field from get-categories).",
@@ -255,6 +264,7 @@ def register_get_transactions_summary(
             group_by=group_by,
             start_date=start_date,
             end_date=end_date,
+            search_text=search_text,
             category_ids=category_ids,
             account_ids=account_ids,
             min_amount=min_amount,
