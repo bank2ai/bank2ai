@@ -6,6 +6,10 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Specification
 
+### 0.19.1, Draft
+
+- **Patch, description-only.** The `get-transactions` `order` parameter description now states the default (`NewestFirst`, most recent first) and tells callers to omit it unless the user explicitly wants oldest-first. No change to the parameter's type, enum, or default. (Reference-server input tolerance for sort-order synonyms ships in library `0.6.2`.)
+
 ### 0.14.0, Draft
 
 - **Breaking, `get-transactions` `verbosity` collapsed to two levels.** The middle `standard` tier is removed and `minimal` becomes the default. `minimal` carries `id`, `accountId`, `description`, `amount`, `date`, `categoryId`, and `originalCurrency` / `originalAmount` (populated only on FX entries) — the fields an LLM typically needs to answer everyday questions, with the merchant / counterparty name read off `description`. `full` allows every optional ISO 20022 / Open Finance audit field on top. Servers MAY still omit any optional field even at `full` when they don't have it.
@@ -84,6 +88,10 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 - A previously specified bank2ai-defined `authenticate` tool was removed.
 
 ## Python library (`bank2ai`)
+
+### 0.6.2
+
+- **`get-transactions` `order` now tolerates the common sort-order synonyms LLMs reach for.** A model answering "show my most recent transactions" routinely fills `order` with `descending` / `desc` / `newest` (and `ascending` / `asc` / `oldest` for the reverse) instead of the canonical `NewestFirst` / `OldestFirst`. The strict `Literal` rejected those *before* the handler ran, so the user saw a failed first tool call and a retry. A `BeforeValidator` on the parameter now folds the synonyms (case-, whitespace-, and separator-insensitive) onto the canonical values. **The wire contract is unchanged** — the advertised enum stays exactly `["NewestFirst", "OldestFirst"]` (the validator does not appear in the JSON Schema), and genuinely unknown values are still rejected. Tracks spec 0.19.1.
 
 ### 0.6.1
 

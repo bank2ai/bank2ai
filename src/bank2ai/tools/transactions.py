@@ -11,6 +11,7 @@ from ..models import (
     CategoryList,
     GetTransactionResponse,
     TransactionList,
+    TransactionOrderInput,
     TransactionsSummary,
 )
 from .base import Handler, OutputSchemaMode, build_decorator_helpers
@@ -42,9 +43,13 @@ def register_get_transactions(
             description="Maximum number of transactions to return.",
             ge=1,
         ),
-        order: Literal["NewestFirst", "OldestFirst"] = Field(
+        order: TransactionOrderInput = Field(
             default="NewestFirst",
-            description="Sort order.",
+            description=(
+                "Sort order. Defaults to `NewestFirst` (most recent first) — "
+                "omit this unless the user explicitly wants the oldest "
+                "transactions first (`OldestFirst`)."
+            ),
         ),
         verbosity: Optional[Literal["minimal", "full"]] = Field(
             default=None,

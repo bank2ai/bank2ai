@@ -7484,7 +7484,7 @@
           },
           "order": {
             "default": "NewestFirst",
-            "description": "Sort order.",
+            "description": "Sort order. Defaults to `NewestFirst` (most recent first) \u2014 omit this unless the user explicitly wants the oldest transactions first (`OldestFirst`).",
             "enum": [
               "NewestFirst",
               "OldestFirst"
@@ -10142,5 +10142,5 @@
       }
     }
   ],
-  "version": "0.19.0"
+  "version": "0.19.1"
 }
