@@ -1025,6 +1025,23 @@
               "default": null,
               "description": "Type of account."
             },
+            "accruedInterest": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Interest earned on the account but not yet credited (accrued), in `currency`. Typically populated on interest-bearing savings accounts; servers omit it when the backend does not expose an accrual figure. Interest already paid out appears as ordinary credit transactions instead.",
+              "examples": [
+                337.5
+              ],
+              "title": "Accruedinterest"
+            },
             "availableBalance": {
               "anyOf": [
                 {
@@ -2611,6 +2628,23 @@
               "default": null,
               "description": "Type of account."
             },
+            "accruedInterest": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Interest earned on the account but not yet credited (accrued), in `currency`. Typically populated on interest-bearing savings accounts; servers omit it when the backend does not expose an accrual figure. Interest already paid out appears as ordinary credit transactions instead.",
+              "examples": [
+                337.5
+              ],
+              "title": "Accruedinterest"
+            },
             "availableBalance": {
               "anyOf": [
                 {
@@ -3820,6 +3854,23 @@
           ],
           "default": null,
           "description": "Type of account."
+        },
+        "accruedInterest": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Interest earned on the account but not yet credited (accrued), in `currency`. Typically populated on interest-bearing savings accounts; servers omit it when the backend does not expose an accrual figure. Interest already paid out appears as ordinary credit transactions instead.",
+          "examples": [
+            337.5
+          ],
+          "title": "Accruedinterest"
         },
         "availableBalance": {
           "anyOf": [
@@ -6012,6 +6063,22 @@
                   ],
                   "default": null,
                   "description": "Type of account."
+                },
+                "accruedInterest": {
+                  "anyOf": [
+                    {
+                      "minimum": 0,
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Interest earned on the account but not yet credited (accrued), in `currency`. Typically populated on interest-bearing savings accounts; servers omit it when the backend does not expose an accrual figure. Interest already paid out appears as ordinary credit transactions instead.",
+                  "examples": [
+                    337.5
+                  ]
                 },
                 "availableBalance": {
                   "anyOf": [
@@ -9609,6 +9676,22 @@
                             "default": null,
                             "description": "Type of account."
                           },
+                          "accruedInterest": {
+                            "anyOf": [
+                              {
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "description": "Interest earned on the account but not yet credited (accrued), in `currency`. Typically populated on interest-bearing savings accounts; servers omit it when the backend does not expose an accrual figure. Interest already paid out appears as ordinary credit transactions instead.",
+                            "examples": [
+                              337.5
+                            ]
+                          },
                           "availableBalance": {
                             "anyOf": [
                               {
@@ -10142,5 +10225,5 @@
       }
     }
   ],
-  "version": "0.19.0"
+  "version": "0.20.0"
 }

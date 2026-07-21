@@ -56,6 +56,7 @@ ACCOUNTS = [
         "balance": 15000.00,
         "availableBalance": 15000.00,
         "overdraftLimit": 0.0,
+        "accruedInterest": 337.50,
         "ownerName": "Alex Demo",
         "product": "Demo High-Yield Savings",
         "status": "Enabled",
