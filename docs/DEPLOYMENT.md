@@ -1,20 +1,29 @@
 # Deploying bank2ai.com
 
-The site is built with Docusaurus and deployed via **Azure Static Web Apps** (the same hosting Bancony uses for `bancony.com`).
+The site is built with Docusaurus and deployed to **Firebase Hosting**
+(site `bank2ai-com`).
 
 ## How it works
 
-- [`.github/workflows/azure-static-web-apps.yml`](../.github/workflows/azure-static-web-apps.yml) runs on every push to `main` and on every PR touching `docs/`, `specs/`, or the workflow itself.
-- The workflow installs `docs/` deps, runs `npm run build` (which calls the `prebuild` `sync-spec` script first), and uploads `docs/build/` to Azure Static Web Apps.
-- Pull requests get preview deployments from Azure SWA automatically; the PR-close job tears them down.
-- [`docs/static/staticwebapp.config.json`](./static/staticwebapp.config.json) configures the SPA fallback (404 → `/404.html` for routes that aren't static assets).
+- [`.github/workflows/firebase-hosting.yml`](../.github/workflows/firebase-hosting.yml)
+  runs on every push to `main` touching `docs/`, `specs/`, or the workflow/config.
+- The workflow installs `docs/` deps, runs `npm run build` (which calls the
+  `prebuild` `sync-spec` script first), and deploys `docs/build/` with
+  `firebase-tools`.
+- Auth is **keyless**: GitHub OIDC → Workload Identity Federation →
+  `deploy-sites@bancony-shared` (Firebase-Hosting-admin only). There are no
+  deployment tokens or secrets in this repo.
+- [`firebase.json`](../firebase.json) carries the hosting behaviour:
+  `trailingSlash: false` (canonical URLs without trailing slash, matching the
+  sitemap) and `.md` served as `text/markdown`. Docusaurus's `404.html` is
+  served automatically for unknown paths.
 
-## One-time setup
+## One-time setup (already done)
 
-1. **Create a Static Web App in Azure** for `bank2ai.com`. Choose the "Custom" build option (not GitHub-managed Oryx) since we build the site ourselves in CI.
-2. **Add the deployment token to GitHub** as a repository secret named `AZURE_STATIC_WEB_APPS_API_TOKEN_BANK2AI`.
-3. **Wire the custom domain** in the Azure portal: add `bank2ai.com` (and optionally `www.bank2ai.com`) to the Static Web App and create the `CNAME` / `ALIAS` records in DNS as instructed.
-4. **Enable HTTPS**, Azure SWA provisions a managed cert automatically once the DNS records are in place.
+1. Firebase Hosting site `bank2ai-com` created.
+2. This repo admitted to the Workload Identity Federation pool the deploy
+   service account trusts (maintainers: see the internal infra repo).
+3. Custom domain `bank2ai.com` wired to the site.
 
 ## Local preview
 
