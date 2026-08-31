@@ -1,0 +1,51 @@
+name: Deploy to Firebase Hosting
+
+# bank2ai.com — Firebase Hosting site `bank2ai-com` (replaces the previous
+# Azure Static Web Apps hosting). Keyless auth: GitHub OIDC → Workload
+# Identity Federation → a deploy service account scoped to Firebase Hosting
+# only. No secrets stored in this repo.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "specs/**"
+      - ".github/workflows/firebase-hosting.yml"
+      - "firebase.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: firebase-hosting
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install and build (prebuild syncs specs/ into the docs)
+        working-directory: docs
+        run: |
+          npm ci
+          npm run build
+
+      - name: Authenticate to Google Cloud (WIF)
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/474743584183/locations/global/workloadIdentityPools/github/providers/github-actions
+          service_account: deploy-sites@bancony-shared.iam.gserviceaccount.com
+
+      - name: Deploy
+        run: npx firebase-tools@14 deploy --only hosting:bank2ai-com --project bancony-shared --non-interactive

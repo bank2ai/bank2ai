@@ -1,0 +1,14 @@
+{
+  "hosting": {
+    "site": "bank2ai-com",
+    "public": "docs/build",
+    "ignore": ["firebase.json", "**/node_modules/**"],
+    "trailingSlash": false,
+    "headers": [
+      {
+        "source": "**/*.md",
+        "headers": [{ "key": "Content-Type", "value": "text/markdown; charset=utf-8" }]
+      }
+    ]
+  }
+}
