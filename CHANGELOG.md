@@ -6,6 +6,10 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Specification
 
+### 0.20.0, Draft
+
+- **`get-transactions-summary` gains an optional `search_text` filter** — free-text search across merchant/recipient/reference/description, with the same matching semantics as `get-transactions`' `description` filter, applied before aggregation. Makes merchant-level aggregation ("how much did I spend at Bónus last year?") a single tool call instead of a transaction-list fetch plus client-side arithmetic. New optional input = minor bump; existing calls are unaffected.
+
 ### 0.14.0, Draft
 
 - **Breaking, `get-transactions` `verbosity` collapsed to two levels.** The middle `standard` tier is removed and `minimal` becomes the default. `minimal` carries `id`, `accountId`, `description`, `amount`, `date`, `categoryId`, and `originalCurrency` / `originalAmount` (populated only on FX entries) — the fields an LLM typically needs to answer everyday questions, with the merchant / counterparty name read off `description`. `full` allows every optional ISO 20022 / Open Finance audit field on top. Servers MAY still omit any optional field even at `full` when they don't have it.
@@ -84,6 +88,10 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 - A previously specified bank2ai-defined `authenticate` tool was removed.
 
 ## Python library (`bank2ai`)
+
+### 0.7.0
+
+- Tracks spec 0.20.0: `register_get_transactions_summary` accepts and forwards the new optional `search_text` kwarg to the handler. Handlers that ignore unknown kwargs are unaffected; handlers with strict signatures add one optional parameter.
 
 ### 0.6.1
 
