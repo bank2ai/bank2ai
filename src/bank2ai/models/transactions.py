@@ -5,9 +5,9 @@ Categories live here because they exist only to classify transactions.
 
 import datetime as _dt
 from enum import Enum
-from typing import Optional
+from typing import Annotated, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, BeforeValidator, Field
 
 from .base import _Bank2aiModel
 from .identity import Party
@@ -221,6 +221,57 @@ class TransactionOrder(str, Enum):
 
     NewestFirst = "NewestFirst"
     OldestFirst = "OldestFirst"
+
+
+# The canonical `order` values (`NewestFirst` / `OldestFirst`) are the only
+# ones an adapter or conformance test may rely on — they stay the advertised
+# enum. But LLMs reliably reach for the everyday synonym a user's phrasing
+# implies ("most recent" → `descending`, "oldest first" → `ascending`), which
+# a strict `Literal` rejects *before* the handler runs: the user sees a failed
+# first tool call, then a retry. Rather than weaken the contract, we accept the
+# common synonyms at the input boundary and fold them onto the canonical value.
+# A `BeforeValidator` runs ahead of the `Literal` check and does not appear in
+# the generated JSON Schema, so the wire contract (and `specs/bank2ai.json`)
+# stays exactly `["NewestFirst", "OldestFirst"]`; genuinely unknown values
+# still fail validation as before.
+_ORDER_SYNONYMS = {
+    "newestfirst": "NewestFirst",
+    "newest": "NewestFirst",
+    "descending": "NewestFirst",
+    "desc": "NewestFirst",
+    "latest": "NewestFirst",
+    "recent": "NewestFirst",
+    "mostrecent": "NewestFirst",
+    "newtoold": "NewestFirst",
+    "oldestfirst": "OldestFirst",
+    "oldest": "OldestFirst",
+    "ascending": "OldestFirst",
+    "asc": "OldestFirst",
+    "earliest": "OldestFirst",
+    "chronological": "OldestFirst",
+    "oldtonew": "OldestFirst",
+}
+
+
+def _normalize_transaction_order(value: object) -> object:
+    """Fold a common sort-order synonym onto its canonical value.
+
+    Case-, whitespace-, and separator-insensitive (``"NEW TO OLD"`` and
+    ``"new-to-old"`` both match ``newtoold``). Values already canonical, and
+    genuinely unknown values, pass through untouched so the ``Literal`` check
+    still accepts the former and rejects the latter.
+    """
+    if isinstance(value, str):
+        key = value.strip().lower().replace("_", "").replace("-", "").replace(" ", "")
+        return _ORDER_SYNONYMS.get(key, value)
+    return value
+
+
+# `order` tool-input type: the strict wire enum plus lenient synonym folding.
+TransactionOrderInput = Annotated[
+    Literal["NewestFirst", "OldestFirst"],
+    BeforeValidator(_normalize_transaction_order),
+]
 
 
 class TransactionDirection(str, Enum):
