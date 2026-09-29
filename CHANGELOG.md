@@ -6,6 +6,10 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Specification
 
+### 0.20.0, Draft
+
+- **New optional `Account.accruedInterest`.** Interest earned on the account but not yet credited, in the account currency — the figure banks show alongside savings balances (Icelandic: áfallnir vextir). Additive and optional: servers omit it when the backend exposes no accrual figure, and clients MUST NOT assume it. Motivated by conversational-banking account cards that show a savings account's earned-so-far interest instead of an available-balance line.
+
 ### 0.14.0, Draft
 
 - **Breaking, `get-transactions` `verbosity` collapsed to two levels.** The middle `standard` tier is removed and `minimal` becomes the default. `minimal` carries `id`, `accountId`, `description`, `amount`, `date`, `categoryId`, and `originalCurrency` / `originalAmount` (populated only on FX entries) — the fields an LLM typically needs to answer everyday questions, with the merchant / counterparty name read off `description`. `full` allows every optional ISO 20022 / Open Finance audit field on top. Servers MAY still omit any optional field even at `full` when they don't have it.

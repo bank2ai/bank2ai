@@ -181,6 +181,18 @@ class Account(_Bank2aiModel):
         ),
         ge=0,
     )
+    accruedInterest: Optional[float] = Field(
+        default=None,
+        description=(
+            "Interest earned on the account but not yet credited (accrued), "
+            "in `currency`. Typically populated on interest-bearing savings "
+            "accounts; servers omit it when the backend does not expose an "
+            "accrual figure. Interest already paid out appears as ordinary "
+            "credit transactions instead."
+        ),
+        ge=0,
+        examples=[337.5],
+    )
     ownerName: Optional[str] = Field(
         default=None,
         description=(
