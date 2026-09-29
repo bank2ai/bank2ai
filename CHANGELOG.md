@@ -6,6 +6,17 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 
 ## Specification
 
+### Unreleased (proposal)
+
+A proposal for discussion that targets spec 0.21.0-draft. It is not part of any released version, and `version` in `specs/bank2ai.json` stays at 0.19.0 until a number is assigned on acceptance. All changes are additive.
+
+- **New rail `domestic-SE`**: Swedish domestic credit transfers in SEK, covering account-to-account transfers and payments to Bankgiro, PlusGiro and Swish numbers. A new §1b documents the rails and the `local_instrument` values on `domestic-SE` (`BANKGIRO`, `PLUSGIRO`, `INST`, `SWISH`). Servers derive the instrument from the creditor identifier when the client omits it, and report it in `summary.localInstrument`.
+- **Rail list closed within a version, grown in minor versions.** The "plus vendor extensions" wording on `Rail` is removed: the input schema has always been a closed enum, so a vendor rail could never be sent. §7 adds that a new enum value or discriminated-union variant is a minor bump, and that clients MUST treat unrecognised values in responses as opaque.
+- **New `other` account identifier** (`{ type: "other", identifier, schemeName, country }`, profile of ISO 20022 `GenericAccountIdentification1`) for scheme-specific identifiers that the other variants cannot carry. Documented scheme names: `BGNR` (Swedish Bankgiro number) and `PGNR` (Swedish PlusGiro number).
+- **New `swish` value on `AliasType`**, next to `phone`, for Swish numbers.
+- **Vendor-tool naming.** Vendor tools SHOULD start with `x-`; bank2ai never defines a standard tool with that prefix.
+- **Non-normative Sweden market note** (Appendix A) mapping Swedish banking concepts onto bank2ai.
+
 ### 0.14.0, Draft
 
 - **Breaking, `get-transactions` `verbosity` collapsed to two levels.** The middle `standard` tier is removed and `minimal` becomes the default. `minimal` carries `id`, `accountId`, `description`, `amount`, `date`, `categoryId`, and `originalCurrency` / `originalAmount` (populated only on FX entries) — the fields an LLM typically needs to answer everyday questions, with the merchant / counterparty name read off `description`. `full` allows every optional ISO 20022 / Open Finance audit field on top. Servers MAY still omit any optional field even at `full` when they don't have it.
@@ -84,6 +95,11 @@ For the authoritative version field, see [`specs/bank2ai.json`](https://github.c
 - A previously specified bank2ai-defined `authenticate` tool was removed.
 
 ## Python library (`bank2ai`)
+
+### Unreleased (proposal)
+
+- Tracks the spec proposal above. New public type `OtherIdentifier`, added to the `AccountIdentifier` union, and new enum members `Rail.DomesticSE` and `AliasType.Swish`. Additive; the package version is unchanged until the proposal is accepted.
+- The demo server derives the `domestic-SE` local instrument from the creditor identifier when it is omitted.
 
 ### 0.6.1
 

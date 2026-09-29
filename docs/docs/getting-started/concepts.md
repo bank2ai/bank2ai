@@ -30,7 +30,7 @@ Every compliant server registers these tools, with these names:
 | [`prepare-transfer`](/docs/specification/tools/prepare-transfer) | **Prepare** a transfer on any supported rail. Does not execute. |
 | [`execute-transfer`](/docs/specification/tools/execute-transfer) | Execute a previously prepared transfer by `transferIntentId`. |
 
-Servers MAY add vendor-specific tools but MUST NOT alter the names, inputs, or outputs of the tools above.
+Servers MAY add vendor-specific tools, named with an `x-` prefix so they never clash with a future standard tool, but MUST NOT alter the names, inputs, or outputs of the tools above.
 
 ## 3. Transfers split into prepare → execute
 

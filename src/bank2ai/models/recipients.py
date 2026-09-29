@@ -15,8 +15,9 @@ class Recipient(_Bank2aiModel):
     Profile of: ISO 20022 `Creditor` and `CreditorAccount` (subset).
     Account routing goes through the typed `accountIdentifier`
     discriminated union (IBAN, BBAN, country-specific account number,
-    or alias); national identification is opaque to bank2ai and lives
-    in the typed `nationalId` sub-object.
+    alias, or a scheme-specific identifier such as a Bankgiro number);
+    national identification is opaque to bank2ai and lives in the typed
+    `nationalId` sub-object.
     """
 
     id: str = Field(description="Unique recipient identifier (server-scoped).")

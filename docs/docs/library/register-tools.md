@@ -38,7 +38,7 @@ def register_tools(
 | Tool | Handler keyword arguments |
 | --- | --- |
 | [`get-accounts`](/docs/specification/tools/get-accounts) | `only_withdrawal_accounts: bool`, `account_type: Literal["Current","Savings","Credit","Loan","Other"] \| None`, `status: Literal["Enabled","Blocked","Deleted"] \| None`, `usage: Literal["Private","Business"] \| None` |
-| [`get-transactions`](/docs/specification/tools/get-transactions) | `count: int \| None`, `order: Literal["NewestFirst","OldestFirst"]`, `verbosity: Literal["minimal","standard","full"]`, `start_date: str \| None`, `end_date: str \| None`, `description: str \| None`, `category_ids: list[str] \| None`, `account_ids: list[str] \| None`, `min_amount: float \| None`, `max_amount: float \| None`, `cursor: str \| None` |
+| [`get-transactions`](/docs/specification/tools/get-transactions) | `count: int \| None`, `order: Literal["NewestFirst","OldestFirst"]`, `verbosity: Literal["minimal","full"]`, `start_date: str \| None`, `end_date: str \| None`, `search_text: str \| None`, `category_ids: list[str] \| None`, `account_ids: list[str] \| None`, `min_amount: float \| None`, `max_amount: float \| None`, `cursor: str \| None` |
 | [`get-transaction`](/docs/specification/tools/get-transaction) | `transaction_id: str`, `account_id: str \| None` |
 | [`get-categories`](/docs/specification/tools/get-categories) | _(none)_ |
 | [`get-transactions-summary`](/docs/specification/tools/get-transactions-summary) | `direction: Literal["Income","Expenses"]`, `group_by: Literal["none","category","month","both"]`, `start_date: str \| None`, `end_date: str \| None`, `category_ids: list[str] \| None`, `account_ids: list[str] \| None`, `min_amount: float \| None`, `max_amount: float \| None` |

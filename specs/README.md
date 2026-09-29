@@ -27,10 +27,10 @@ Long-term we'd like to flip the relationship: hand-author this spec as the contr
 
 ## Versioning
 
-`bank2ai.json` exposes a top-level `version` (currently `0.1.0`) that follows [SemVer](https://semver.org/):
+`bank2ai.json` exposes a top-level `version` that follows [SemVer](https://semver.org/):
 
 * **Major** bumps for breaking changes, removing tools, renaming inputs/outputs, tightening required fields, changing semantic meaning.
-* **Minor** bumps for additive changes, new tools, new optional inputs, new optional output fields.
+* **Minor** bumps for additive changes, new tools, new optional inputs, new optional output fields, new enum values or union variants (see §7 of the spec).
 * **Patch** bumps for description / metadata edits with no behavioural impact.
 
 The Python package (`bank2ai`) versions independently of the spec.

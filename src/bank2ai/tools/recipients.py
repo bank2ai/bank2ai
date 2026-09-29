@@ -56,7 +56,8 @@ def register_create_recipient(
             "Create a new payment recipient. Account routing goes "
             "through the typed `account_identifier` discriminated "
             "union (IBAN, BBAN with country, country-specific account "
-            "number, or alias). National identification, when known, "
+            "number, alias, or a scheme-specific identifier such as a "
+            "Bankgiro number). National identification, when known, "
             "uses the typed `national_id` sub-object. The recipient "
             "can then be used for transfers."
         ),
@@ -70,7 +71,8 @@ def register_create_recipient(
                 "`{type: 'iban', iban}`, "
                 "`{type: 'bban', bban, country}`, "
                 "`{type: 'accountNumber', accountNumber, country, routing?, sortCode?}`, "
-                "`{type: 'alias', alias, aliasType}`."
+                "`{type: 'alias', alias, aliasType}`, "
+                "`{type: 'other', identifier, schemeName, country}`."
             ),
         ),
         national_id: Optional[NationalId] = Field(

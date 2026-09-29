@@ -19,9 +19,9 @@ from bank2ai import Account, Transaction, Category, Recipient
 These are the types most handlers return. Each is a `BaseModel`:
 
 - `Account`, id, accountNumber, currency, balance; optional typed identifiers `iban` / `bban` / `bic` / `maskedPan`; optional `availableBalance` / `overdraftLimit` / `ownerName` / `product` / `openedDate` / `balanceUpdatedAt`; optional `accountType`, `status`, `usage`, `isWithdrawalAccount`, `isDefaultAccount`. Credit accounts may also carry `statementBalance` / `minimumPaymentDue` / `paymentDueDate` / `statementClosingDate`. Field names follow [Berlin Group PSD2 `accountDetails`](https://www.berlin-group.org/openfinance-downloads) where they overlap.
-- `Transaction`, id, description, amount (negative = expense), transaction_date, optional category_id (resolves via `get-categories`).
+- `Transaction`, id, accountId, description, amount (negative = expense), date; optional categoryId (resolves via `get-categories`), isPending, originalDescription, transactionDate, valueDate, originalCurrency / originalAmount, counterparty (a typed `Party`), and a `properties` bag of ISO 20022 / Open Finance audit metadata.
 - `Category`, id, name (localized).
-- `Recipient`, id, name, accountNumber, accountNumberType, socialSecurityNumber, optional bankInfo/paymentType/address/isFavorite/description.
+- `Recipient`, id, name, accountIdentifier (typed union: `iban` / `bban` / `accountNumber` / `alias` / `other`); optional nickname, nationalId, bic, defaultDescription, lastUsedAt, isFavorite.
 
 ## Enums
 
@@ -45,19 +45,21 @@ Some tools return wrapped responses with a `content` field for human-readable st
 ```python
 from bank2ai import (
     TransactionsSummary, TransactionsSummaryGroup, TransactionsSummaryPeriod,
+    GetTransactionResponse,
     CreateRecipientResponse,
-    TransferPreparedResponse, TransferPreparedItem, TransferAction,
-    ExecuteTransferResponse, ExecuteTransferDetail,
-    RecipientInfo,
+    PrepareTransferResponse, PreparedTransfer, TransferAction,
+    ExecuteTransferResponse, ExecutedTransfer,
 )
 ```
 
 Use these for type-safe handler return values:
 
 ```python
-async def create_recipient(*, name, account_number, kennitala) -> CreateRecipientResponse:
+async def create_recipient(
+    *, name, account_identifier, national_id, nickname, bic, default_description, idempotency_key,
+) -> CreateRecipientResponse:
     try:
-        rec = await acme_api.create_recipient(name, account_number, kennitala)
+        rec = await acme_api.create_recipient(name, account_identifier, national_id)
         return CreateRecipientResponse(
             content=f"Saved {name} as a recipient.",
             item=Recipient(...),
@@ -65,6 +67,7 @@ async def create_recipient(*, name, account_number, kennitala) -> CreateRecipien
     except DuplicateRecipientError:
         return CreateRecipientResponse(
             content=f"A recipient called '{name}' already exists.",
+            code="duplicate_recipient",
         )
 ```
 
