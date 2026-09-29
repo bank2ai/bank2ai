@@ -30,10 +30,10 @@ A bank2ai server MAY register any subset of the following tools. Tools that are 
 | `get-transactions-summary` | Aggregated transactions, scoped to either income or expenses (required `direction`). Group by `none`, `category`, `month`, or `both`; each row reports the corresponding `category_id` and/or `month`. Filters mirror `get-transactions`: account, date, amount, category ids. |
 | `get-recipients`           | Look up saved payment recipients by partial name match.            |
 | `create-recipient`         | Save a new recipient for future transfers.                         |
-| `prepare-transfer`         | **Prepare** a transfer on any supported rail (`Rail` enum: `domestic-IS`, `sepa`, `sepa-instant`, `swift`, plus vendor extensions). Returns a `transferIntentId`, a validated `summary` for user confirmation, and rail-specific metadata (fees, FX, Confirmation of Payee, warnings). Does **not** execute. |
+| `prepare-transfer`         | **Prepare** a transfer on any supported rail (`Rail` enum: `domestic-IS`, `domestic-SE`, `sepa`, `sepa-instant`, `swift`; see [§1b](#1b-rails-and-local-instruments)). Returns a `transferIntentId`, a validated `summary` for user confirmation, and rail-specific metadata (fees, FX, Confirmation of Payee, warnings). Does **not** execute. |
 | `execute-transfer`         | Execute a previously prepared transfer by `transferIntentId`. Servers reject expired or unknown intents with a structured error; the intent's amount, creditor, debtor, and rail are immutable. |
 
-Servers MAY also register additional, vendor-specific tools, but they MUST NOT alter the names, inputs, or outputs of the tools above.
+Servers MAY also register additional, vendor-specific tools, but they MUST NOT alter the names, inputs, or outputs of the tools above. A vendor tool's name SHOULD start with `x-`, optionally followed by a vendor token (for example `x-acme-get-invoices`). bank2ai will never define a standard tool whose name starts with `x-`, so a vendor tool cannot collide with a tool added in a later spec version. Clients MUST NOT assume that an `x-` tool follows any bank2ai contract.
 
 > **Why "prepare → execute"?** Splitting transfers into two tools keeps the AI agent on a safe rail: the agent gathers details, the user confirms in their UI, and only then is `execute-transfer` called. Servers SHOULD reject `execute-transfer` calls that don't correspond to a recently prepared transfer.
 
@@ -60,6 +60,32 @@ When `tool_names` is omitted, the server MUST return an entry for every bank2ai 
 
 The canonical JSON Schemas in [`bank2ai.json`](./bank2ai.json) remain fully inlined regardless of which runtime mode a server picks — the spec file is the contract for humans and code generators, and discovery is purely a runtime optimisation.
 
+### 1b. Rails and local instruments
+
+`prepare-transfer` takes a `rail` from the `Rail` enum and an optional, free-form `local_instrument` that selects a variant within the rail. The enum is closed within a spec version; new rails arrive in minor versions (see [§7](#7-backwards-compatibility)).
+
+| `rail`         | Covers |
+| -------------- | ------ |
+| `domestic-IS`  | Icelandic domestic transfers. |
+| `domestic-SE`  | Swedish domestic credit transfers in SEK: account-to-account transfers and payments to Bankgiro, PlusGiro and Swish numbers. |
+| `sepa`         | SEPA Credit Transfers in EUR. |
+| `sepa-instant` | SEPA Instant Credit Transfers in EUR. |
+| `swift`        | Cross-border transfers over SWIFT. |
+
+A rail names the payment type the customer picks, not the clearing system behind it, so a change of clearing infrastructure does not change the rail.
+
+On `domestic-SE`, the documented `local_instrument` values and the creditor `accountIdentifier` each one expects are:
+
+| `local_instrument` | Payment | Creditor `accountIdentifier` |
+| ------------------ | ------- | ---------------------------- |
+| omitted            | Account-to-account transfer | `bban` (clearing number plus account number) or `iban` |
+| `INST`             | Instant account-to-account transfer | `bban` or `iban` |
+| `BANKGIRO`         | Payment to a Bankgiro number | `other` with `schemeName: "BGNR"` |
+| `PLUSGIRO`         | Payment to a PlusGiro number | `other` with `schemeName: "PGNR"` |
+| `SWISH`            | Swish payment | `alias` with `aliasType: "swish"`, or `"phone"` for a private payee's mobile number |
+
+When the client omits `local_instrument`, servers SHOULD derive it from the creditor's `accountIdentifier` as in the table. Either way, servers SHOULD report the instrument they will use in `summary.localInstrument`, so the user confirms the kind of payment along with the amount and the creditor. Servers SHOULD answer a `local_instrument` that contradicts the creditor identifier with a recoverable error ([§5](#5-error-model)).
+
 ## 2. Lifecycle
 
 A typical bank2ai session looks like this:
@@ -79,7 +105,7 @@ Each model is a *profile* of one or more upstream standards: it adopts a strict,
 * **`Category`**. bank2ai-defined categorization model; not profiled from a single upstream standard. id, name (localized). Localized names live here so clients can render category labels per the user's locale; programmatic identity goes through `id` (see [§6](#6-localization)). Servers SHOULD use the canonical ids listed below when a category maps cleanly; non-canonical ids remain valid and clients MUST treat any `id` as opaque.
 
   Canonical `Category.id` values: `Income`, `Transfer`, `Groceries`, `DiningAndEntertainment`, `Transport`, `Housing`, `Utilities`, `Shopping`, `Health`, `Travel`, `Subscriptions`, `Fees`, `Cash`, `Other`. Sharing these ids across servers gives clients a portable taxonomy, with the localized display name still controlled per server via `Category.name`.
-* **`Recipient`**. *Profile of:* ISO 20022 `Creditor` and `CreditorAccount` (subset). id, name, accountIdentifier (typed discriminated union: `iban` / `bban` / `accountNumber` / `alias`); optional nickname, nationalId (`{ value, country, type? }`), bic, defaultDescription, lastUsedAt, isFavorite. Account routing flows through the typed identifier; the previous loose `accountNumber` + `accountNumberType` pair has been replaced. National identification is opaque labelling — bank2ai does not validate kennitala / SSN / etc. format.
+* **`Recipient`**. *Profile of:* ISO 20022 `Creditor` and `CreditorAccount` (subset). id, name, accountIdentifier (typed discriminated union: `iban` / `bban` / `accountNumber` / `alias` / `other`); optional nickname, nationalId (`{ value, country, type? }`), bic, defaultDescription, lastUsedAt, isFavorite. Account routing flows through the typed identifier; the previous loose `accountNumber` + `accountNumberType` pair has been replaced. The `other` variant (`{ type: "other", identifier, schemeName, country }`, profile of ISO 20022 `GenericAccountIdentification1`) carries scheme-specific identifiers that none of the other variants can, such as a Swedish Bankgiro number (`schemeName: "BGNR"`); servers SHOULD use the more specific variants whenever one applies. National identification is opaque labelling — bank2ai does not validate kennitala / SSN / etc. format.
 
 Per the field omission and tolerance rule in the preamble, servers MAY omit any optional field they don't have, and clients MUST tolerate both missing optional fields and unknown additional fields. Servers MUST NOT omit fields marked `required` in the schemas.
 
@@ -125,9 +151,28 @@ The spec versioning policy lives in [`README.md`](./README.md). Notable additive
 * Adding a new optional tool input is a **minor** bump.
 * Adding a new optional output field is a **minor** bump; clients MUST tolerate unknown fields.
 * Adding a new tool is a **minor** bump.
+* Adding a value to an enum (for example a new `Rail` or `AliasType` value) or a variant to a discriminated union (for example a new `AccountIdentifier` type) is a **minor** bump. Clients MUST treat an enum value or union variant they do not recognise in a response as opaque: they MAY show it as-is and MUST NOT reject the rest of the response because of it.
+* New rails are added this way. Because the `Rail` enum is closed within a spec version, servers MUST NOT accept or emit rail values outside it. A market that needs a new rail proposes it as a spec change.
 * Removing or renaming anything, or making a previously optional field required, is a **major** bump.
 
 ## 8. Reference implementations
 
 * [`examples/demo`](../examples/demo), full surface backed by hardcoded data; useful for client conformance testing without a real bank.
+
+## Appendix A. Market notes (non-normative)
+
+These notes show how a market's banking concepts map onto bank2ai. They add no requirements.
+
+### Sweden
+
+* **Rails.** SEK payments inside Sweden use `domestic-SE`, with the instrument chosen as in [§1b](#1b-rails-and-local-instruments). EUR payments use `sepa` or `sepa-instant`, and other cross-border payments use `swift`. Because a rail names the payment type rather than the clearing system, `domestic-SE` is unaffected by Sweden's 2026 move of domestic clearing to ISO 20022; Bankgiro, PlusGiro and OCR numbers stay in use.
+* **Currency and accounts.** Amounts are in `SEK`. Swedish IBANs (`SE` plus 22 digits) and BICs fit the `iban` and `bic` fields. A clearing number plus account number is a `bban` with `country: "SE"`.
+* **Giro numbers.** A Bankgiro number is an `other` identifier, for example `{ type: "other", identifier: "1234-5674", schemeName: "BGNR", country: "SE" }`; `BGNR` is the proprietary scheme name Swedish ISO 20022 practice uses. A PlusGiro number uses `schemeName: "PGNR"`; in ISO 20022 messages, banks carry it as a BBAN under clearing number 9960, which servers can map to.
+* **National identifiers.** A personnummer is a `nationalId` with `type: "personnummer"`. An organisationsnummer has no dedicated type and uses `type: "other"`. bank2ai does not validate either format.
+* **Payment references.** An OCR number (the structured reference on Swedish invoices, up to 25 digits with a check digit) goes in `remittanceInformation.creditorReference`, the same place as an ISO 11649 RF reference.
+* **Swish.** A Swish number is an `alias` with `aliasType: "swish"`; business Swish numbers start with 123. A private payee's Swish number is their mobile number, so `aliasType: "phone"` also works. Payments use `rail: "domestic-SE"` with `local_instrument: "SWISH"`.
+* **Autogiro.** A booked Autogiro (direct debit) entry can carry the payer number from the mandate in `properties.mandateId` and the payee's Bankgiro number in `properties.creditorId`.
+* **Categories.** Category names are localised server-side (for example `name: "Livsmedel"`), while `Category.id` stays canonical (`Groceries`).
+* **Payee verification.** Where the bank verifies the payee's name, for example under the EU Verification of Payee rules, the result goes in `PreparedTransfer.confirmationOfPayee` as on any other rail.
+* **Not covered yet.** Bills, e-invoices (e-faktura) and direct-debit mandate management have no standard tools. Servers can expose them as vendor tools ([§1](#1-tool-surface)).
 

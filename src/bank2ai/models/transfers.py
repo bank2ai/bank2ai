@@ -22,12 +22,14 @@ class TransferAction(BaseModel):
 class Rail(str, Enum):
     """Payment rail used to settle a transfer.
 
-    Servers MAY register additional rails via vendor extensions; the
-    canonical list reflects the rails the reference implementations
-    exercise today.
+    The list is closed within a spec version and grows through minor
+    spec versions (spec §7). Variants within a rail, such as instant
+    versus standard transfers or a payment to a Bankgiro number on
+    `domestic-SE`, are selected with `local_instrument` (spec §1b).
     """
 
     DomesticIS = "domestic-IS"
+    DomesticSE = "domestic-SE"
     SEPA = "sepa"
     SEPAInstant = "sepa-instant"
     SWIFT = "swift"
@@ -138,7 +140,10 @@ class TransferSummary(_Bank2aiModel):
         default=None,
         description=(
             "Rail-specific local instrument code (e.g., `INST` for SEPA "
-            "Instant)."
+            "Instant; `BANKGIRO`, `PLUSGIRO`, `INST` or `SWISH` on "
+            "`domestic-SE`). Carries the instrument the server will use, "
+            "including one it derived from the creditor identifier when "
+            "the client omitted `local_instrument`."
         ),
     )
     requestedExecutionDate: Optional[date] = Field(

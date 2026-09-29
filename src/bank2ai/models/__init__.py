@@ -22,6 +22,7 @@ from .identity import (
     IbanIdentifier,
     NationalId,
     NationalIdType,
+    OtherIdentifier,
     Party,
     PostalAddress,
 )
@@ -86,6 +87,7 @@ __all__ = [
     "IbanIdentifier",
     "NationalId",
     "NationalIdType",
+    "OtherIdentifier",
     "Party",
     "PostalAddress",
     "PrepareTransferResponse",

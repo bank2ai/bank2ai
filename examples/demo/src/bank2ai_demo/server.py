@@ -18,12 +18,15 @@ from fastmcp import FastMCP
 from bank2ai import (
     Account,
     AccountList,
+    AliasIdentifier,
+    AliasType,
     Category,
     CategoryList,
     CreateRecipientResponse,
     ExecuteTransferResponse,
     ExecutedTransfer,
     GetTransactionResponse,
+    OtherIdentifier,
     Party,
     PrepareTransferResponse,
     PreparedTransfer,
@@ -356,6 +359,33 @@ def _idempotent_put(tool: str, key: Optional[str], response: object) -> None:
         _idempotency_cache[(tool, key)] = response
 
 
+# ---- Local instruments ----
+#
+# On `domestic-SE` the creditor identifier implies the instrument
+# (spec §1b), so an omitted `local_instrument` is derived from it and
+# echoed in the summary for the user to confirm.
+
+_SE_SCHEME_INSTRUMENTS = {"BGNR": "BANKGIRO", "PGNR": "PLUSGIRO"}
+
+
+def _resolve_local_instrument(
+    rail: str,
+    creditor: Party,
+    local_instrument: Optional[str],
+) -> Optional[str]:
+    if local_instrument is not None or rail != Rail.DomesticSE:
+        return local_instrument
+    identifier = creditor.accountIdentifier
+    if isinstance(identifier, OtherIdentifier):
+        return _SE_SCHEME_INSTRUMENTS.get(identifier.schemeName)
+    if isinstance(identifier, AliasIdentifier) and identifier.aliasType in (
+        AliasType.Swish,
+        AliasType.Phone,
+    ):
+        return "SWISH"
+    return None
+
+
 async def prepare_transfer(
     *,
     debtor_account_id: str,
@@ -410,7 +440,7 @@ async def prepare_transfer(
         amount=amount,
         currency=currency,
         rail=Rail(rail),
-        localInstrument=local_instrument,
+        localInstrument=_resolve_local_instrument(rail, creditor_party, local_instrument),
         requestedExecutionDate=requested_execution_date,
         remittanceInformation=(
             RemittanceInformation.model_validate(remittance_information)

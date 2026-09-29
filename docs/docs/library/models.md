@@ -21,7 +21,7 @@ These are the types most handlers return. Each is a `BaseModel`:
 - `Account`, id, accountNumber, currency, balance; optional typed identifiers `iban` / `bban` / `bic` / `maskedPan`; optional `availableBalance` / `overdraftLimit` / `ownerName` / `product` / `openedDate` / `balanceUpdatedAt`; optional `accountType`, `status`, `usage`, `isWithdrawalAccount`, `isDefaultAccount`. Credit accounts may also carry `statementBalance` / `minimumPaymentDue` / `paymentDueDate` / `statementClosingDate`. Field names follow [Berlin Group PSD2 `accountDetails`](https://www.berlin-group.org/openfinance-downloads) where they overlap.
 - `Transaction`, id, accountId, description, amount (negative = expense), date; optional categoryId (resolves via `get-categories`), isPending, originalDescription, transactionDate, valueDate, originalCurrency / originalAmount, counterparty (a typed `Party`), and a `properties` bag of ISO 20022 / Open Finance audit metadata.
 - `Category`, id, name (localized).
-- `Recipient`, id, name, accountIdentifier (typed union: `iban` / `bban` / `accountNumber` / `alias`); optional nickname, nationalId, bic, defaultDescription, lastUsedAt, isFavorite.
+- `Recipient`, id, name, accountIdentifier (typed union: `iban` / `bban` / `accountNumber` / `alias` / `other`); optional nickname, nationalId, bic, defaultDescription, lastUsedAt, isFavorite.
 
 ## Enums
 

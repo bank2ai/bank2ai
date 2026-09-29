@@ -211,7 +211,7 @@ intent_id = prepared["item"]["transferIntentId"]
 await client.call_tool("execute-transfer", {"transfer_intent_id": intent_id})
 ```
 
-The `Rail` enum ships with `domestic-IS`, `sepa`, `sepa-instant`, `swift`; servers MAY register more values via vendor extensions.
+The `Rail` enum shipped in 0.11 with `domestic-IS`, `sepa`, `sepa-instant`, `swift`. It is closed within a spec version; later minor versions add rails (see [Rails and local instruments](/docs/specification/overview#1b-rails-and-local-instruments)).
 
 `prepare-transfer-icelandic` is no longer registered. Replace any call site with `prepare-transfer` and `rail=domestic-IS`.
 

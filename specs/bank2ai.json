@@ -63,10 +63,11 @@
     "AliasIdentifier": {
       "$defs": {
         "AliasType": {
-          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.).",
+          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
           "enum": [
             "email",
             "phone",
+            "swish",
             "vpa",
             "pix",
             "other"
@@ -75,13 +76,14 @@
           "type": "string"
         }
       },
-      "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+      "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
       "properties": {
         "alias": {
           "description": "The alias value as the user knows it.",
           "examples": [
             "alex@upi",
-            "+44-7700-900000"
+            "+44-7700-900000",
+            "1231181189"
           ],
           "title": "Alias",
           "type": "string"
@@ -373,6 +375,51 @@
       "title": "NationalId",
       "type": "object"
     },
+    "OtherIdentifier": {
+      "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+      "properties": {
+        "country": {
+          "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+          "examples": [
+            "SE"
+          ],
+          "pattern": "^[A-Z]{2}$",
+          "title": "Country",
+          "type": "string"
+        },
+        "identifier": {
+          "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+          "examples": [
+            "1234-5674"
+          ],
+          "title": "Identifier",
+          "type": "string"
+        },
+        "schemeName": {
+          "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+          "examples": [
+            "BGNR",
+            "PGNR"
+          ],
+          "title": "Schemename",
+          "type": "string"
+        },
+        "type": {
+          "const": "other",
+          "default": "other",
+          "description": "Discriminator: `other`.",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "identifier",
+        "schemeName",
+        "country"
+      ],
+      "title": "OtherIdentifier",
+      "type": "object"
+    },
     "Party": {
       "$defs": {
         "AccountNumberIdentifier": {
@@ -435,13 +482,14 @@
           "type": "object"
         },
         "AliasIdentifier": {
-          "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+          "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
           "properties": {
             "alias": {
               "description": "The alias value as the user knows it.",
               "examples": [
                 "alex@upi",
-                "+44-7700-900000"
+                "+44-7700-900000",
+                "1231181189"
               ],
               "title": "Alias",
               "type": "string"
@@ -466,10 +514,11 @@
           "type": "object"
         },
         "AliasType": {
-          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.).",
+          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
           "enum": [
             "email",
             "phone",
+            "swish",
             "vpa",
             "pix",
             "other"
@@ -594,6 +643,51 @@
           ],
           "title": "NationalIdType",
           "type": "string"
+        },
+        "OtherIdentifier": {
+          "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+          "properties": {
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+              "examples": [
+                "SE"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "identifier": {
+              "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+              "examples": [
+                "1234-5674"
+              ],
+              "title": "Identifier",
+              "type": "string"
+            },
+            "schemeName": {
+              "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+              "examples": [
+                "BGNR",
+                "PGNR"
+              ],
+              "title": "Schemename",
+              "type": "string"
+            },
+            "type": {
+              "const": "other",
+              "default": "other",
+              "description": "Discriminator: `other`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "identifier",
+            "schemeName",
+            "country"
+          ],
+          "title": "OtherIdentifier",
+          "type": "object"
         },
         "PostalAddress": {
           "description": "Postal address of a party or card-acceptor merchant.\n\nProfile of: ISO 20022 `PostalAddress24` (subset). Aligns with the\nOpen Finance / Berlin Group `cardAcceptorAddress` structure so card\ntransactions can surface where the swipe happened. Servers SHOULD\npopulate whichever subfields the bank exposes and omit the rest;\n`townName` and `country` are the most commonly available and the\nmost useful for LLM context.",
@@ -735,7 +829,8 @@
                   "accountNumber": "#/$defs/AccountNumberIdentifier",
                   "alias": "#/$defs/AliasIdentifier",
                   "bban": "#/$defs/BbanIdentifier",
-                  "iban": "#/$defs/IbanIdentifier"
+                  "iban": "#/$defs/IbanIdentifier",
+                  "other": "#/$defs/OtherIdentifier"
                 },
                 "propertyName": "type"
               },
@@ -751,6 +846,9 @@
                 },
                 {
                   "$ref": "#/$defs/AliasIdentifier"
+                },
+                {
+                  "$ref": "#/$defs/OtherIdentifier"
                 }
               ]
             },
@@ -1448,13 +1546,14 @@
           "type": "string"
         },
         "AliasIdentifier": {
-          "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+          "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
           "properties": {
             "alias": {
               "description": "The alias value as the user knows it.",
               "examples": [
                 "alex@upi",
-                "+44-7700-900000"
+                "+44-7700-900000",
+                "1231181189"
               ],
               "title": "Alias",
               "type": "string"
@@ -1479,10 +1578,11 @@
           "type": "object"
         },
         "AliasType": {
-          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.).",
+          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
           "enum": [
             "email",
             "phone",
+            "swish",
             "vpa",
             "pix",
             "other"
@@ -1699,6 +1799,51 @@
           "title": "NationalIdType",
           "type": "string"
         },
+        "OtherIdentifier": {
+          "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+          "properties": {
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+              "examples": [
+                "SE"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "identifier": {
+              "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+              "examples": [
+                "1234-5674"
+              ],
+              "title": "Identifier",
+              "type": "string"
+            },
+            "schemeName": {
+              "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+              "examples": [
+                "BGNR",
+                "PGNR"
+              ],
+              "title": "Schemename",
+              "type": "string"
+            },
+            "type": {
+              "const": "other",
+              "default": "other",
+              "description": "Discriminator: `other`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "identifier",
+            "schemeName",
+            "country"
+          ],
+          "title": "OtherIdentifier",
+          "type": "object"
+        },
         "Party": {
           "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset). For card\ntransactions the counterparty is the card-accepting merchant;\n`postalAddress` then carries the Open Finance `cardAcceptorAddress`.",
           "properties": {
@@ -1711,7 +1856,8 @@
                       "accountNumber": "#/$defs/AccountNumberIdentifier",
                       "alias": "#/$defs/AliasIdentifier",
                       "bban": "#/$defs/BbanIdentifier",
-                      "iban": "#/$defs/IbanIdentifier"
+                      "iban": "#/$defs/IbanIdentifier",
+                      "other": "#/$defs/OtherIdentifier"
                     },
                     "propertyName": "type"
                   },
@@ -1727,6 +1873,9 @@
                     },
                     {
                       "$ref": "#/$defs/AliasIdentifier"
+                    },
+                    {
+                      "$ref": "#/$defs/OtherIdentifier"
                     }
                   ]
                 },
@@ -1975,9 +2124,10 @@
           "type": "object"
         },
         "Rail": {
-          "description": "Payment rail used to settle a transfer.\n\nServers MAY register additional rails via vendor extensions; the\ncanonical list reflects the rails the reference implementations\nexercise today.",
+          "description": "Payment rail used to settle a transfer.\n\nThe list is closed within a spec version and grows through minor\nspec versions (spec \u00a77). Variants within a rail, such as instant\nversus standard transfers or a payment to a Bankgiro number on\n`domestic-SE`, are selected with `local_instrument` (spec \u00a71b).",
           "enum": [
             "domestic-IS",
+            "domestic-SE",
             "sepa",
             "sepa-instant",
             "swift"
@@ -2171,7 +2321,7 @@
                 }
               ],
               "default": null,
-              "description": "Rail-specific local instrument code (e.g., `INST` for SEPA Instant).",
+              "description": "Rail-specific local instrument code (e.g., `INST` for SEPA Instant; `BANKGIRO`, `PLUSGIRO`, `INST` or `SWISH` on `domestic-SE`). Carries the instrument the server will use, including one it derived from the creditor identifier when the client omitted `local_instrument`.",
               "title": "Localinstrument"
             },
             "rail": {
@@ -3034,13 +3184,14 @@
           "type": "string"
         },
         "AliasIdentifier": {
-          "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+          "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
           "properties": {
             "alias": {
               "description": "The alias value as the user knows it.",
               "examples": [
                 "alex@upi",
-                "+44-7700-900000"
+                "+44-7700-900000",
+                "1231181189"
               ],
               "title": "Alias",
               "type": "string"
@@ -3065,10 +3216,11 @@
           "type": "object"
         },
         "AliasType": {
-          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.).",
+          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
           "enum": [
             "email",
             "phone",
+            "swish",
             "vpa",
             "pix",
             "other"
@@ -3247,6 +3399,51 @@
           "title": "NationalIdType",
           "type": "string"
         },
+        "OtherIdentifier": {
+          "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+          "properties": {
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+              "examples": [
+                "SE"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "identifier": {
+              "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+              "examples": [
+                "1234-5674"
+              ],
+              "title": "Identifier",
+              "type": "string"
+            },
+            "schemeName": {
+              "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+              "examples": [
+                "BGNR",
+                "PGNR"
+              ],
+              "title": "Schemename",
+              "type": "string"
+            },
+            "type": {
+              "const": "other",
+              "default": "other",
+              "description": "Discriminator: `other`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "identifier",
+            "schemeName",
+            "country"
+          ],
+          "title": "OtherIdentifier",
+          "type": "object"
+        },
         "Party": {
           "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset). For card\ntransactions the counterparty is the card-accepting merchant;\n`postalAddress` then carries the Open Finance `cardAcceptorAddress`.",
           "properties": {
@@ -3259,7 +3456,8 @@
                       "accountNumber": "#/$defs/AccountNumberIdentifier",
                       "alias": "#/$defs/AliasIdentifier",
                       "bban": "#/$defs/BbanIdentifier",
-                      "iban": "#/$defs/IbanIdentifier"
+                      "iban": "#/$defs/IbanIdentifier",
+                      "other": "#/$defs/OtherIdentifier"
                     },
                     "propertyName": "type"
                   },
@@ -3275,6 +3473,9 @@
                     },
                     {
                       "$ref": "#/$defs/AliasIdentifier"
+                    },
+                    {
+                      "$ref": "#/$defs/OtherIdentifier"
                     }
                   ]
                 },
@@ -3523,9 +3724,10 @@
           "type": "object"
         },
         "Rail": {
-          "description": "Payment rail used to settle a transfer.\n\nServers MAY register additional rails via vendor extensions; the\ncanonical list reflects the rails the reference implementations\nexercise today.",
+          "description": "Payment rail used to settle a transfer.\n\nThe list is closed within a spec version and grows through minor\nspec versions (spec \u00a77). Variants within a rail, such as instant\nversus standard transfers or a payment to a Bankgiro number on\n`domestic-SE`, are selected with `local_instrument` (spec \u00a71b).",
           "enum": [
             "domestic-IS",
+            "domestic-SE",
             "sepa",
             "sepa-instant",
             "swift"
@@ -3625,7 +3827,7 @@
             }
           ],
           "default": null,
-          "description": "Rail-specific local instrument code (e.g., `INST` for SEPA Instant).",
+          "description": "Rail-specific local instrument code (e.g., `INST` for SEPA Instant; `BANKGIRO`, `PLUSGIRO`, `INST` or `SWISH` on `domestic-SE`). Carries the instrument the server will use, including one it derived from the creditor identifier when the client omitted `local_instrument`.",
           "title": "Localinstrument"
         },
         "rail": {
@@ -4247,13 +4449,14 @@
           "type": "object"
         },
         "AliasIdentifier": {
-          "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+          "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
           "properties": {
             "alias": {
               "description": "The alias value as the user knows it.",
               "examples": [
                 "alex@upi",
-                "+44-7700-900000"
+                "+44-7700-900000",
+                "1231181189"
               ],
               "title": "Alias",
               "type": "string"
@@ -4278,10 +4481,11 @@
           "type": "object"
         },
         "AliasType": {
-          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.).",
+          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
           "enum": [
             "email",
             "phone",
+            "swish",
             "vpa",
             "pix",
             "other"
@@ -4406,9 +4610,54 @@
           ],
           "title": "NationalIdType",
           "type": "string"
+        },
+        "OtherIdentifier": {
+          "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+          "properties": {
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+              "examples": [
+                "SE"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "identifier": {
+              "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+              "examples": [
+                "1234-5674"
+              ],
+              "title": "Identifier",
+              "type": "string"
+            },
+            "schemeName": {
+              "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+              "examples": [
+                "BGNR",
+                "PGNR"
+              ],
+              "title": "Schemename",
+              "type": "string"
+            },
+            "type": {
+              "const": "other",
+              "default": "other",
+              "description": "Discriminator: `other`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "identifier",
+            "schemeName",
+            "country"
+          ],
+          "title": "OtherIdentifier",
+          "type": "object"
         }
       },
-      "description": "Saved payment recipient.\n\nProfile of: ISO 20022 `Creditor` and `CreditorAccount` (subset).\nAccount routing goes through the typed `accountIdentifier`\ndiscriminated union (IBAN, BBAN, country-specific account number,\nor alias); national identification is opaque to bank2ai and lives\nin the typed `nationalId` sub-object.",
+      "description": "Saved payment recipient.\n\nProfile of: ISO 20022 `Creditor` and `CreditorAccount` (subset).\nAccount routing goes through the typed `accountIdentifier`\ndiscriminated union (IBAN, BBAN, country-specific account number,\nalias, or a scheme-specific identifier such as a Bankgiro number);\nnational identification is opaque to bank2ai and lives in the typed\n`nationalId` sub-object.",
       "properties": {
         "accountIdentifier": {
           "description": "Typed account identifier for routing the transfer.",
@@ -4417,7 +4666,8 @@
               "accountNumber": "#/$defs/AccountNumberIdentifier",
               "alias": "#/$defs/AliasIdentifier",
               "bban": "#/$defs/BbanIdentifier",
-              "iban": "#/$defs/IbanIdentifier"
+              "iban": "#/$defs/IbanIdentifier",
+              "other": "#/$defs/OtherIdentifier"
             },
             "propertyName": "type"
           },
@@ -4433,6 +4683,9 @@
             },
             {
               "$ref": "#/$defs/AliasIdentifier"
+            },
+            {
+              "$ref": "#/$defs/OtherIdentifier"
             }
           ],
           "title": "Accountidentifier"
@@ -4601,13 +4854,14 @@
           "type": "object"
         },
         "AliasIdentifier": {
-          "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+          "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
           "properties": {
             "alias": {
               "description": "The alias value as the user knows it.",
               "examples": [
                 "alex@upi",
-                "+44-7700-900000"
+                "+44-7700-900000",
+                "1231181189"
               ],
               "title": "Alias",
               "type": "string"
@@ -4632,10 +4886,11 @@
           "type": "object"
         },
         "AliasType": {
-          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.).",
+          "description": "Type tag for alias-based account identifiers (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
           "enum": [
             "email",
             "phone",
+            "swish",
             "vpa",
             "pix",
             "other"
@@ -4761,6 +5016,51 @@
           "title": "NationalIdType",
           "type": "string"
         },
+        "OtherIdentifier": {
+          "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+          "properties": {
+            "country": {
+              "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+              "examples": [
+                "SE"
+              ],
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            },
+            "identifier": {
+              "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+              "examples": [
+                "1234-5674"
+              ],
+              "title": "Identifier",
+              "type": "string"
+            },
+            "schemeName": {
+              "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+              "examples": [
+                "BGNR",
+                "PGNR"
+              ],
+              "title": "Schemename",
+              "type": "string"
+            },
+            "type": {
+              "const": "other",
+              "default": "other",
+              "description": "Discriminator: `other`.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "identifier",
+            "schemeName",
+            "country"
+          ],
+          "title": "OtherIdentifier",
+          "type": "object"
+        },
         "Party": {
           "description": "Counterparty in a transaction or transfer.\n\nProfile of: ISO 20022 `PartyIdentification135` (subset). For card\ntransactions the counterparty is the card-accepting merchant;\n`postalAddress` then carries the Open Finance `cardAcceptorAddress`.",
           "properties": {
@@ -4773,7 +5073,8 @@
                       "accountNumber": "#/$defs/AccountNumberIdentifier",
                       "alias": "#/$defs/AliasIdentifier",
                       "bban": "#/$defs/BbanIdentifier",
-                      "iban": "#/$defs/IbanIdentifier"
+                      "iban": "#/$defs/IbanIdentifier",
+                      "other": "#/$defs/OtherIdentifier"
                     },
                     "propertyName": "type"
                   },
@@ -4789,6 +5090,9 @@
                     },
                     {
                       "$ref": "#/$defs/AliasIdentifier"
+                    },
+                    {
+                      "$ref": "#/$defs/OtherIdentifier"
                     }
                   ]
                 },
@@ -5206,12 +5510,12 @@
   },
   "tools": [
     {
-      "description": "Create a new payment recipient. Account routing goes through the typed `account_identifier` discriminated union (IBAN, BBAN with country, country-specific account number, or alias). National identification, when known, uses the typed `national_id` sub-object. The recipient can then be used for transfers.",
+      "description": "Create a new payment recipient. Account routing goes through the typed `account_identifier` discriminated union (IBAN, BBAN with country, country-specific account number, alias, or a scheme-specific identifier such as a Bankgiro number). National identification, when known, uses the typed `national_id` sub-object. The recipient can then be used for transfers.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
           "account_identifier": {
-            "description": "Typed account identifier. One of: `{type: 'iban', iban}`, `{type: 'bban', bban, country}`, `{type: 'accountNumber', accountNumber, country, routing?, sortCode?}`, `{type: 'alias', alias, aliasType}`.",
+            "description": "Typed account identifier. One of: `{type: 'iban', iban}`, `{type: 'bban', bban, country}`, `{type: 'accountNumber', accountNumber, country, routing?, sortCode?}`, `{type: 'alias', alias, aliasType}`, `{type: 'other', identifier, schemeName, country}`.",
             "oneOf": [
               {
                 "description": "IBAN-routed account, ISO 13616.",
@@ -5323,13 +5627,14 @@
                 "type": "object"
               },
               {
-                "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+                "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
                 "properties": {
                   "alias": {
                     "description": "The alias value as the user knows it.",
                     "examples": [
                       "alex@upi",
-                      "+44-7700-900000"
+                      "+44-7700-900000",
+                      "1231181189"
                     ],
                     "type": "string"
                   },
@@ -5338,6 +5643,7 @@
                     "enum": [
                       "email",
                       "phone",
+                      "swish",
                       "vpa",
                       "pix",
                       "other"
@@ -5354,6 +5660,46 @@
                 "required": [
                   "alias",
                   "aliasType"
+                ],
+                "type": "object"
+              },
+              {
+                "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+                "properties": {
+                  "country": {
+                    "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+                    "examples": [
+                      "SE"
+                    ],
+                    "pattern": "^[A-Z]{2}$",
+                    "type": "string"
+                  },
+                  "identifier": {
+                    "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+                    "examples": [
+                      "1234-5674"
+                    ],
+                    "type": "string"
+                  },
+                  "schemeName": {
+                    "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+                    "examples": [
+                      "BGNR",
+                      "PGNR"
+                    ],
+                    "type": "string"
+                  },
+                  "type": {
+                    "const": "other",
+                    "default": "other",
+                    "description": "Discriminator: `other`.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "identifier",
+                  "schemeName",
+                  "country"
                 ],
                 "type": "object"
               }
@@ -5500,7 +5846,7 @@
           "item": {
             "anyOf": [
               {
-                "description": "Saved payment recipient.\n\nProfile of: ISO 20022 `Creditor` and `CreditorAccount` (subset).\nAccount routing goes through the typed `accountIdentifier`\ndiscriminated union (IBAN, BBAN, country-specific account number,\nor alias); national identification is opaque to bank2ai and lives\nin the typed `nationalId` sub-object.",
+                "description": "Saved payment recipient.\n\nProfile of: ISO 20022 `Creditor` and `CreditorAccount` (subset).\nAccount routing goes through the typed `accountIdentifier`\ndiscriminated union (IBAN, BBAN, country-specific account number,\nalias, or a scheme-specific identifier such as a Bankgiro number);\nnational identification is opaque to bank2ai and lives in the typed\n`nationalId` sub-object.",
                 "properties": {
                   "accountIdentifier": {
                     "description": "Typed account identifier for routing the transfer.",
@@ -5615,13 +5961,14 @@
                         "type": "object"
                       },
                       {
-                        "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+                        "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
                         "properties": {
                           "alias": {
                             "description": "The alias value as the user knows it.",
                             "examples": [
                               "alex@upi",
-                              "+44-7700-900000"
+                              "+44-7700-900000",
+                              "1231181189"
                             ],
                             "type": "string"
                           },
@@ -5630,6 +5977,7 @@
                             "enum": [
                               "email",
                               "phone",
+                              "swish",
                               "vpa",
                               "pix",
                               "other"
@@ -5646,6 +5994,46 @@
                         "required": [
                           "alias",
                           "aliasType"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+                        "properties": {
+                          "country": {
+                            "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+                            "examples": [
+                              "SE"
+                            ],
+                            "pattern": "^[A-Z]{2}$",
+                            "type": "string"
+                          },
+                          "identifier": {
+                            "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+                            "examples": [
+                              "1234-5674"
+                            ],
+                            "type": "string"
+                          },
+                          "schemeName": {
+                            "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+                            "examples": [
+                              "BGNR",
+                              "PGNR"
+                            ],
+                            "type": "string"
+                          },
+                          "type": {
+                            "const": "other",
+                            "default": "other",
+                            "description": "Discriminator: `other`.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "identifier",
+                          "schemeName",
+                          "country"
                         ],
                         "type": "object"
                       }
@@ -6457,7 +6845,7 @@
           "items": {
             "description": "Recipients matching the request.",
             "items": {
-              "description": "Saved payment recipient.\n\nProfile of: ISO 20022 `Creditor` and `CreditorAccount` (subset).\nAccount routing goes through the typed `accountIdentifier`\ndiscriminated union (IBAN, BBAN, country-specific account number,\nor alias); national identification is opaque to bank2ai and lives\nin the typed `nationalId` sub-object.",
+              "description": "Saved payment recipient.\n\nProfile of: ISO 20022 `Creditor` and `CreditorAccount` (subset).\nAccount routing goes through the typed `accountIdentifier`\ndiscriminated union (IBAN, BBAN, country-specific account number,\nalias, or a scheme-specific identifier such as a Bankgiro number);\nnational identification is opaque to bank2ai and lives in the typed\n`nationalId` sub-object.",
               "properties": {
                 "accountIdentifier": {
                   "description": "Typed account identifier for routing the transfer.",
@@ -6572,13 +6960,14 @@
                       "type": "object"
                     },
                     {
-                      "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+                      "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
                       "properties": {
                         "alias": {
                           "description": "The alias value as the user knows it.",
                           "examples": [
                             "alex@upi",
-                            "+44-7700-900000"
+                            "+44-7700-900000",
+                            "1231181189"
                           ],
                           "type": "string"
                         },
@@ -6587,6 +6976,7 @@
                           "enum": [
                             "email",
                             "phone",
+                            "swish",
                             "vpa",
                             "pix",
                             "other"
@@ -6603,6 +6993,46 @@
                       "required": [
                         "alias",
                         "aliasType"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+                      "properties": {
+                        "country": {
+                          "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+                          "examples": [
+                            "SE"
+                          ],
+                          "pattern": "^[A-Z]{2}$",
+                          "type": "string"
+                        },
+                        "identifier": {
+                          "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+                          "examples": [
+                            "1234-5674"
+                          ],
+                          "type": "string"
+                        },
+                        "schemeName": {
+                          "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+                          "examples": [
+                            "BGNR",
+                            "PGNR"
+                          ],
+                          "type": "string"
+                        },
+                        "type": {
+                          "const": "other",
+                          "default": "other",
+                          "description": "Discriminator: `other`.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "identifier",
+                        "schemeName",
+                        "country"
                       ],
                       "type": "object"
                     }
@@ -6936,13 +7366,14 @@
                                     "type": "object"
                                   },
                                   {
-                                    "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+                                    "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
                                     "properties": {
                                       "alias": {
                                         "description": "The alias value as the user knows it.",
                                         "examples": [
                                           "alex@upi",
-                                          "+44-7700-900000"
+                                          "+44-7700-900000",
+                                          "1231181189"
                                         ],
                                         "type": "string"
                                       },
@@ -6951,6 +7382,7 @@
                                         "enum": [
                                           "email",
                                           "phone",
+                                          "swish",
                                           "vpa",
                                           "pix",
                                           "other"
@@ -6967,6 +7399,46 @@
                                     "required": [
                                       "alias",
                                       "aliasType"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  {
+                                    "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+                                    "properties": {
+                                      "country": {
+                                        "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+                                        "examples": [
+                                          "SE"
+                                        ],
+                                        "pattern": "^[A-Z]{2}$",
+                                        "type": "string"
+                                      },
+                                      "identifier": {
+                                        "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+                                        "examples": [
+                                          "1234-5674"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "schemeName": {
+                                        "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+                                        "examples": [
+                                          "BGNR",
+                                          "PGNR"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "const": "other",
+                                        "default": "other",
+                                        "description": "Discriminator: `other`.",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "identifier",
+                                      "schemeName",
+                                      "country"
                                     ],
                                     "type": "object"
                                   }
@@ -7687,13 +8159,14 @@
                                   "type": "object"
                                 },
                                 {
-                                  "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+                                  "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
                                   "properties": {
                                     "alias": {
                                       "description": "The alias value as the user knows it.",
                                       "examples": [
                                         "alex@upi",
-                                        "+44-7700-900000"
+                                        "+44-7700-900000",
+                                        "1231181189"
                                       ],
                                       "type": "string"
                                     },
@@ -7702,6 +8175,7 @@
                                       "enum": [
                                         "email",
                                         "phone",
+                                        "swish",
                                         "vpa",
                                         "pix",
                                         "other"
@@ -7718,6 +8192,46 @@
                                   "required": [
                                     "alias",
                                     "aliasType"
+                                  ],
+                                  "type": "object"
+                                },
+                                {
+                                  "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+                                  "properties": {
+                                    "country": {
+                                      "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+                                      "examples": [
+                                        "SE"
+                                      ],
+                                      "pattern": "^[A-Z]{2}$",
+                                      "type": "string"
+                                    },
+                                    "identifier": {
+                                      "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+                                      "examples": [
+                                        "1234-5674"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "schemeName": {
+                                      "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+                                      "examples": [
+                                        "BGNR",
+                                        "PGNR"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "const": "other",
+                                      "default": "other",
+                                      "description": "Discriminator: `other`.",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "identifier",
+                                    "schemeName",
+                                    "country"
                                   ],
                                   "type": "object"
                                 }
@@ -8353,7 +8867,7 @@
       }
     },
     {
-      "description": "Prepare a money transfer on any supported rail (SEPA, SEPA Instant, SWIFT, domestic-IS, etc.). Validates the creditor, computes fees / FX / payee verification when applicable, and returns a transferIntentId plus a summary the user confirms. Does NOT execute; pass the intent id to `execute-transfer`.",
+      "description": "Prepare a money transfer on any supported rail (SEPA, SEPA Instant, SWIFT, domestic-IS, domestic-SE, etc.). Validates the creditor, computes fees / FX / payee verification when applicable, and returns a transferIntentId plus a summary the user confirms. Does NOT execute; pass the intent id to `execute-transfer`.",
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
@@ -8480,13 +8994,14 @@
                         "type": "object"
                       },
                       {
-                        "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+                        "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
                         "properties": {
                           "alias": {
                             "description": "The alias value as the user knows it.",
                             "examples": [
                               "alex@upi",
-                              "+44-7700-900000"
+                              "+44-7700-900000",
+                              "1231181189"
                             ],
                             "type": "string"
                           },
@@ -8495,6 +9010,7 @@
                             "enum": [
                               "email",
                               "phone",
+                              "swish",
                               "vpa",
                               "pix",
                               "other"
@@ -8511,6 +9027,46 @@
                         "required": [
                           "alias",
                           "aliasType"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+                        "properties": {
+                          "country": {
+                            "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+                            "examples": [
+                              "SE"
+                            ],
+                            "pattern": "^[A-Z]{2}$",
+                            "type": "string"
+                          },
+                          "identifier": {
+                            "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+                            "examples": [
+                              "1234-5674"
+                            ],
+                            "type": "string"
+                          },
+                          "schemeName": {
+                            "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+                            "examples": [
+                              "BGNR",
+                              "PGNR"
+                            ],
+                            "type": "string"
+                          },
+                          "type": {
+                            "const": "other",
+                            "default": "other",
+                            "description": "Discriminator: `other`.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "identifier",
+                          "schemeName",
+                          "country"
                         ],
                         "type": "object"
                       }
@@ -8848,12 +9404,13 @@
               }
             ],
             "default": null,
-            "description": "Rail-specific instrument code; `INST` for SEPA Instant, `RTGS` for SWIFT, etc. Free-form per rail."
+            "description": "Rail-specific instrument code; `INST` for SEPA Instant, `RTGS` for SWIFT, etc. On `domestic-SE`: `BANKGIRO`, `PLUSGIRO`, `INST` (instant account transfer) or `SWISH`. Omit to let the server derive it from the creditor's `accountIdentifier`; the resolved value is echoed in `summary.localInstrument`. Free-form per rail."
           },
           "rail": {
             "description": "Settlement rail. Drives validation, fees, and the set of meaningful `local_instrument` values.",
             "enum": [
               "domestic-IS",
+              "domestic-SE",
               "sepa",
               "sepa-instant",
               "swift"
@@ -9260,13 +9817,14 @@
                                     "type": "object"
                                   },
                                   {
-                                    "description": "Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.).",
+                                    "description": "Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.).",
                                     "properties": {
                                       "alias": {
                                         "description": "The alias value as the user knows it.",
                                         "examples": [
                                           "alex@upi",
-                                          "+44-7700-900000"
+                                          "+44-7700-900000",
+                                          "1231181189"
                                         ],
                                         "type": "string"
                                       },
@@ -9275,6 +9833,7 @@
                                         "enum": [
                                           "email",
                                           "phone",
+                                          "swish",
                                           "vpa",
                                           "pix",
                                           "other"
@@ -9291,6 +9850,46 @@
                                     "required": [
                                       "alias",
                                       "aliasType"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  {
+                                    "description": "Scheme-specific account identifier that no other variant can carry.\n\nProfile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus\n`SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,\nwhich ISO 20022 messages carry as `Othr/Id` with the proprietary\nscheme name `BGNR`. Servers SHOULD use the more specific variants\n(`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.",
+                                    "properties": {
+                                      "country": {
+                                        "description": "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since proprietary scheme names are market-specific.",
+                                        "examples": [
+                                          "SE"
+                                        ],
+                                        "pattern": "^[A-Z]{2}$",
+                                        "type": "string"
+                                      },
+                                      "identifier": {
+                                        "description": "Identifier value in the scheme's native format, as the user knows it (for example as printed on an invoice). Servers normalise it for the rail.",
+                                        "examples": [
+                                          "1234-5674"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "schemeName": {
+                                        "description": "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 `ExternalAccountIdentification1Code` or a market-practice proprietary name. Documented values: `BGNR` (Swedish Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients MUST treat unknown values as opaque.",
+                                        "examples": [
+                                          "BGNR",
+                                          "PGNR"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "const": "other",
+                                        "default": "other",
+                                        "description": "Discriminator: `other`.",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "identifier",
+                                      "schemeName",
+                                      "country"
                                     ],
                                     "type": "object"
                                   }
@@ -9997,12 +10596,13 @@
                           }
                         ],
                         "default": null,
-                        "description": "Rail-specific local instrument code (e.g., `INST` for SEPA Instant)."
+                        "description": "Rail-specific local instrument code (e.g., `INST` for SEPA Instant; `BANKGIRO`, `PLUSGIRO`, `INST` or `SWISH` on `domestic-SE`). Carries the instrument the server will use, including one it derived from the creditor identifier when the client omitted `local_instrument`."
                       },
                       "rail": {
                         "description": "Settlement rail.",
                         "enum": [
                           "domestic-IS",
+                          "domestic-SE",
                           "sepa",
                           "sepa-instant",
                           "swift"

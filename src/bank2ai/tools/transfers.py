@@ -29,7 +29,7 @@ def register_prepare_transfer(
         name="prepare-transfer",
         description=desc(
             "Prepare a money transfer on any supported rail (SEPA, "
-            "SEPA Instant, SWIFT, domestic-IS, etc.). Validates the "
+            "SEPA Instant, SWIFT, domestic-IS, domestic-SE, etc.). Validates the "
             "creditor, computes fees / FX / payee verification when "
             "applicable, and returns a transferIntentId plus a "
             "summary the user confirms. Does NOT execute; pass the "
@@ -67,7 +67,12 @@ def register_prepare_transfer(
             default=None,
             description=(
                 "Rail-specific instrument code; `INST` for SEPA "
-                "Instant, `RTGS` for SWIFT, etc. Free-form per rail."
+                "Instant, `RTGS` for SWIFT, etc. On `domestic-SE`: "
+                "`BANKGIRO`, `PLUSGIRO`, `INST` (instant account "
+                "transfer) or `SWISH`. Omit to let the server derive "
+                "it from the creditor's `accountIdentifier`; the "
+                "resolved value is echoed in `summary.localInstrument`. "
+                "Free-form per rail."
             ),
         ),
         requested_execution_date: Optional[str] = Field(

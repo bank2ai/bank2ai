@@ -13,10 +13,11 @@ from .base import _Bank2aiModel
 
 
 class AliasType(str, Enum):
-    """Type tag for alias-based account identifiers (UPI VPA, Pix key, email-routed payments, etc.)."""
+    """Type tag for alias-based account identifiers (UPI VPA, Pix key, Swish number, email-routed payments, etc.)."""
 
     Email = "email"
     Phone = "phone"
+    Swish = "swish"
     VPA = "vpa"
     Pix = "pix"
     Other = "other"
@@ -90,14 +91,53 @@ class AccountNumberIdentifier(_Bank2aiModel):
 
 
 class AliasIdentifier(_Bank2aiModel):
-    """Alias-based identifier (UPI VPA, Pix key, email-routed payments, etc.)."""
+    """Alias-based identifier (UPI VPA, Pix key, Swish number, email-routed payments, etc.)."""
 
     type: Literal["alias"] = Field(default="alias", description="Discriminator: `alias`.")
     alias: str = Field(
         description="The alias value as the user knows it.",
-        examples=["alex@upi", "+44-7700-900000"],
+        examples=["alex@upi", "+44-7700-900000", "1231181189"],
     )
     aliasType: AliasType = Field(description="Kind of alias.")
+
+
+class OtherIdentifier(_Bank2aiModel):
+    """Scheme-specific account identifier that no other variant can carry.
+
+    Profile of: ISO 20022 `GenericAccountIdentification1` (`Othr/Id` plus
+    `SchmeNm`). Covers identifiers such as a Swedish Bankgiro number,
+    which ISO 20022 messages carry as `Othr/Id` with the proprietary
+    scheme name `BGNR`. Servers SHOULD use the more specific variants
+    (`iban`, `bban`, `accountNumber`, `alias`) whenever one applies.
+    """
+
+    type: Literal["other"] = Field(default="other", description="Discriminator: `other`.")
+    identifier: str = Field(
+        description=(
+            "Identifier value in the scheme's native format, as the user "
+            "knows it (for example as printed on an invoice). Servers "
+            "normalise it for the rail."
+        ),
+        examples=["1234-5674"],
+    )
+    schemeName: str = Field(
+        description=(
+            "Identification scheme (ISO 20022 `SchmeNm`): an ISO 20022 "
+            "`ExternalAccountIdentification1Code` or a market-practice "
+            "proprietary name. Documented values: `BGNR` (Swedish "
+            "Bankgiro number), `PGNR` (Swedish PlusGiro number). Clients "
+            "MUST treat unknown values as opaque."
+        ),
+        examples=["BGNR", "PGNR"],
+    )
+    country: str = Field(
+        description=(
+            "ISO 3166-1 alpha-2 country code. Scopes `schemeName`, since "
+            "proprietary scheme names are market-specific."
+        ),
+        pattern=r"^[A-Z]{2}$",
+        examples=["SE"],
+    )
 
 
 AccountIdentifier = Annotated[
@@ -106,6 +146,7 @@ AccountIdentifier = Annotated[
         BbanIdentifier,
         AccountNumberIdentifier,
         AliasIdentifier,
+        OtherIdentifier,
     ],
     Field(
         discriminator="type",
