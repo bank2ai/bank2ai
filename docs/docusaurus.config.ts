@@ -79,6 +79,12 @@ const config: Config = {
         theme: {
           customCss: './src/css/custom.css',
         },
+        // Google Analytics 4 (page views and traffic sources only; no ads
+        // features). The measurement ID is public by design.
+        gtag: {
+          trackingID: 'G-06F97KDXF7',
+          anonymizeIP: true,
+        },
       } satisfies Preset.Options,
     ],
   ],
