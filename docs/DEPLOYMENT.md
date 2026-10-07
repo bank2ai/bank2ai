@@ -25,6 +25,14 @@ The site is built with Docusaurus and deployed to **Firebase Hosting**
    service account trusts (maintainers: see the internal infra repo).
 3. Custom domain `bank2ai.com` wired to the site.
 
+## Analytics
+
+Google Analytics 4 via Docusaurus's built-in `gtag` preset option in
+[`docusaurus.config.ts`](docusaurus.config.ts): property `bank2ai.com`,
+measurement ID `G-06F97KDXF7` (public by design, so it lives in the config,
+not in a secret store). Page views and traffic sources only; no advertising
+features. The sitemap at `/sitemap.xml` is submitted in Google Search Console.
+
 ## Local preview
 
 ```bash
